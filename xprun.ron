@@ -5,7 +5,7 @@ XpV0(
             command: ["python", "main_script.py"],
             dockerfile: "Dockerfile",
             copy_repo: true,
-            // wandb: true,
+            wandb: true,
 
             gpu: 1,
             gpu_mem: "11GB",
