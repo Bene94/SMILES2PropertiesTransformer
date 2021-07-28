@@ -1,5 +1,5 @@
 from nn_model import * 
-from nn_main import *
+from nn_dataloader import *
 import torch
 import torch.nn as nn
 from dataclasses import dataclass
