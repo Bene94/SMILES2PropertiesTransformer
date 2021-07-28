@@ -1,0 +1,14 @@
+XpV0(
+    project: "NNgamma",
+    containers: {
+        "main": (
+            command: ["python", "nn_main.py"],
+            dockerfile: "Dockerfile",
+            copy_repo: true,
+            // wandb: true,
+
+            gpu: 1,
+            gpu_mem: "11GB",
+        ),
+    }
+)
