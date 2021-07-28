@@ -16,7 +16,7 @@ class gamma_dataset(Dataset):
         
 
     def load_data(self):
-        #laods the data from sefl.root  acroidng to type from batches in root
+        #laods the data from sefl.root  acroidng to type from batches in current direcory plus root
         files = os.listdir(self.root)
         #load all files into a numpy array from a cvs file
 
@@ -25,7 +25,7 @@ class gamma_dataset(Dataset):
         # load first file into data then append all other files data is a .npy file
         data = np.array([])
         for i in range(0, len(files)):
-            bar.update(i)
+            #bar.update(i)
             if files[i].startswith(self.data_type):
                 # when the data array is empty create lese append
                 if data.size == 0:

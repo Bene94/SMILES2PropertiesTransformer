@@ -12,7 +12,6 @@ if __name__ == '__main__':
 
     wandb.init(project= 'gamma', entity='bene94')
 
-
     config = wandb.config
 
     config.device = torch.device('cuda')
@@ -41,8 +40,8 @@ if __name__ == '__main__':
 
     # load training and validation data
 
-    train_dataset = gamma_dataset('TrainingData_test/', 'train')
-    val_dataset = gamma_dataset('TrainingData_test/', 'val')
+    train_dataset = gamma_dataset('../TrainingData_test/', 'train')
+    val_dataset = gamma_dataset('../TrainingData_test/', 'val')
 
     # train_dataset.train_data = train_dataset.train_data[0:16]
     # train_dataset.train_target = train_dataset.train_target[0:16]
