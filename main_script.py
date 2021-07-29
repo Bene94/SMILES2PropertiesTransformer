@@ -6,32 +6,45 @@ from dataclasses import dataclass
 import wandb
 
 
+import click
 
+@click.command()
+@click.option('--emb', default=256, help='Embeding size')
+@click.option('--hid', default=512, help='Hidden layer size')
+@click.option('--nlay', default=4, help='Number of transfprmer layers')
+@click.option('--nhead', default=2, help='Number of heads')
+@click.option('--drp', default=0.2, help='Dropout rate')
+@click.option('--lr', default=0.001, help='learning rate')
+@click.option('--epo', default=50, help='Number of epochs')
+@click.option('--btch', default=128, help='Batchsize')
+@click.option('--set', default='TrainingData_test', help='Location of dataset')
 
-if __name__ == '__main__': 
-
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
+    
     wandb.init(project= 'gamma', entity='bene94')
 
     config = wandb.config
 
     config.device = torch.device('cuda')
-    config.ntokens =  37
-    config.embed_size = 256
-    config.hidden_size = 512
-    config.num_layers = 8
-    config.num_heads = 4
-    config.dropout = 0.2
     config.criterion = nn.MSELoss()
-    config.lr = 0.0001
-    config.epoch = 50
-    config.batch_size  = 128
+    
+    config.padding_idx = 36
+    config.ntokens =  37
+
+    config.embed_size = emb
+    config.hidden_size = hid
+    config.num_layers = nlay
+    config.num_heads = nhead
+    config.dropout =  drp
+    config.lr = lr
+    config.epoch =  epo
+    config.batch_size  = btch
 
     model = TransformerModel(config).to(config.device)
-
     wandb.watch(model)
 
 
-    criterion = nn.MSELoss() # I guess i want something else
+    criterion = nn.MSELoss() 
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
 
@@ -40,8 +53,8 @@ if __name__ == '__main__':
 
     # load training and validation data
 
-    train_dataset = gamma_dataset('../TrainingData_test/', 'train')
-    val_dataset = gamma_dataset('../TrainingData_test/', 'val')
+    train_dataset = gamma_dataset('TrainingData_test/', 'train')
+    val_dataset = gamma_dataset('TrainingData_test/', 'val')
 
     # train_dataset.train_data = train_dataset.train_data[0:16]
     # train_dataset.train_target = train_dataset.train_target[0:16]
@@ -66,4 +79,8 @@ if __name__ == '__main__':
             best_val_loss = val_loss
             best_model = model
 
-        #scheduler.step()
+        scheduler.step()
+
+
+if __name__ == '__main__': 
+    main()

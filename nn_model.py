@@ -20,7 +20,7 @@ class TransformerModel(nn.Module):
         self.pos_encoder = PositionalEncoding(config.embed_size, config.dropout)
         encoder_layers = TransformerEncoderLayer(config.embed_size, config.num_heads, config.hidden_size, config.dropout)
         self.transformer_encoder = TransformerEncoder(encoder_layers, config.num_layers)
-        self.encoder = nn.Embedding(config.ntokens, config.embed_size)
+        self.encoder = nn.Embedding(config.ntokens, config.embed_size, padding_idx = config.padding_idx)
         self.ninp = config.embed_size
         self.dense = nn.Linear(config.embed_size, config.embed_size)
         self.decoder = nn.Linear(config.embed_size, 1)
