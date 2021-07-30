@@ -16,7 +16,7 @@ import click
 @click.option('--drp', default=0.2, help='Dropout rate')
 @click.option('--lr', default=0.0001, help='learning rate')
 @click.option('--epo', default=100, help='Number of epochs')
-@click.option('--btch', default=256, help='Batchsize')
+@click.option('--btch', default=128, help='Batchsize')
 @click.option('--set', default='TrainingData_test/', help='Location of dataset')
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
@@ -74,6 +74,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
             .format(epoch, (time.time() - epoch_start_time),
                                         val_loss))
         print('-' * 89)
+        wandb.log({"val_loss": val_loss})
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss

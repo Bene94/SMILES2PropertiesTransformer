@@ -49,7 +49,7 @@ class TransformerModel(nn.Module):
     
 class PositionalEncoding(nn.Module):
 
-    def __init__(self, d_model, dropout=0.1, max_len=200):
+    def __init__(self, d_model, dropout=0.1, max_len=400):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 
@@ -114,6 +114,6 @@ def evaluate(eval_model, val_dataloader, criterion, config):
             src_key_padding_mask = data.eq(35)
             src_key_padding_mask = src_key_padding_mask.permute(1,0)
             output = eval_model(data, src_key_padding_mask = src_key_padding_mask)
-            total_loss += len(data) * criterion(output, targets).item()
+            total_loss += criterion(output, targets).item()
     return total_loss / (len(val_dataloader))
 
