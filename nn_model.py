@@ -89,6 +89,8 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
         wandb.log({"train_loss": loss.item()})
         wandb.log({"grad_norm": torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)})
         wandb.log({"lr": optimizer.param_groups[0]['lr']})
+        wandb.log({"epoch": epoch})
+        wandb.log({"batch_time": time.time() - start_time})
       
         if i % log_interval == 0 and i > 0:
             cur_loss = total_loss / log_interval
