@@ -16,7 +16,7 @@ import click
 @click.option('--drp', default=0.2, help='Dropout rate')
 @click.option('--lr', default=0.0001, help='learning rate')
 @click.option('--epo', default=100, help='Number of epochs')
-@click.option('--btch', default=128, help='Batchsize')
+@click.option('--btch', default=256, help='Batchsize')
 @click.option('--set', default='TrainingData_test', help='Location of dataset')
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
@@ -53,8 +53,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
 
     # load training and validation data
 
-    train_dataset = gamma_dataset('TrainingData_test/', 'train')
-    val_dataset = gamma_dataset('TrainingData_test/', 'val')
+    train_dataset = gamma_dataset('set/', 'train')
+    val_dataset = gamma_dataset('set/', 'val')
 
     # train_dataset.train_data = train_dataset.train_data[0:16]
     # train_dataset.train_target = train_dataset.train_target[0:16]
