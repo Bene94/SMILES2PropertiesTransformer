@@ -39,6 +39,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
     config.lr = lr
     config.epoch =  epo
     config.batch_size  = btch
+    config.data_path = set
 
     model = TransformerModel(config).to(config.device)
     wandb.watch(model)
