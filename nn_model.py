@@ -43,7 +43,6 @@ class TransformerModel(nn.Module):
         output = self.pool(output.permute(0,2,1)).permute(0,2,1)
         output = F.relu(self.dense(output))
         output = self.decoder(output)
-        #output[src_key_padding_mask.transpose(1,0)] = float('-inf')
         return output
 
     
@@ -70,17 +69,14 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
     model.train() # Turn on the train mode
     total_loss = 0.
     start_time = time.time()
-    #src_mask = model.generate_square_subsequent_mask(bptt).to(device)
-    for i in range(len(train_dataloader)):
-        data, targets = next(iter(train_dataloader))
+    for i, batch in enumerate(train_dataloader):
+        data, targets = batch[0], batch[1]
         optimizer.zero_grad()
-        src_key_padding_mask = data.eq(35)
-        src_key_padding_mask = src_key_padding_mask.permute(1,0)
-        #src_key_padding_mask = src_key_padding_mask.float().masked_fill(src_key_padding_mask == 0, float('-inf')).masked_fill(src_key_padding_mask == 1, float(0.0))
-        output = model(data, src_key_padding_mask = src_key_padding_mask)
+        src_padding_mask = (data == wandb.config.padding_idx).transpose(0, 1)
+        output = model(data, src_key_padding_mask = src_padding_mask)
         loss = criterion(output, targets)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # gradient clipping this is questionable
+        #torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # gradient clipping this is questionable
         optimizer.step()
 
         total_loss += loss.item()

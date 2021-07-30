@@ -9,15 +9,15 @@ import wandb
 import click
 
 @click.command()
-@click.option('--emb', default=128, help='Embeding size')
+@click.option('--emb', default=64, help='Embeding size')
 @click.option('--hid', default=256, help='Hidden layer size')
 @click.option('--nlay', default=6, help='Number of transfprmer layers')
-@click.option('--nhead', default=2, help='Number of heads')
+@click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.2, help='Dropout rate')
 @click.option('--lr', default=0.0001, help='learning rate')
 @click.option('--epo', default=100, help='Number of epochs')
 @click.option('--btch', default=128, help='Batchsize')
-@click.option('--set', default='TrainingData_test/', help='Location of dataset')
+@click.option('--set', default='TrainingData/', help='Location of dataset')
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
     
@@ -28,7 +28,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
     config.device = torch.device('cuda')
     config.criterion = nn.MSELoss()
     
-    config.padding_idx = 36
+    config.padding_idx = 35
     config.ntokens =  37
 
     config.embed_size = emb
