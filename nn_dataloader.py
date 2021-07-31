@@ -21,11 +21,11 @@ class gamma_dataset(Dataset):
         #load all files into a numpy array from a cvs file
 
         # progress bar for loading data 
-        bar = pb.ProgressBar(maxval=len(files), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
+        #bar = pb.ProgressBar(maxval=len(files), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
         # load first file into data then append all other files data is a .npy file
         data = np.array([])
         for i in range(0, len(files)):
-            bar.update(i)
+            #bar.update(i)
             if files[i].startswith(self.data_type):
                 # when the data array is empty create lese append
                 if data.size == 0:
