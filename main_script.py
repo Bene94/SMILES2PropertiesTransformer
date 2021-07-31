@@ -18,8 +18,10 @@ import click
 @click.option('--epo', default=100, help='Number of epochs')
 @click.option('--btch', default=128, help='Batchsize')
 @click.option('--set', default='TrainingData/', help='Location of dataset')
+@click.option('--wdecay', default=0, help='Weight decay')
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
+
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay):
     
     wandb.init(project= 'gamma', entity='bene94')
 
@@ -40,13 +42,14 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set):
     config.epoch =  epo
     config.batch_size  = btch
     config.data_path = set
+    config.wdecay = wdecay
 
     model = TransformerModel(config).to(config.device)
     wandb.watch(model)
 
 
     criterion = nn.MSELoss() 
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.wdecay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = config.epoch, eta_min=config.lr/100)
 
     best_val_loss = float("inf")
