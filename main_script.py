@@ -59,8 +59,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay):
 
     data_path = os.path.join('/mnt/xprun/common/NNGamma/',config.data_path)
 
-    train_dataset = gamma_dataset(set, 'train')
-    val_dataset = gamma_dataset(set, 'val')
+    train_dataset = gamma_dataset(data_path, 'train')
+    val_dataset = gamma_dataset(data_path, 'val')
 
     # train_dataset.train_data = train_dataset.train_data[0:16]
     # train_dataset.train_target = train_dataset.train_target[0:16]

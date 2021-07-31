@@ -25,7 +25,7 @@ class gamma_dataset(Dataset):
         # load first file into data then append all other files data is a .npy file
         data = np.array([])
         for i in range(0, len(files)):
-            #bar.update(i)
+            bar.update(i)
             if files[i].startswith(self.data_type):
                 # when the data array is empty create lese append
                 if data.size == 0:
