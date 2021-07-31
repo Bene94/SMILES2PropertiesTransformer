@@ -71,6 +71,8 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
     start_time = time.time()
     for i, batch in enumerate(train_dataloader):
         data, targets = batch[0], batch[1]
+        data = data.to(wandb.config.device)
+        targets = targets.to(wandb.config.device)
         optimizer.zero_grad()
         src_padding_mask = (data == wandb.config.padding_idx).transpose(0, 1)
         output = model(data, src_key_padding_mask = src_padding_mask)

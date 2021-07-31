@@ -39,8 +39,8 @@ class gamma_dataset(Dataset):
         data = torch.tensor(data)
         target = torch.from_numpy(target)
 
-        data = data.type(torch.cuda.ByteTensor)
-        target = target.type(torch.cuda.FloatTensor)
+        data = data.type(torch.ByteTensor)
+        target = target.type(torch.FloatTensor)
         target = target.view((target.shape[0],1,1))
         #return the data and target
         return data, target
