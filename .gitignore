@@ -4,6 +4,7 @@ wandb/**
 InputData_test/**
 TrainingData/**
 TrainingData_test/**
+TrainingData_red/**
 
 # Standard for python in vs code
 
