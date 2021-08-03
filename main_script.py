@@ -13,10 +13,10 @@ import click
 @click.option('--hid', default=256, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transfprmer layers')
 @click.option('--nhead', default=4, help='Number of heads')
-@click.option('--drp', default=0.2, help='Dropout rate')
-@click.option('--lr', default=0.00001, help='learning rate')
+@click.option('--drp', default=0.1, help='Dropout rate')
+@click.option('--lr', default=0.0001, help='learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
-@click.option('--btch', default=512, help='Batchsize')
+@click.option('--btch', default=128, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0, help='Weight decay')
 @click.option('--local' , default=False, help='Using training data from local folder')
@@ -45,7 +45,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local):
     config.epoch =  epo
     config.batch_size  = btch
     config.data_path = set
-    config.wdecay = wdecay
+    config.weight_decay = wdecay
 
 
 
