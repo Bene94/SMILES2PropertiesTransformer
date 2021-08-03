@@ -59,7 +59,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local):
 
 
     criterion = nn.MSELoss() 
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.wdecay)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = config.epoch, eta_min=config.lr/10)
 
     best_val_loss = float("inf")
