@@ -68,13 +68,17 @@ class PositionalEncoding(nn.Module):
 def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb):
     model.train() # Turn on the train mode
     total_loss = 0.
+
+    total_tokens = epoch * len(train_dataloader) * train_dataloader.batch_size * 256 * 1e-6
+    total_compute = 6 * wandb.config.params * epoch * len(train_dataloader) * train_dataloader.batch_size * 1e-6
+
     start_time = time.time()
     for i, batch in enumerate(train_dataloader):
         data, targets = batch[0], batch[1]
         data = data.to(wandb.config.device)
         targets = targets.to(wandb.config.device)
         optimizer.zero_grad()
-        src_padding_mask = (data == wandb.config.padding_idx).transpose(0, 1)
+        src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
         output = model(data, src_key_padding_mask = src_padding_mask)
         loss = criterion(output, targets)
         loss.backward()
@@ -83,12 +87,16 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
         total_loss += loss.item()
         log_interval = 10
+        total_tokens += train_dataloader.batch_size * 256 * 1e-6
+        total_compute += 6 * wandb.config.params * train_dataloader.batch_size * 1e-6
       
         wandb.log({"train_loss": loss.item()})
         wandb.log({"grad_norm": torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)})
         wandb.log({"lr": optimizer.param_groups[0]['lr']})
         wandb.log({"epoch": epoch})
         wandb.log({"batch_time": time.time() - start_time})
+        wandb.log({"n_tokens": total_tokens})
+        wandb.log({"compute": total_compute})
       
         if i % log_interval == 0 and i > 0:
             cur_loss = total_loss / log_interval
