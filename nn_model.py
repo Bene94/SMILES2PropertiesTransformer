@@ -68,21 +68,28 @@ class PositionalEncoding(nn.Module):
 def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb):
     model.train() # Turn on the train mode
     total_loss = 0.
+    config = wandb.config
+
+    n_chunks = config.batch_size / config.batch_max
 
     total_tokens = epoch * len(train_dataloader) * train_dataloader.batch_size * 256 * 1e-6
     total_compute = 6 * wandb.config.params * epoch * len(train_dataloader) * train_dataloader.batch_size * 1e-6
 
     start_time = time.time()
     for i, batch in enumerate(train_dataloader):
-        data, targets = batch[0], batch[1]
-        data = data.to(wandb.config.device)
-        targets = targets.to(wandb.config.device)
-        optimizer.zero_grad()
-        src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
-        output = model(data, src_key_padding_mask = src_padding_mask)
-        loss = criterion(output, targets)
+        
+        loss = []
+        chunks = torch.split(batch,n_chunks)
+        for j, chunk in enumerate(chunks):
+            data, targets = chunk[0], chunk[1]
+            data = data.to(wandb.config.device)
+            targets = targets.to(wandb.config.device)
+            optimizer.zero_grad()
+            src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
+            output = model(data, src_key_padding_mask = src_padding_mask)
+            loss += criterion(output, targets)
+
         loss.backward()
-        #torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5) # gradient clipping this is questionable
         optimizer.step()
 
         total_loss += loss.item()

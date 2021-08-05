@@ -20,6 +20,8 @@ import click
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0, help='Weight decay')
 @click.option('--local' , default=False, help='Using training data from local folder')
+@click.option('--max_btch', default=256, help='Maximum batch size')
+@click.option('--wandb', default=True, help='log with wandb')
 
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local):
