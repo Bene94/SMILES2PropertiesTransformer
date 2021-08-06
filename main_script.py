@@ -10,21 +10,20 @@ import click
 
 @click.command()
 @click.option('--emb', default=128, help='Embeding size')
-@click.option('--hid', default=256, help='Hidden layer size')
+@click.option('--hid', default=8196, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transfprmer layers')
 @click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
-@click.option('--lr', default=0.0001, help='learning rate')
+@click.option('--lr', default= 0.001, help='learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=128, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0, help='Weight decay')
-@click.option('--local' , default=False, help='Using training data from local folder')
-@click.option('--max_btch', default=256, help='Maximum batch size')
-@click.option('--wandb', default=True, help='log with wandb')
+@click.option('--local' , default=True, help='Using training data from local folder')
+@click.option('--max_btch', default=1, help='Maximum batch size')
 
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local):
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch):
     
     wandb.init(project= 'gamma', entity='bene94')
 
@@ -48,6 +47,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local):
     config.batch_size  = btch
     config.data_path = set
     config.weight_decay = wdecay
+    config.max_btch = max_btch
 
 
 
