@@ -26,7 +26,7 @@ class TransformerModel(nn.Module):
         self.ninp = config.embed_size
         self.dense = nn.Linear(config.embed_size, config.embed_size)
         self.decoder = nn.Linear(config.embed_size, 1)
-        self.pool = nn.MaxPool1d(kernel_size = 256, stride = 256)
+        self.pool = nn.MaxPool1d(kernel_size = 128, stride = 128)
 
         self.init_weights()
 
@@ -50,7 +50,7 @@ class TransformerModel(nn.Module):
     
 class PositionalEncoding(nn.Module):
 
-    def __init__(self, d_model, dropout=0.1, max_len=1024):
+    def __init__(self, d_model, dropout=0.1, max_len=2048):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 
@@ -74,7 +74,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
     chunk_size = config.max_btch
 
-    total_tokens = epoch * len(train_dataloader) * train_dataloader.batch_size * 256 * 1e-6
+    total_tokens = epoch * len(train_dataloader) * train_dataloader.batch_size * 128 * 1e-6
     total_compute = 6 * wandb.config.params * epoch * len(train_dataloader) * train_dataloader.batch_size * 1e-6
 
     start_time = time.time()
@@ -114,7 +114,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
         total_loss += log_loss
         log_interval = 1
-        total_tokens += train_dataloader.batch_size * 256 * 1e-6
+        total_tokens += train_dataloader.batch_size * 128 * 1e-6
         total_compute += 6 * wandb.config.params * train_dataloader.batch_size * 1e-6
       
         wandb.log({"train_loss": log_loss})
@@ -157,12 +157,12 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                     target = target.to(config.device)
 
                     data = data.type(torch.IntTensor).to(config.device)
-                    targets = targets.type(torch.FloatTensor).to(config.device)
-                    targets = targets.view((targets.shape[0],1,1))
+                    target = target.type(torch.FloatTensor).to(config.device)
+                    target = target.view((target.shape[0],1,1))
                     src_key_padding_mask = data.eq(35)
                     src_key_padding_mask = src_key_padding_mask.permute(1,0)
                     output = eval_model(data, src_key_padding_mask = src_key_padding_mask)
-                    total_loss += criterion(output, targets).item()/len(data_chunks)
+                    total_loss += criterion(output, target).item()/len(data_chunks)
 
     return total_loss / (len(val_dataloader))
 
