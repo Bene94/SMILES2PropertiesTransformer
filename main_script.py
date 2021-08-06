@@ -89,6 +89,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     for epoch in range(1, config.epoch + 1):
         epoch_start_time = time.time()
         train(model, criterion, optimizer, training_data, scheduler, epoch, wandb )
+        torch.cuda.empty_cache()
         val_loss = evaluate(model, val_data, criterion, config)
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '

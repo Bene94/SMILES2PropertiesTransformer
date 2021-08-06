@@ -140,15 +140,29 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 def evaluate(eval_model, val_dataloader, criterion, config):
     eval_model.eval() # Turn on the evaluation mode
     total_loss = 0.
+    chunk_size = config.max_btch
     with torch.no_grad():
-        for i in range(len(val_dataloader)):
-            data, targets = next(iter(val_dataloader))
-            data = data.type(torch.IntTensor).to(config.device)
-            targets = targets.type(torch.FloatTensor).to(config.device)
-            targets = targets.view((targets.shape[0],1,1))
-            src_key_padding_mask = data.eq(35)
-            src_key_padding_mask = src_key_padding_mask.permute(1,0)
-            output = eval_model(data, src_key_padding_mask = src_key_padding_mask)
-            total_loss += criterion(output, targets).item()
+
+            for i, batch in enumerate(val_dataloader):
+                
+                data_batch, target_batch = batch[0], batch[1]
+                data_chunks = torch.split(data_batch,chunk_size)
+                target_chunks = torch.split(target_batch,chunk_size)
+                    
+                for j, data in enumerate(data_chunks):
+            
+                    target = target_chunks[j]
+
+                    data = data.to(config.device)
+                    target = target.to(config.device)
+
+                    data = data.type(torch.IntTensor).to(config.device)
+                    targets = targets.type(torch.FloatTensor).to(config.device)
+                    targets = targets.view((targets.shape[0],1,1))
+                    src_key_padding_mask = data.eq(35)
+                    src_key_padding_mask = src_key_padding_mask.permute(1,0)
+                    output = eval_model(data, src_key_padding_mask = src_key_padding_mask)
+                    total_loss += criterion(output, targets).item()/len(data_chunks)
+
     return total_loss / (len(val_dataloader))
 
