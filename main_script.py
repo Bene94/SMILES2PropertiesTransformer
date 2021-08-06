@@ -19,7 +19,7 @@ import click
 @click.option('--btch', default=128, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0, help='Weight decay')
-@click.option('--local' , default=True, help='Using training data from local folder')
+@click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
 
 
