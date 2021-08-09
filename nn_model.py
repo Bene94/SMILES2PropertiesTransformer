@@ -20,7 +20,7 @@ class TransformerModel(nn.Module):
         super(TransformerModel, self).__init__()
         self.model_type = 'Transformer'
         self.pos_encoder = PositionalEncoding(config.embed_size, config.dropout)
-        encoder_layers = TransformerEncoderLayer(config.embed_size, config.num_heads, config.hidden_size, config.dropout)
+        encoder_layers = TransformerEncoderLayer(config.embed_size, config.num_heads, dim_feedforward = config.hidden_size, dropout = config.dropout)
         self.transformer_encoder = TransformerEncoder(encoder_layers, config.num_layers)
         self.encoder = nn.Embedding(config.ntokens, config.embed_size, padding_idx = config.padding_idx)
         self.ninp = config.embed_size
@@ -106,10 +106,12 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
             log_loss += loss.item()
            
             scaler.scale(loss).backward()
-            
+
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
+
         scaler.step(optimizer)
         scaler.update()
-        
+
         optimizer.zero_grad()
 
         total_loss += log_loss
