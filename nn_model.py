@@ -106,12 +106,12 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
             log_loss += loss.item()
            
             scaler.scale(loss).backward()
-
+        
+        scaler.unscale_(optimizer)
         grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
 
         scaler.step(optimizer)
         scaler.update()
-
         optimizer.zero_grad()
 
         total_loss += log_loss
