@@ -9,17 +9,17 @@ import wandb
 import click
 
 @click.command()
-@click.option('--emb', default=128, help='Embedding size')
-@click.option('--hid', default=8196, help='Hidden layer size')
+@click.option('--emb', default=1024, help='Embedding size')
+@click.option('--hid', default=2048, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transformer layers')
 @click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
-@click.option('--lr', default= 0.001, help='Learning rate')
+@click.option('--lr', default= 0.0001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
-@click.option('--btch', default=128, help='Batchsize')
-@click.option('--set', default='TrainingData_red/', help='Location of dataset')
+@click.option('--btch', default=1024, help='Batchsize')
+@click.option('--set', default='/home/bene/TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0., help='Weight decay')
-@click.option('--local' , default=False, help='Using training data from local folder')
+@click.option('--local' , default=True, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
 
 
