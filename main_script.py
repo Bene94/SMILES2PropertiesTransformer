@@ -9,12 +9,12 @@ import wandb
 import click
 
 @click.command()
-@click.option('--emb', default=128, help='Embeding size')
+@click.option('--emb', default=128, help='Embedding size')
 @click.option('--hid', default=8196, help='Hidden layer size')
-@click.option('--nlay', default=2, help='Number of transfprmer layers')
+@click.option('--nlay', default=2, help='Number of transformer layers')
 @click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
-@click.option('--lr', default= 0.001, help='learning rate')
+@click.option('--lr', default= 0.001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=128, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
