@@ -107,7 +107,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
            
             scaler.scale(loss).backward()
 
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
+        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
 
         scaler.step(optimizer)
         scaler.update()
@@ -120,7 +120,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
         total_compute += 6 * wandb.config.params * train_dataloader.batch_size * 1e-6
       
         wandb.log({"train_loss": log_loss})
-        wandb.log({"grad_norm": torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)})
+        wandb.log({"grad_norm": grad_norm})
         wandb.log({"lr": optimizer.param_groups[0]['lr']})
         wandb.log({"epoch": epoch})
         wandb.log({"batch_time": time.time() - start_time})
