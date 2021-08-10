@@ -108,7 +108,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
             scaler.scale(loss).backward()
         
         scaler.unscale_(optimizer)
-        #grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 10000)
+        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100000)
 
         scaler.step(optimizer)
         scaler.update()
