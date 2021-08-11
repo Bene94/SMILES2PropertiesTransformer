@@ -79,7 +79,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
     start_time = time.time()
     
-    scaler = GradScaler(enabled=False) 
+    scaler = GradScaler(init_scale=8192) 
 
     for i, batch in enumerate(train_dataloader):
         
@@ -99,13 +99,14 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
             src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
             
-            with autocast(False):
+            with autocast(True):
                 output = model(data, src_key_padding_mask = src_padding_mask) 
                 loss = criterion(output, target)
                 loss = loss / len(data_chunks)
-            log_loss += loss.item()
-           
+            
             scaler.scale(loss).backward()
+            
+            log_loss += loss.item()
         
         scaler.unscale_(optimizer)
         grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100000)
