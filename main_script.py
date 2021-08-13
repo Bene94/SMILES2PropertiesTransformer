@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from dataclasses import dataclass
 import wandb
+import datetime
 
 
 import click
@@ -15,7 +16,7 @@ import click
 @click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
 @click.option('--lr', default= 0.0001, help='Learning rate')
-@click.option('--epo', default=1, help='Number of epochs')
+@click.option('--epo', default=0, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0.1, help='Weight decay')
@@ -113,8 +114,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     print('-' * 89)
     print("Best validation loss {:.4f}".format(best_val_loss))
     model = best_model
-    modle_path = os.path.join("Modles/", name, '.pt')
-    torch.save(model.state_dict(), modle_path)
+    date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    torch.save(model.state_dict(), '../Models/'+ date + name +'.pth')
 
 if __name__ == '__main__': 
     main()
