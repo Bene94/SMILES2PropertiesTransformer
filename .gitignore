@@ -5,6 +5,7 @@ InputData_test/**
 TrainingData/**
 TrainingData_test/**
 TrainingData_red/**
+Models/**
 
 # Standard for python in vs code
 
