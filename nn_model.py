@@ -28,14 +28,15 @@ class TransformerModel(nn.Module):
         self.decoder = nn.Linear(config.embed_size, 1)
         self.pool = nn.MaxPool1d(kernel_size = 128, stride = 128)
 
-        self.init_weights()
+        self.init_weights(config)
 
 
-    def init_weights(self):
-        initrange = 1
-        self.encoder.weight.data.uniform_(-initrange, initrange)
+    def init_weights(self, config):
+
+        self.encoder.weight.data = nn.init.xavier_normal_(self.encoder.weight.data)
+        
         self.decoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
+        self.decoder.weight.data.normal_(0, math.sqrt(2/config.embed_size))
 
     def forward(self, src, src_key_padding_mask):
         src = src.type(torch.cuda.IntTensor)
@@ -99,7 +100,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
             src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
             
-            with autocast(True):
+            with autocast(False):
                 output = model(data, src_key_padding_mask = src_padding_mask) 
                 loss = criterion(output, target)
                 loss = loss / len(data_chunks)
@@ -115,7 +116,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
         scaler.update()
 
         total_loss += log_loss
-        log_interval = 1
+        log_interval = 10
         total_tokens += train_dataloader.batch_size * 128 * 1e-6
         total_compute += 6 * wandb.config.params * train_dataloader.batch_size * 1e-6
       
@@ -123,13 +124,13 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
         wandb.log({"grad_norm": grad_norm})
         wandb.log({"lr": optimizer.param_groups[0]['lr']})
         wandb.log({"epoch": epoch})
-        wandb.log({"batch_time": time.time() - start_time})
         wandb.log({"n_tokens": total_tokens})
         wandb.log({"compute": total_compute})
       
         if i % log_interval == 0 and i > 0:
             cur_loss = total_loss / log_interval
             elapsed = time.time() - start_time
+            wandb.log({"batch_time":  elapsed / log_interval})
             print('| epoch {:3d} | {:5d}/{:5d} batches | '
                   'lr {:02.2f} | ms/batch {:5.2f} | '
                   'loss {:5.2f}'.format(

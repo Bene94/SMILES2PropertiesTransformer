@@ -9,21 +9,25 @@ import wandb
 import click
 
 @click.command()
-@click.option('--emb', default=1024, help='Embedding size')
-@click.option('--hid', default=2048, help='Hidden layer size')
+@click.option('--emb', default=512, help='Embedding size')
+@click.option('--hid', default=1024, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transformer layers')
 @click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
 @click.option('--lr', default= 0.0001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
-@click.option('--set', default='/home/bene/TrainingData_red/', help='Location of dataset')
+@click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0., help='Weight decay')
-@click.option('--local' , default=False, help='Using training data from local folder')
+@click.option('--local' , default=True, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
+@click.option('--cuda', default=True, help='Using GPU')
 
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch):
+
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda):
+    
+    
     
     wandb.init(project= 'gamma', entity='bene94')
 
@@ -48,8 +52,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.data_path = set
     config.weight_decay = wdecay
     config.max_btch = max_btch
-
-
 
     model = TransformerModel(config).to(config.device)
     wandb.watch(model)
