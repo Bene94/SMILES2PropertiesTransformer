@@ -26,7 +26,6 @@ class TransformerModel(nn.Module):
 
         self.init_weights(config)
 
-
     def init_weights(self, config):
         self.encoder.weight.data = nn.init.xavier_normal_(self.encoder.weight.data)
         
@@ -42,7 +41,6 @@ class TransformerModel(nn.Module):
         output = F.relu(self.dense(output))
         output = self.decoder(output)
         return output
-
     
 class PositionalEncoding(nn.Module):
 
