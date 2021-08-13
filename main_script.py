@@ -1,12 +1,11 @@
+import datetime
+
 from nn_model import * 
 from nn_dataloader import *
 import torch
 import torch.nn as nn
-from dataclasses import dataclass
+
 import wandb
-import datetime
-
-
 import click
 
 @click.command()
@@ -28,7 +27,7 @@ import click
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda):
     
-    name = 'trans_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + str(drp) + '_' + str(wdecay) + '_' + str(lr) +  '_' + str(btch) + '_' + str(epo)
+    name = 'trans_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + str(drp) + '_' + str(wdecay) + '_' + '{:1e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
     wandb.init(project= 'gamma', entity='bene94', name=name)
 

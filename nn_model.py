@@ -1,6 +1,5 @@
-# test transformer
-
 import math
+import time
 
 import torch
 import torch.nn as nn
@@ -8,9 +7,6 @@ import torch.nn.functional as F
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
 from torch.cuda.amp import GradScaler
 from torch.cuda.amp import autocast
-
-import time
-
 from torch.nn.modules import activation
 
 
@@ -32,7 +28,6 @@ class TransformerModel(nn.Module):
 
 
     def init_weights(self, config):
-
         self.encoder.weight.data = nn.init.xavier_normal_(self.encoder.weight.data)
         
         self.decoder.bias.data.zero_()
