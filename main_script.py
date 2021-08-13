@@ -15,7 +15,7 @@ import click
 @click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
 @click.option('--lr', default= 0.0001, help='Learning rate')
-@click.option('--epo', default=50, help='Number of epochs')
+@click.option('--epo', default=1, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0.1, help='Weight decay')
@@ -27,9 +27,9 @@ import click
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda):
     
+    name = 'trans_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + str(drp) + '_' + str(wdecay) + '_' + str(lr) +  '_' + str(btch) + '_' + str(epo)
     
-    
-    wandb.init(project= 'gamma', entity='bene94')
+    wandb.init(project= 'gamma', entity='bene94', name=name)
 
     config = wandb.config
 
@@ -88,6 +88,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
 
+    overall_start_time = time.time()
+
     for epoch in range(1, config.epoch + 1):
         epoch_start_time = time.time()
         train(model, criterion, optimizer, training_data, scheduler, epoch, wandb )
@@ -106,6 +108,13 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
         scheduler.step()
 
+    print('-' * 89)
+    print('| End of training | time: {:5.2f}s |'.format((time.time() - overall_start_time)))
+    print('-' * 89)
+    print("Best validation loss {:.4f}".format(best_val_loss))
+    model = best_model
+    modle_path = os.path.join("Modles/", name, '.pt')
+    torch.save(model.state_dict(), modle_path)
 
 if __name__ == '__main__': 
     main()
