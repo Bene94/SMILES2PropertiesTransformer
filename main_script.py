@@ -18,8 +18,8 @@ import click
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
-@click.option('--wdecay', default=0., help='Weight decay')
-@click.option('--local' , default=True, help='Using training data from local folder')
+@click.option('--wdecay', default=0.1, help='Weight decay')
+@click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
 @click.option('--cuda', default=True, help='Using GPU')
 
