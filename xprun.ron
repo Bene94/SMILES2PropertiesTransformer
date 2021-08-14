@@ -11,8 +11,9 @@ XpV0(
             gpu_mem: "11GB",
 
             volumes: 
-                {"/home/bene/TrainingData_red": "/mnt/xprun/data",
-            }
+                //{"/home/bene/TrainingData_red": "/mnt/xprun/data"
+                {"/home/bene/TrainingData_red": "/mnt/xprun/data", "/home/bene/NNGamma/Models": "/mnt/xprun/out"
+            },
         ),
     }
 )

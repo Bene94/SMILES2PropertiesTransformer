@@ -15,7 +15,7 @@ import click
 @click.option('--nhead', default=4, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
 @click.option('--lr', default= 0.0001, help='Learning rate')
-@click.option('--epo', default=0, help='Number of epochs')
+@click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
 @click.option('--set', default='TrainingData_red/', help='Location of dataset')
 @click.option('--wdecay', default=0.1, help='Weight decay')
@@ -27,7 +27,7 @@ import click
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda):
     
-    name = 'trans_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + str(drp) + '_' + str(wdecay) + '_' + '{:1e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
+    name = 'trans_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
     wandb.init(project= 'gamma', entity='bene94', name=name)
 
@@ -73,6 +73,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     if local:
         data_path = os.path.join(config.data_path)
+        data_path = "/home/bene/TrainingData_red/"
     else:
         data_path = os.path.join('/mnt/xprun/data/')
 
@@ -113,8 +114,20 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     print('-' * 89)
     print("Best validation loss {:.4f}".format(best_val_loss))
     model = best_model
-    date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    torch.save(model.state_dict(), '../Models/'+ date + name +'.pth')
+
+    if local:
+        path = '../Models/'
+    else:
+        path = "/mnt/xprun/out/"
+        print(path) 
+
+    print("Saving at: " + path)
+    
+    print(os.listdir(path))
+    date = datetime.datetime.now().strftime("%Y%m%d%H%M")
+    torch.save(model.state_dict(), path + date + name +'.pth')
+    print(os.listdir(path))
+        
 
 if __name__ == '__main__': 
     main()
