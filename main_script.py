@@ -1,12 +1,14 @@
 import datetime
 
-from nn_model import * 
-from nn_dataloader import *
 import torch
 import torch.nn as nn
-
 import wandb
 import click
+
+from nn_model import * 
+from nn_dataloader import *
+from plot_results import *
+
 
 @click.command()
 @click.option('--emb', default=512, help='Embedding size')
@@ -17,7 +19,7 @@ import click
 @click.option('--lr', default= 0.0001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
-@click.option('--set', default='TrainingData_red/', help='Location of dataset')
+@click.option('--set', default='data', help='Location of dataset')
 @click.option('--wdecay', default=0.1, help='Weight decay')
 @click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
@@ -54,6 +56,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.max_btch = max_btch
 
     model = TransformerModel(config).to(config.device)
+
+    
     wandb.watch(model)
 
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -75,27 +79,34 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         data_path = os.path.join(config.data_path)
         data_path = "/home/bene/TrainingData_red/"
     else:
-        data_path = os.path.join('/mnt/xprun/data/')
+        data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
 
     train_dataset = gamma_dataset(data_path, 'train')
     val_dataset = gamma_dataset(data_path, 'val')
 
-    # train_dataset.train_data = train_dataset.train_data[0:16]
-    # train_dataset.train_target = train_dataset.train_target[0:16]
+    if False:
+        train_dataset.train_data = train_dataset.train_data[0:500]
+        train_dataset.train_target = train_dataset.train_target[0:500]
 
-    # val_dataset.train_data = val_dataset.train_data[0:16]
-    # val_dataset.train_target = val_dataset.train_target[0:16]
+        val_dataset.train_data = val_dataset.train_data[0:2]
+        val_dataset.train_target = val_dataset.train_target[0:2]
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
-    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
 
     overall_start_time = time.time()
 
     for epoch in range(1, config.epoch + 1):
+
         epoch_start_time = time.time()
+
         train(model, criterion, optimizer, training_data, scheduler, epoch, wandb )
+
         torch.cuda.empty_cache()
-        val_loss = evaluate(model, val_data, criterion, config)
+
+        val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
+
+
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
             .format(epoch, (time.time() - epoch_start_time),
@@ -107,25 +118,50 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             best_val_loss = val_loss
             best_model = model
 
+
+        plot_interval = 1
+
+        if epoch % plot_interval == 0:
+            val_target = val_target.squeeze()
+            val_out = val_out.squeeze()
+
+            if local:
+                path = '../Plot/'
+            else:
+                path = "/mnt/xprun/plot/"
+
+            name = str(epoch) + '_val_' + '{:.0e}'.format(val_loss) +'.png'
+
+            make_histogram(val_out, val_target, name, path)
+            make_heatmap(val_out, val_target, name, path)
+
+            train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+            
+            train_target = train_target.squeeze()
+            train_out = train_out.squeeze()
+            
+            name = str(epoch) + '_train_' + '{:.0e}'.format(train_loss) + '.png'
+            
+            make_histogram(train_out, train_target, name, path)
+            make_heatmap(train_out, train_target, name, path)
+
+
         scheduler.step()
 
     print('-' * 89)
     print('| End of training | time: {:5.2f}s |'.format((time.time() - overall_start_time)))
     print('-' * 89)
     print("Best validation loss {:.4f}".format(best_val_loss))
-    model = best_model
 
     if local:
         path = '../Models/'
     else:
-        path = "/mnt/xprun/out/"
-        print(path) 
+        path = "/mnt/xprun/plot/"
 
-    print("Saving at: " + path)
-    
     print(os.listdir(path))
-    date = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    torch.save(model.state_dict(), path + date + name +'.pth')
+    date = datetime.datetime.now().strftime("%Y%m%d%H")
+    torch.save(best_model.state_dict(), path + date + '_' + name +'.pth')
+    #torch.save(best_model.state_dict(), path + date + '_overfitt_test.pth')
     print(os.listdir(path))
         
 

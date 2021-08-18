@@ -2,6 +2,7 @@ import math
 import time
 
 import torch
+from torch.functional import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
@@ -137,6 +138,9 @@ def evaluate(eval_model, val_dataloader, criterion, config):
     eval_model.eval() # Turn on the evaluation mode
     total_loss = 0.
     chunk_size = config.max_btch
+    total_output = Tensor([]).to(config.device)
+    total_target = Tensor([]).to(config.device)
+
     with torch.no_grad():
 
             for i, batch in enumerate(val_dataloader):
@@ -159,6 +163,12 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                     src_key_padding_mask = src_key_padding_mask.permute(1,0)
                     output = eval_model(data, src_key_padding_mask = src_key_padding_mask)
                     total_loss += criterion(output, target).item()/len(data_chunks)
+                    
+                    total_output = torch.cat((total_output, output), dim=0)
+                    total_target = torch.cat((total_target, target), dim=0)
 
-    return total_loss / (len(val_dataloader))
+    total_output = total_output.cpu().numpy()
+    total_target = total_target.cpu().numpy()
+    
+    return total_loss / (len(val_dataloader)), total_output, total_target
 
