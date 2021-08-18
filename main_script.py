@@ -92,7 +92,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         val_dataset.train_target = val_dataset.train_target[0:2]
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
-    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
 
     overall_start_time = time.time()
 
@@ -112,6 +112,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             .format(epoch, (time.time() - epoch_start_time),
                                         val_loss))
         print('-' * 89)
+        
         wandb.log({"val_loss": val_loss})
 
         if val_loss < best_val_loss:

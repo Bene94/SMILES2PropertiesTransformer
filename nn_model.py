@@ -23,7 +23,7 @@ class TransformerModel(nn.Module):
         self.ninp = config.embed_size
         self.dense = nn.Linear(config.embed_size, config.embed_size)
         self.decoder = nn.Linear(config.embed_size, 1)
-        self.pool = nn.MaxPool1d(kernel_size = 128, stride = 128)
+        self.pool = nn.AvgPool1d(kernel_size = 128, stride = 128)
 
         self.init_weights(config)
 

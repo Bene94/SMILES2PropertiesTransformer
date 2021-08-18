@@ -13,7 +13,7 @@ def make_histogram(prediciton, target, name, path):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
     plt.hist(prediciton, bins=100, alpha=0.5, label='prediciton')
-    plt.hist(target, bins=100, alpha=0.5, label='target', range=(max(prediciton), min(prediciton)))
+    plt.hist(target, bins=100, alpha=0.5, label='target', range=(min(prediciton), max(prediciton)))
     plt.legend(loc='upper right')
     plt.ylabel('count')
     plt.title(name)
