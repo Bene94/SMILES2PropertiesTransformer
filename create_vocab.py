@@ -33,21 +33,27 @@ def find_vocab(df):
 def create_vocab_dict(vocab):
     # create a dictionary for the vocab with the char being the key and the value being the index       
     vocab_dict = {}
+    
+    # add special characters to the vocab dictionary 
+    vocab_dict['&'] = 0 # for padding
+    vocab_dict['!'] = 1 # for start of sentence
+    vocab_dict['?'] = 2 # for joining
+    vocab_dict['*'] = 3 # for end of sentence
+
     for i, char in enumerate(vocab):       
-        vocab_dict[char] = i
-    vocab_dict['%'] = len(vocab_dict)
-    vocab_dict['&'] = len(vocab_dict)
+        vocab_dict[char] = i + 4
+
     return vocab_dict
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     #add consol output to show progress
-    df, num_smile0, num_smile1 = load_data('InputData')
+    df, num_smile0, num_smile1 = load_data('Input_Reduced')
     print("Find Vocab")
     vocab = find_vocab(df)
     print("Create Vocab Dict")
     vocab_dict = create_vocab_dict(vocab)
     # save vocab_dict into TrainingData\
-    with open('TrainingData/vocab_dict.csv', 'w') as f:
+    with open('Vocab/vocab_dict.csv', 'w') as f:
         for key, value in vocab_dict.items():
             f.write(key + ' ' + str(value) + '\n')
         

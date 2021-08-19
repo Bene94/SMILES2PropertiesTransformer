@@ -90,18 +90,18 @@ def load_data_test_val(folder_path, val_dict):
         df_val = df_val.append(temp_df_val)
     return df_train, df_val
 
-def join_input_data(df):
+def join_input_data(df, vocab_dict):
     #takes the smiles and adds them together wiht a space between them for the combination 0 ,1 collume 2 is the value otherwise collume 3
     df_joined = pd.DataFrame()
 
     temp_df = pd.DataFrame()
-    temp_df['SMILES'] = df.iloc[:,0] + ['$'] + df.iloc[:,1]
+    temp_df['SMILES'] = list(vocab_dict.keys())[1] + df.iloc[:,0] + list(vocab_dict.keys())[2] + df.iloc[:,1] + list(vocab_dict.keys())[3]
     temp_df['gamma'] = df.iloc[:,2]
 
     df_joined = df_joined.append(temp_df)
 
     temp_df = pd.DataFrame()
-    temp_df['SMILES'] = df.iloc[:,1] + ['$'] + df.iloc[:,0]
+    temp_df['SMILES'] = list(vocab_dict.keys())[1] + df.iloc[:,1] + list(vocab_dict.keys())[2] + df.iloc[:,0] + list(vocab_dict.keys())[3]
     temp_df['gamma'] = df.iloc[:,3]
     df_joined = df_joined.append(temp_df)
     return df_joined
@@ -109,17 +109,29 @@ def join_input_data(df):
 def apply_vocab(df, vocab_dict):
     # apply the vocab to the dataframe and padd the data
     bar = pb.ProgressBar(maxval=df.shape[0], widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
-    temp = np.zeros([df.shape[0], 256])
+    temp = np.zeros([df.shape[0], 128])
+    remove_index = []
+    padd_char = list(vocab_dict.keys())[0]
     for i in range(df.shape[0]):
         bar.update(i)
-        text = df.iloc[i,0].ljust(256, '&')
-        temp[i,:] = [vocab_dict [char] for char in text]
+        # if data longer than 128 chars then add to remove index
+        if len(df.iloc[i][0]) > 128:
+            remove_index.append(i)
+        else:
+            # padd to 128 with 0
+            text = df.iloc[i,0].ljust(128, padd_char)
+            temp[i,:] = [vocab_dict [char] for char in text]
+    
     data = np.zeros([df.shape[0], 1])
     data = np.array(df.iloc[:,1])
     # make data an 2d array
     data = data.reshape(data.shape[0],1)
     # add data and temp to as single array
     data = np.concatenate((data, temp), axis=1)
+    # remove the rows that are too long
+    data = np.delete(data, remove_index, axis=0)
+    # remove all data where gamma < -10 or > 10
+    data = data[np.logical_and(data[:,0] > -10, data[:,0] < 10)]
     return data
 
 
@@ -148,14 +160,14 @@ def save_batches(batches, folder_path, type):
 
 if __name__ == "__main__":
 
-    file_path = "InputData"
+    file_path = "Input_Reduced"
     print("Data Loading")
-    vocab_dict = load_vocab('TrainingData','vocab_dict')
+    vocab_dict = load_vocab('Vocab','vocab_dict')
     list_smile0, list_smile1  = get_smiles(file_path)
     val_dict = get_smiles_test_val(list_smile0, list_smile1, 0.2)
     df_train,df_val = load_data_test_val(file_path, val_dict)
-    df_train_joined = join_input_data(df_train)
-    df_val_joined = join_input_data(df_val)
+    df_train_joined = join_input_data(df_train, vocab_dict)
+    df_val_joined = join_input_data(df_val, vocab_dict)
     print("Data Loaded")
     
     # apply vocab
@@ -165,6 +177,6 @@ if __name__ == "__main__":
     #save batches
     print("Saving Batches")
     batches = make_batches(df_train_joined, 100000)
-    save_batches(batches, "TrainingData", "train")
+    save_batches(batches, "Data_no_tail", "train")
     batches = make_batches(df_val_joined, 100000)
-    save_batches(batches, "TrainingData", "val")
+    save_batches(batches, "Data_no_tail", "val")
