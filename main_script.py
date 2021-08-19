@@ -19,13 +19,13 @@ from plot_results import *
 @click.option('--lr', default= 0.0001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
-@click.option('--set', default='data', help='Location of dataset')
+@click.option('--set', default='data_red', help='Location of dataset')
 @click.option('--wdecay', default=0.1, help='Weight decay')
 @click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--n_dense', default=4, help='Number of dense layers')
+@click.option('--n_dense', default=2, help='Number of dense layers')
 @click.option('--dense_drp', default=0.5, help='Number of dense layers')
 
 
@@ -45,10 +45,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     config.criterion = nn.MSELoss()
     
-
-
-    config.padding_idx = 22
-    config.ntokens =  24
+    config.padding_idx = 0
+    config.ntokens =  23
 
     config.embed_size = emb
     config.hidden_size = hid
@@ -65,6 +63,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.batch_size  = btch
     config.max_btch = max_btch
     config.epoch =  epo
+
 
 
     model = TransformerModel(config).to(config.device)
@@ -89,7 +88,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     if local:
         data_path = os.path.join(config.data_path)
-        data_path = "/home/bene/TrainingData_red/"
     else:
         data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
 

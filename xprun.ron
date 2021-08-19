@@ -13,9 +13,8 @@ XpV0(
                 "WANDB_API_KEY": "wandb-api-key",
             },
             volumes: 
-                //{"/home/bene/TrainingData_red": "/mnt/xprun/data"
-                {"/home/bene/TrainingData_red": "/mnt/xprun/data", 
-                "/home/bene/NNGamma/NNgamma/TrainingData_test":"/mnt/xprun/data_test", 
+                {"/home/bene/NNGamma/data_red": "/mnt/xprun/data_red",
+                "/home/bene/NNGamma/data_red_no_tail": "/mnt/xprun/data_red_no_tail", 
                 "/home/bene/NNGamma/Models": "/mnt/xprun/out",
                 "/home/bene/NNGamma/Plot": "/mnt/xprun/plot"
             },
