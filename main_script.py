@@ -24,10 +24,13 @@ from plot_results import *
 @click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
 @click.option('--cuda', default=True, help='Using GPU')
+@click.option('--log_name', default='', help='Using GPU')
+@click.option('--n_dense', default=4, help='Number of dense layers')
+@click.option('--dense_drp', default=0.5, help='Number of dense layers')
 
 
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda):
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp):
     
     name = 'trans_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -35,7 +38,11 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     config = wandb.config
 
-    config.device = torch.device('cuda')
+    if cuda:
+        config.device = torch.device('cuda')
+    else:
+        config.device = torch.device('cpu')
+
     config.criterion = nn.MSELoss()
     
 
@@ -49,11 +56,16 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.num_heads = nhead
     config.dropout =  drp
     config.lr = lr
-    config.epoch =  epo
-    config.batch_size  = btch
-    config.data_path = set
     config.weight_decay = wdecay
+    
+    config.n_dense = n_dense
+    config.dense_dropout = dense_drp
+
+    config.data_path = set
+    config.batch_size  = btch
     config.max_btch = max_btch
+    config.epoch =  epo
+
 
     model = TransformerModel(config).to(config.device)
 
@@ -131,7 +143,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             else:
                 path = "/mnt/xprun/plot/"
 
-            name = str(epoch) + '_val_' + '{:.0e}'.format(val_loss) +'.png'
+            name = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
 
             make_histogram(val_out, val_target, name, path)
             make_heatmap(val_out, val_target, name, path)
@@ -141,7 +153,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             train_target = train_target.squeeze()
             train_out = train_out.squeeze()
             
-            name = str(epoch) + '_train_' + '{:.0e}'.format(train_loss) + '.png'
+            name = log_name + '_' + str(epoch) + '_train_' + '{:.1e}'.format(train_loss) + '.png'
             
             make_histogram(train_out, train_target, name, path)
             make_heatmap(train_out, train_target, name, path)

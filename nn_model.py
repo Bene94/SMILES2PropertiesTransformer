@@ -21,9 +21,12 @@ class TransformerModel(nn.Module):
         self.transformer_encoder = TransformerEncoder(encoder_layers, config.num_layers)
         self.encoder = nn.Embedding(config.ntokens, config.embed_size, padding_idx = config.padding_idx)
         self.ninp = config.embed_size
-        self.dense = nn.Linear(config.embed_size, config.embed_size)
+
+        self.dense_list = nn.ModuleList([nn.Linear(config.embed_size, config.embed_size) for _ in range(config.n_dens)])
+        self.dropout_list = nn.ModuleList([nn.Dropout(config.dense_dropout) for _ in range(config.n_dens)])
+        
         self.decoder = nn.Linear(config.embed_size, 1)
-        self.pool = nn.AvgPool1d(kernel_size = 128, stride = 128)
+        self.pool = nn.MaxPool1d(kernel_size = 128, stride = 128)
 
         self.init_weights(config)
 
@@ -39,13 +42,19 @@ class TransformerModel(nn.Module):
         src = self.pos_encoder(src)
         output = self.transformer_encoder(src)
         output = self.pool(output.permute(0,2,1)).permute(0,2,1)
-        output = F.relu(self.dense(output))
+
+        for i in range(len(self.dense_list)):
+            output = self.dense_list[i](output)
+            output = F.relu(output)
+            output = self.dropout_list[i](output)
+
         output = self.decoder(output)
+
         return output
     
 class PositionalEncoding(nn.Module):
 
-    def __init__(self, d_model, dropout=0.1, max_len=2048):
+    def __init__(self, d_model, dropout=0.1, max_len=128):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 

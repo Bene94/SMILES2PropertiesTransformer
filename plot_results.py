@@ -12,8 +12,8 @@ from nn_model import *
 def make_histogram(prediciton, target, name, path):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
-    plt.hist(prediciton, bins=100, alpha=0.5, label='prediciton')
-    plt.hist(target, bins=100, alpha=0.5, label='target', range=(min(prediciton), max(prediciton)))
+    plt.hist(target, bins=100, alpha=0.5, label='target', range=(min(target), max(target)))
+    plt.hist(prediciton, bins=100, alpha=0.5, label='prediciton', range=(min(target), max(target)))
     plt.legend(loc='upper right')
     plt.ylabel('count')
     plt.title(name)
@@ -27,13 +27,15 @@ def make_heatmap(prediciton, target, name, path):
     plt.show()
     plt.xlim(-10,10)
     plt.ylim(-10,10)
+    plt.ylabel('predicted value')
+    plt.xlabel('ground truth')
     plt.savefig(path + 'heat_' + name)
 
 def make_scatter(prediciton, target, name, path):
     plt.clf()
-    plt.scatter(prediciton, target)
-    plt.xlabel('predicted value')
-    plt.ylabel('ground truth')
+    plt.scatter(target, prediciton)
+    plt.ylabel('predicted value')
+    plt.xlabel('ground truth')
     plt.savefig(path + 'scat_' + name)
 
 if __name__ == '__main__':
