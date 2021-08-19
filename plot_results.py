@@ -12,21 +12,21 @@ from nn_model import *
 def make_histogram(prediciton, target, name, path):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
-    plt.hist(target, bins=100, alpha=0.5, label='target', range=(min(target), max(target)))
-    plt.hist(prediciton, bins=100, alpha=0.5, label='prediciton', range=(min(target), max(target)))
+    plt.hist(target, bins=500, alpha=0.5, label='target', range=(min(target), max(target)))
+    plt.hist(prediciton, bins=500, alpha=0.5, label='prediciton', range=(min(target), max(target)))
     plt.legend(loc='upper right')
     plt.ylabel('count')
     plt.title(name)
     plt.savefig(path + 'hist_' + name)
 
 def make_heatmap(prediciton, target, name, path):
-    heatmap, xedges, yedges = np.histogram2d(target.squeeze(), prediciton.squeeze(), bins=500)
+    heatmap, xedges, yedges = np.histogram2d(target.squeeze(), prediciton.squeeze(), bins=2000)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     plt.clf()
     plt.imshow(heatmap.T, extent=extent, origin='lower')
     plt.show()
-    plt.xlim(-10,10)
-    plt.ylim(-10,10)
+    plt.xlim(-2.5,2.5)
+    plt.ylim(-2.5,2.5)
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
     plt.savefig(path + 'heat_' + name)
