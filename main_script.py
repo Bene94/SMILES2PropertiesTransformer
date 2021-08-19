@@ -143,8 +143,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
             name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
 
-            make_histogram(val_out, val_target, name, path)
-            make_heatmap(val_out, val_target, name, path)
+            make_histogram(val_out, val_target, name_plot, path)
+            make_heatmap(val_out, val_target, name_plot, path)
 
             train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
             
