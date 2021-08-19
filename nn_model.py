@@ -22,8 +22,8 @@ class TransformerModel(nn.Module):
         self.encoder = nn.Embedding(config.ntokens, config.embed_size, padding_idx = config.padding_idx)
         self.ninp = config.embed_size
 
-        self.dense_list = nn.ModuleList([nn.Linear(config.embed_size, config.embed_size) for _ in range(config.n_dens)])
-        self.dropout_list = nn.ModuleList([nn.Dropout(config.dense_dropout) for _ in range(config.n_dens)])
+        self.dense_list = nn.ModuleList([nn.Linear(config.embed_size, config.embed_size) for _ in range(config.n_dense)])
+        self.dropout_list = nn.ModuleList([nn.Dropout(config.dense_dropout) for _ in range(config.n_dense)])
         
         self.decoder = nn.Linear(config.embed_size, 1)
         self.pool = nn.MaxPool1d(kernel_size = 128, stride = 128)
