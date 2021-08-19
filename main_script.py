@@ -26,7 +26,7 @@ from plot_results import *
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
 @click.option('--n_dense', default=2, help='Number of dense layers')
-@click.option('--dense_drp', default=0.5, help='Number of dense layers')
+@click.option('--dense_drp', default=0.0, help='Number of dense layers')
 
 
 
