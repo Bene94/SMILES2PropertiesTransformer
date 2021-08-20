@@ -8,6 +8,8 @@ import click
 from nn_model import * 
 from nn_dataloader import *
 from plot_results import *
+from trainer import *
+import minGPT
 
 
 @click.command()
@@ -27,12 +29,13 @@ from plot_results import *
 @click.option('--log_name', default='', help='Using GPU')
 @click.option('--n_dense', default=2, help='Number of dense layers')
 @click.option('--dense_drp', default=0.0, help='Number of dense layers')
+@click.option('--modle_type', default="minGPT", help='Selected Modle')
 
 
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp):
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type):
     
-    name = 'trans_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
+    name = modle_type + '_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
     wandb.init(project= 'gamma', entity='bene94', name=name)
 
@@ -46,7 +49,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.criterion = nn.MSELoss()
     
     config.padding_idx = 0
-    config.ntokens =  23
+    config.vocab_size =  23
+    config.block_size = 128
 
     config.embed_size = emb
     config.hidden_size = hid
@@ -54,7 +58,10 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.num_heads = nhead
     config.dropout =  drp
     config.lr = lr
+    config.betas = [0.9,0.99]
     config.weight_decay = wdecay
+    
+
     
     config.n_dense = n_dense
     config.dense_dropout = dense_drp
@@ -64,22 +71,24 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.max_btch = max_btch
     config.epoch =  epo
 
+    criterion = nn.MSELoss() 
 
-
-    model = TransformerModel(config).to(config.device)
-
+    if modle_type == 'minGPT':
+        model = minGPT.GPT(config)
+        optimizer = model.configure_optimizers(config)
+    elif modle_type == 'pytorch':
+        model = TransformerModel(config)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+    
+    model = model.to(config.device)
+    
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = config.epoch, eta_min=config.lr/10)
     
     wandb.watch(model)
-
+    
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    pytorch_total_params = pytorch_total_params - emb *config.ntokens
-
+    pytorch_total_params = pytorch_total_params - emb *config.vocab_size
     config.params = pytorch_total_params
-
-
-    criterion = nn.MSELoss() 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = config.epoch, eta_min=config.lr/10)
 
     best_val_loss = float("inf")
     best_model = None
@@ -87,9 +96,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     # load training and validation data
 
     if local:
-        print(local)
-        data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
-        #data_path = '/home/bene/NNGamma/data_red_no_tail_neg/'
+        data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
     else:
         data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
 
@@ -140,7 +147,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
             if local:
                 path = '../Plot/'
-                path = "/mnt/xprun/plot/"
             else:
                 path = "/mnt/xprun/plot/"
 
