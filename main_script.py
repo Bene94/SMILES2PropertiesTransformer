@@ -26,7 +26,7 @@ from plot_results import *
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
 @click.option('--n_dense', default=2, help='Number of dense layers')
-@click.option('--dense_drp', default=0.5, help='Number of dense layers')
+@click.option('--dense_drp', default=0.0, help='Number of dense layers')
 
 
 
@@ -141,20 +141,20 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             else:
                 path = "/mnt/xprun/plot/"
 
-            name = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
+            name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
 
-            make_histogram(val_out, val_target, name, path)
-            make_heatmap(val_out, val_target, name, path)
+            make_histogram(val_out, val_target, name_plot, path)
+            make_heatmap(val_out, val_target, name_plot, path)
 
             train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
             
             train_target = train_target.squeeze()
             train_out = train_out.squeeze()
             
-            name = log_name + '_' + str(epoch) + '_train_' + '{:.1e}'.format(train_loss) + '.png'
+            name_plot = log_name + '_' + str(epoch) + '_train_' + '{:.1e}'.format(train_loss) + '.png'
             
-            make_histogram(train_out, train_target, name, path)
-            make_heatmap(train_out, train_target, name, path)
+            make_histogram(train_out, train_target, name_plot, path)
+            make_heatmap(train_out, train_target, name_plot, path)
 
 
         scheduler.step()
@@ -167,7 +167,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     if local:
         path = '../Models/'
     else:
-        path = "/mnt/xprun/plot/"
+        path = "/mnt/xprun/out/"
 
     print(os.listdir(path))
     date = datetime.datetime.now().strftime("%Y%m%d%H")

@@ -16,6 +16,8 @@ def make_histogram(prediciton, target, name, path):
     plt.hist(prediciton, bins=500, alpha=0.5, label='prediciton', range=(min(target), max(target)))
     plt.legend(loc='upper right')
     plt.ylabel('count')
+    plt.xlim(-10,10)
+    plt.ylim(-10,10)
     plt.title(name)
     plt.savefig(path + 'hist_' + name)
 
