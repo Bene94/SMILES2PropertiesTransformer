@@ -16,10 +16,10 @@ import minGPT
 @click.option('--emb', default=512, help='Embedding size')
 @click.option('--hid', default=1024, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transformer layers')
-@click.option('--nhead', default=4, help='Number of heads')
+@click.option('--nhead', default=8, help='Number of heads')
 @click.option('--drp', default=0.1, help='Dropout rate')
 @click.option('--lr', default= 0.0001, help='Learning rate')
-@click.option('--epo', default=50, help='Number of epochs')
+@click.option('--epo', default=10, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
 @click.option('--set', default='data_red', help='Location of dataset')
 @click.option('--wdecay', default=0.1, help='Weight decay')
@@ -35,7 +35,7 @@ import minGPT
 
 def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type):
     
-    name = modle_type + '_' + str(emb) + '_' + str(hid) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
+    name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
     wandb.init(project= 'gamma', entity='bene94', name=name)
 

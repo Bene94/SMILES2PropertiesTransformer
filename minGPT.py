@@ -112,7 +112,8 @@ class GPT(nn.Module):
         self.blocks = nn.Sequential(*[Block(config) for _ in range(config.num_layers)])
         # decoder head
         self.ln_f = nn.LayerNorm(config.embed_size)
-        self.head = nn.Linear(config.embed_size, 1, bias=False)
+        self.decoder = nn.Linear(config.embed_size, config.embed_size)
+        self.head = nn.Linear(config.embed_size, 1)
 
         self.block_size = config.block_size
         self.apply(self._init_weights)
@@ -130,6 +131,8 @@ class GPT(nn.Module):
         elif isinstance(module, nn.LayerNorm):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
+        
+        self.head.bias.data.fill_(0.5) # this is only for current data
 
     def configure_optimizers(self, config):
         """
@@ -189,6 +192,8 @@ class GPT(nn.Module):
         x = self.blocks(x)
         x = self.ln_f(x)
         x = torch.max(x, dim=1)[0]
+        x = self.decoder(x)
+        x = F.relu(x)
         logits = self.head(x)
 
         return logits
