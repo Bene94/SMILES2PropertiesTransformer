@@ -87,8 +87,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     # load training and validation data
 
     if local:
-        data_path = os.path.join(config.data_path)
-        data_path = '/home/bene/NNGamma/data_red_no_tail_neg/'
+        data_path = os.path.join('/mnt/xprun/' + config.data_path)
+        #data_path = '/home/bene/NNGamma/data_red_no_tail_neg/'
     else:
         data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
 
