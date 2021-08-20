@@ -140,6 +140,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
             if local:
                 path = '../Plot/'
+                path = "/mnt/xprun/plot/"
             else:
                 path = "/mnt/xprun/plot/"
 
