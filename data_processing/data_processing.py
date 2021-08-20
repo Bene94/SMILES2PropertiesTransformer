@@ -128,10 +128,12 @@ def apply_vocab(df, vocab_dict):
     data = data.reshape(data.shape[0],1)
     # add data and temp to as single array
     data = np.concatenate((data, temp), axis=1)
+    #negate data
+    data = -data
     # remove the rows that are too long
     data = np.delete(data, remove_index, axis=0)
     # remove all data where gamma < -10 or > 10
-    data = data[np.logical_and(data[:,0] > -10, data[:,0] < 10)]
+    #data = data[np.logical_and(data[:,0] > -10, data[:,0] < 10)]
     return data
 
 
@@ -161,6 +163,10 @@ def save_batches(batches, folder_path, type):
 if __name__ == "__main__":
 
     file_path = "Input_Reduced"
+    file_out = "data_red_neg"
+
+    # make os path
+
     print("Data Loading")
     vocab_dict = load_vocab('Vocab','vocab_dict')
     list_smile0, list_smile1  = get_smiles(file_path)
@@ -177,6 +183,6 @@ if __name__ == "__main__":
     #save batches
     print("Saving Batches")
     batches = make_batches(df_train_joined, 100000)
-    save_batches(batches, "Data_no_tail", "train")
+    save_batches(batches, file_out, "train")
     batches = make_batches(df_val_joined, 100000)
-    save_batches(batches, "Data_no_tail", "val")
+    save_batches(batches, file_out, "val")

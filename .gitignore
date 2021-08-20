@@ -8,6 +8,7 @@ TrainingData_red/**
 Data_no_tail/*
 Models/**
 Input_Reduced/**
+data_*
 
 # Standard for python in vs code
 
