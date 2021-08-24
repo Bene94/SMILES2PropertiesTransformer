@@ -63,7 +63,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
         scaler.update()
 
         if warmup:
-            lr = config.lr * (1/10 +  9/10 * i/n_steps)
+            lr = config.lr * (1/10 +  9/10 *  ((epoch -1 + i / n_steps) / config.warmup_epochs))
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr 
         else:

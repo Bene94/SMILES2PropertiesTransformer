@@ -30,10 +30,11 @@ import minGPT
 @click.option('--n_dense', default=2, help='Number of dense layers')
 @click.option('--dense_drp', default=0.0, help='Number of dense layers')
 @click.option('--modle_type', default="minGPT", help='Selected Modle')
+@click.option('--warmup', default=1, help='Number of warmup epochs')
 
 
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type):
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type, warmup):
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -61,7 +62,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.betas = [0.9,0.99]
     config.weight_decay = wdecay
 
-    config.warmup_epochs = 1
+    config.warmup_epochs = warmup
     
     config.n_dense = n_dense
     config.dense_dropout = dense_drp
