@@ -104,7 +104,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     
     model = model.to(config.device)
     
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = config.epoch * len(training_data), eta_min=config.lr/10)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = (config.epoch-config.warmup) * len(training_data), eta_min=config.lr/10)
     
     wandb.watch(model)
     
