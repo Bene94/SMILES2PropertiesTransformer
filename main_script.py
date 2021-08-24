@@ -104,7 +104,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     
     model = model.to(config.device)
     
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = (config.epoch-config.warmup) * len(training_data), eta_min=config.lr/10)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = (config.epoch-config.warmup_epochs) * len(training_data), eta_min=config.lr/10)
     
     wandb.watch(model)
     
@@ -121,8 +121,10 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
         epoch_start_time = time.time()
 
-        if epoch < config.warmup_epochs:
+        if epoch <= config.warmup_epochs:
             warmup = True
+        else :
+            warmup = False
 
 
 
@@ -152,7 +154,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             val_out = val_out.squeeze()
 
             if local:
-                path = '../Plot/'
+                path = '/home/bene/NNGamma//Plot/'
             else:
                 path = "/mnt/xprun/plot/"
 

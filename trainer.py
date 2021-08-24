@@ -63,12 +63,12 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
         scaler.update()
 
         if warmup:
-            lr = config.lr / 10 * i/n_steps
+            lr = config.lr * (1/10 +  9/10 * i/n_steps)
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr 
         else:
             scheduler.step()
-            
+
         ##Loss logging and display
 
         total_loss += log_loss
