@@ -60,8 +60,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.lr = lr
     config.betas = [0.9,0.99]
     config.weight_decay = wdecay
-    
 
+    config.warmup_epochs = 1
     
     config.n_dense = n_dense
     config.dense_dropout = dense_drp
@@ -70,28 +70,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.batch_size  = btch
     config.max_btch = max_btch
     config.epoch =  epo
-
-    criterion = nn.MSELoss() 
-
-    if modle_type == 'minGPT':
-        model = minGPT.GPT(config)
-        optimizer = model.configure_optimizers(config)
-    elif modle_type == 'pytorch':
-        model = TransformerModel(config)
-        optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
-    
-    model = model.to(config.device)
-    
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = config.epoch, eta_min=config.lr/10)
-    
-    wandb.watch(model)
-    
-    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    pytorch_total_params = pytorch_total_params - emb *config.vocab_size
-    config.params = pytorch_total_params
-
-    best_val_loss = float("inf")
-    best_model = None
 
     # load training and validation data
 
@@ -113,14 +91,42 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
 
+    ## Create model
+
+    criterion = nn.MSELoss() 
+
+    if modle_type == 'minGPT':
+        model = minGPT.GPT(config)
+        optimizer = model.configure_optimizers(config)
+    elif modle_type == 'pytorch':
+        model = TransformerModel(config)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+    
+    model = model.to(config.device)
+    
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = config.epoch * len(training_data), eta_min=config.lr/10)
+    
+    wandb.watch(model)
+    
+    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    pytorch_total_params = pytorch_total_params - emb *config.vocab_size
+    config.params = pytorch_total_params
+
+    best_val_loss = float("inf")
+    best_model = None
+
     overall_start_time = time.time()
 
     for epoch in range(1, config.epoch + 1):
 
         epoch_start_time = time.time()
 
-        train(model, criterion, optimizer, training_data, scheduler, epoch, wandb )
+        if epoch < config.warmup_epochs:
+            warmup = True
 
+
+
+        train(model, criterion, optimizer, training_data, scheduler, epoch, wandb, warmup)
         torch.cuda.empty_cache()
 
         val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
@@ -165,8 +171,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             make_histogram(train_out, train_target, name_plot, path)
             make_heatmap(train_out, train_target, name_plot, path)
 
-
-        scheduler.step()
 
     print('-' * 89)
     print('| End of training | time: {:5.2f}s |'.format((time.time() - overall_start_time)))

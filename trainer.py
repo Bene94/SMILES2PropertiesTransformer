@@ -12,7 +12,7 @@ from torch.nn.modules import activation
 
 
 
-def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb):
+def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb, warmup):
     
     model.train() # Turn on the train mode
     total_loss = 0.
@@ -26,6 +26,8 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
     start_time = time.time()
     
     scaler = GradScaler(init_scale=8192) 
+
+    n_steps = len(train_dataloader)
 
     for i, batch in enumerate(train_dataloader):
         
@@ -59,6 +61,15 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
         scaler.step(optimizer)
         scaler.update()
+
+        if warmup:
+            lr = config.lr / 10 * i/n_steps
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = lr 
+        else:
+            scheduler.step()
+            
+        ##Loss logging and display
 
         total_loss += log_loss
         log_interval = 10
