@@ -1,5 +1,10 @@
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
+from matplotlib import cm
+import numpy as np
+
+from scipy.stats import gaussian_kde as kde
 
 import wandb
 import torch.nn as nn
@@ -32,65 +37,36 @@ def make_heatmap(prediciton, target, name, path):
     plt.xlabel('ground truth')
     plt.savefig(path + 'heat_' + name)
 
-def make_scatter(prediciton, target, name, path):
+def make_scatter(prediciton, target, name = '', path = '', save=False):
     plt.clf()
-    plt.scatter(target, prediciton)
+    vals = []
+    vals.append(target)
+    vals.append(prediciton)
+    colors = makeColours(vals)
+
+    plt.scatter(target, prediciton, color=colors)
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
-    plt.savefig(path + 'scat_' + name)
+    if save:
+        plt.savefig(path + 'scatter_' + name)
+    else:
+        plt.show()
+ 
+def makeColours( vals ):
+    N = 10000
+    mean = [np.mean(vals[0]),np.mean(vals[1])]
+    cov = [[2,2],[0,2]]
 
-if __name__ == '__main__':
-    config = wandb.config
-    data_path = '/home/bene/TrainingData_red/'
+    samples = np.random.multivariate_normal(mean,cov,N).T   
+    densObj = kde( vals )
+    
+    vals = densObj.evaluate( vals )
 
-    device = 'cuda'
-    emb = 512
-    hid = 1024
-    nlay = 2
-    nhead = 4
-    drp = 0.1
+    colours = np.zeros( (len(vals),3) )
+    norm = Normalize( vmin=vals.min(), vmax=vals.max() )
 
+    #Can put any colormap you like here.
+    colours = [cm.ScalarMappable( norm=norm, cmap='jet').to_rgba( val ) for val in vals]
 
-    batch_size = 1024
-    max_btch = 512
-
-
-    config.embed_size = emb
-    config.hidden_size = hid
-    config.num_layers = nlay
-    config.num_heads = nhead
-    config.max_btch = max_btch
-    config.dropout = drp
-    config.padding_idx = 22
-    config.ntokens =  24
-    config.device = device
-    config.data_path = data_path
-    config.batch_size = batch_size
-
-    model = TransformerModel(config).to(config.device)
-    #model.load_state_dict(torch.load('../Models/202108151834trans_512_1024_2_4_1e-01_1e-01_1e-04_1024_5000.pth'))
-    model.load_state_dict(torch.load('../Models/overfitt_test.pth'))
-    model.eval()
-
-
-    criterion = nn.MSELoss() 
-    train_dataset = gamma_dataset(config.data_path, 'train')
-    val_dataset = gamma_dataset(config.data_path, 'val')
-
-    train_dataset.train_data = train_dataset.train_data[0:500]
-    train_dataset.train_target = train_dataset.train_target[0:500]
-
-    val_dataset.train_data = val_dataset.train_data[0:10]
-    val_dataset.train_target = val_dataset.train_target[0:10]
-
-    training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
-    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
-
-    # load the pytorch model form ../models/
-
-
-    # calculate the results for the training data and val data  
-    total_loss_val , output_val = evaluate(model, val_data, criterion, config)
-    total_loss_train , output_train = evaluate(model, training_data, criterion, config)
-
+    return colours
 
