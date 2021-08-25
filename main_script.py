@@ -115,7 +115,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.params = pytorch_total_params
 
     ## set up scheduler
-
     total_steps = len(training_data) * config.epoch
     min_lr = config.lr / warmup_lr
     warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
@@ -124,7 +123,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
 
     ## train model
-
     best_val_loss = float("inf")
     best_model = None
 
@@ -139,7 +137,6 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
         val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
 
-
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
             .format(epoch, (time.time() - epoch_start_time),
@@ -152,33 +149,12 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             best_val_loss = val_loss
             best_model = model
 
-
-        plot_interval = 200
+        plot_interval = 5
 
         if epoch % plot_interval == 0:
-            val_target = val_target.squeeze()
-            val_out = val_out.squeeze()
-
-            if local:
-                path = '/home/bene/NNGamma/Plot/'
-            else:
-                path = "/mnt/xprun/plot/"
-
-            name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
-
-            make_histogram(val_out, val_target, name_plot, path)
-            make_heatmap(val_out, val_target, name_plot, path)
-
-            train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+            plot_results(val_target, val_out, local, log_name, epoch, val_loss)
             
-            train_target = train_target.squeeze()
-            train_out = train_out.squeeze()
-            
-            name_plot = log_name + '_' + str(epoch) + '_train_' + '{:.1e}'.format(train_loss) + '.png'
-            
-            make_histogram(train_out, train_target, name_plot, path)
-            make_heatmap(train_out, train_target, name_plot, path)
-
+    ## End Training
 
     print('-' * 89)
     print('| End of training | time: {:5.2f}s |'.format((time.time() - overall_start_time)))
@@ -192,7 +168,31 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     date = datetime.datetime.now().strftime("%Y%m%d%H")
     torch.save(best_model.state_dict(), path + date + '_' + name +'.pth')
-    #torch.save(best_model.state_dict(), path + date + '_overfitt_test.pth')
+
+def plot_results(val_target, val_out, local, log_name, epoch, val_loss):
+    val_target = val_target.squeeze()
+    val_out = val_out.squeeze()
+
+    if local:
+        path = '/home/bene/NNGamma/Plot/'
+    else:
+        path = "/mnt/xprun/plot/"
+
+    name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
+
+    make_histogram(val_out, val_target, name_plot, path)
+    make_heatmap(val_out, val_target, name_plot, path)
+
+    train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+    
+    train_target = train_target.squeeze()
+    train_out = train_out.squeeze()
+    
+    name_plot = log_name + '_' + str(epoch) + '_train_' + '{:.1e}'.format(train_loss) + '.png'
+    
+    make_histogram(train_out, train_target, name_plot, path)
+    make_heatmap(train_out, train_target, name_plot, path)
+
 
 if __name__ == '__main__': 
     main()
