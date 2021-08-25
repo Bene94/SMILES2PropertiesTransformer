@@ -1,4 +1,5 @@
 import datetime
+import pickle
 
 import torch
 import torch.nn as nn
@@ -35,9 +36,10 @@ from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 @click.option('--warmup_lr', default=10, help='Reduciton of LR in the warmup')
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
+@click.option('--test', default=False, help='If true smale dataset is used')
 
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma):
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test):
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -85,7 +87,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     train_dataset = gamma_dataset(data_path, 'train')
     val_dataset = gamma_dataset(data_path, 'val')
 
-    if True:
+    if test:
         train_dataset.train_data = train_dataset.train_data[0:500]
         train_dataset.train_target = train_dataset.train_target[0:500]
 
@@ -152,7 +154,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         plot_interval = 5
 
         if epoch % plot_interval == 0:
-            plot_results(val_target, val_out, local, log_name, epoch, val_loss)
+            train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+            plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target)
             
     ## End Training
 
@@ -168,10 +171,18 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     date = datetime.datetime.now().strftime("%Y%m%d%H")
     torch.save(best_model.state_dict(), path + date + '_' + name +'.pth')
+    config_dict = config.as_dict()
+    config_dict['val_loss'] = best_val_loss
+    config_dict['epoch'] = epoch
+    config_dict['name'] = name
+    config_dict['date'] = date
+    # save config dict with pickle
+    with open(path + date + '_' + name + '.pkl', 'wb') as f:
+        pickle.dump(config_dict, f)
+    
 
-def plot_results(val_target, val_out, local, log_name, epoch, val_loss):
-    val_target = val_target.squeeze()
-    val_out = val_out.squeeze()
+def plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target):
+
 
     if local:
         path = '/home/bene/NNGamma/Plot/'
@@ -180,10 +191,11 @@ def plot_results(val_target, val_out, local, log_name, epoch, val_loss):
 
     name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
 
+    val_target = val_target.squeeze()
+    val_out = val_out.squeeze()
+
     make_histogram(val_out, val_target, name_plot, path)
     make_heatmap(val_out, val_target, name_plot, path)
-
-    train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
     
     train_target = train_target.squeeze()
     train_out = train_out.squeeze()
