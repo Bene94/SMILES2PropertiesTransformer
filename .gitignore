@@ -9,6 +9,7 @@ Data_no_tail/*
 Models/**
 Input_Reduced/**
 data_*
+data/*
 
 # Standard for python in vs code
 
