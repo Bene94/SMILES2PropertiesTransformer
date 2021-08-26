@@ -117,8 +117,7 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                     data = data.type(torch.IntTensor).to(config.device)
                     target = target.type(torch.FloatTensor).to(config.device)
                     target = target.view((target.shape[0],1,1))
-                    src_key_padding_mask = data.eq(35)
-                    src_key_padding_mask = src_key_padding_mask.permute(1,0)
+                   
                     output = eval_model(data)
                     total_loss += criterion(output.squeeze(), target.squeeze()).item()/len(data_chunks)
                     

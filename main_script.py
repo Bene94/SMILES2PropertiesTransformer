@@ -157,7 +157,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             best_val_loss = val_loss
             best_model = model
 
-        plot_interval = 5
+        plot_interval = 1
 
         if epoch % plot_interval == 0:
             train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)

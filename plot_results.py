@@ -53,13 +53,10 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
         plt.show()
  
 def makeColours( vals ):
-    N = 10000
-    mean = [np.mean(vals[0]),np.mean(vals[1])]
-    cov = [[2,2],[0,2]]
 
-    samples = np.random.multivariate_normal(mean,cov,N).T   
-    densObj = kde( vals )
-    
+    # sample 100000 points from vals
+    vals = np.random.choice(vals, size=100000, replace=True)
+    densObj = kde( vals )    
     vals = densObj.evaluate( vals )
 
     colours = np.zeros( (len(vals),3) )

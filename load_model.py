@@ -57,12 +57,12 @@ if __name__ == '__main__':
     train_dataset = gamma_dataset(data_path, 'train')
     val_dataset = gamma_dataset(data_path, 'val')
 
-    if False:
+    if True:
         train_dataset.train_data = train_dataset.train_data[0:500]
         train_dataset.train_target = train_dataset.train_target[0:500]
 
-        val_dataset.train_data = val_dataset.train_data[0:2]
-        val_dataset.train_target = val_dataset.train_target[0:2]
+        val_dataset.train_data = val_dataset.train_data[:]
+        val_dataset.train_target = val_dataset.train_target[:]
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
     val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
