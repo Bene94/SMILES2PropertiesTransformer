@@ -99,8 +99,10 @@ def evaluate(eval_model, val_dataloader, criterion, config):
 
     with torch.no_grad():
 
+            # incude progress bar
+
             for i, batch in enumerate(val_dataloader):
-                
+
                 data_batch, target_batch = batch[0], batch[1]
                 data_chunks = torch.split(data_batch,chunk_size)
                 target_chunks = torch.split(target_batch,chunk_size)

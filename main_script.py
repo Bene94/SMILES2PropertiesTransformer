@@ -55,7 +55,13 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.criterion = nn.MSELoss()
     
     config.padding_idx = 0
-    config.vocab_size =  23
+    
+    if set =='data':
+        config.vocab_size = 40
+    else:
+        config.vocab_size =  23
+    
+    
     config.block_size = 128
 
     config.embed_size = emb

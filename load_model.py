@@ -17,15 +17,21 @@ from plot_results import *
 
 def load_model(path, name):
     # load config file
-    config_path = os.path.join(path + name + '.pkl')
-    with open(config_path, 'rb') as f:
-        config = pickle.load(f)
+    #list all files in path
+    files = os.listdir(path)
+    # check if the beginning of one file is the same as the name else make error
+    for file in files:
+        if file.startswith(name):
+            config_file = file
+    # remove last 4 characters from config file name
+    config_file = config_file[:-4]
+    config = pickle.load(open(path + config_file + '.pkl', 'rb'))
 
     config = convert_config(config)
 
     # load model
     model = minGPT.GPT(config)
-    model.load_state_dict(torch.load(path + name + '.pth'))
+    model.load_state_dict(torch.load(path + config_file + '.pth'))
     model.eval()
     return model, config
 
@@ -36,7 +42,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '2021082514_minGPT_2048_2_16_0e+00_1e-01_1e-04_1024_10'
+    name = '2021082514_minGPT'
     model, config = load_model(path,name)
     print("done")
 
@@ -73,7 +79,7 @@ if __name__ == '__main__':
     print("Validation loss: ", val_loss)
     print("Training loss: ", train_loss)
 
-
-    make_scatter(train_out, train_target, name = "test", save = True)
+    make_scatter(train_out, train_target, name = "train", save = True)
+    make_scatter(val_out, val_target, name = "val", save = True)
 
 
