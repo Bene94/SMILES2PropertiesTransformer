@@ -10,6 +10,7 @@ from nn_dataloader import *
 from plot_results import *
 from trainer import *
 import minGPT
+from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 
 
 @click.command()
@@ -30,10 +31,13 @@ import minGPT
 @click.option('--n_dense', default=2, help='Number of dense layers')
 @click.option('--dense_drp', default=0.0, help='Number of dense layers')
 @click.option('--modle_type', default="minGPT", help='Selected Modle')
+@click.option('--warmup_epo', default=1, help='Number of warmup epochs')
+@click.option('--warmup_lr', default=10, help='Reduciton of LR in the warmup')
+@click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
+@click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 
 
-
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type):
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma):
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -61,7 +65,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.betas = [0.9,0.99]
     config.weight_decay = wdecay
 
-    config.warmup_epochs = 1
+    config.warmup_epochs = warmup_epo
     
     config.n_dense = n_dense
     config.dense_dropout = dense_drp
@@ -71,7 +75,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.max_btch = max_btch
     config.epoch =  epo
 
-    # load training and validation data
+    ## load training and validation data
 
     if local:
         data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
@@ -81,7 +85,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     train_dataset = gamma_dataset(data_path, 'train')
     val_dataset = gamma_dataset(data_path, 'val')
 
-    if False:
+    if True:
         train_dataset.train_data = train_dataset.train_data[0:500]
         train_dataset.train_target = train_dataset.train_target[0:500]
 
@@ -91,7 +95,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
 
-    ## Create model
+    ## create model
 
     criterion = nn.MSELoss() 
 
@@ -104,14 +108,21 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     
     model = model.to(config.device)
     
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = (config.epoch-config.warmup_epochs) * len(training_data), eta_min=config.lr/10)
-    
     wandb.watch(model)
-    
+
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     pytorch_total_params = pytorch_total_params - emb *config.vocab_size
     config.params = pytorch_total_params
 
+    ## set up scheduler
+    total_steps = len(training_data) * config.epoch
+    min_lr = config.lr / warmup_lr
+    warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
+    first_cycle_steps = int(total_steps / warmup_cycle)
+    
+    scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
+
+    ## train model
     best_val_loss = float("inf")
     best_model = None
 
@@ -121,18 +132,10 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
         epoch_start_time = time.time()
 
-        if epoch <= config.warmup_epochs:
-            warmup = True
-        else :
-            warmup = False
-
-
-
-        train(model, criterion, optimizer, training_data, scheduler, epoch, wandb, warmup)
+        train(model, criterion, optimizer, training_data, scheduler, epoch, wandb)
         torch.cuda.empty_cache()
 
         val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
-
 
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
@@ -146,33 +149,12 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             best_val_loss = val_loss
             best_model = model
 
-
-        plot_interval = 1
+        plot_interval = 5
 
         if epoch % plot_interval == 0:
-            val_target = val_target.squeeze()
-            val_out = val_out.squeeze()
-
-            if local:
-                path = '/home/bene/NNGamma//Plot/'
-            else:
-                path = "/mnt/xprun/plot/"
-
-            name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
-
-            make_histogram(val_out, val_target, name_plot, path)
-            make_heatmap(val_out, val_target, name_plot, path)
-
-            train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+            plot_results(val_target, val_out, local, log_name, epoch, val_loss)
             
-            train_target = train_target.squeeze()
-            train_out = train_out.squeeze()
-            
-            name_plot = log_name + '_' + str(epoch) + '_train_' + '{:.1e}'.format(train_loss) + '.png'
-            
-            make_histogram(train_out, train_target, name_plot, path)
-            make_heatmap(train_out, train_target, name_plot, path)
-
+    ## End Training
 
     print('-' * 89)
     print('| End of training | time: {:5.2f}s |'.format((time.time() - overall_start_time)))
@@ -184,12 +166,33 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     else:
         path = "/mnt/xprun/out/"
 
-    print(os.listdir(path))
     date = datetime.datetime.now().strftime("%Y%m%d%H")
     torch.save(best_model.state_dict(), path + date + '_' + name +'.pth')
-    #torch.save(best_model.state_dict(), path + date + '_overfitt_test.pth')
-    print(os.listdir(path))
-        
+
+def plot_results(val_target, val_out, local, log_name, epoch, val_loss):
+    val_target = val_target.squeeze()
+    val_out = val_out.squeeze()
+
+    if local:
+        path = '/home/bene/NNGamma/Plot/'
+    else:
+        path = "/mnt/xprun/plot/"
+
+    name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
+
+    make_histogram(val_out, val_target, name_plot, path)
+    make_heatmap(val_out, val_target, name_plot, path)
+
+    train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+    
+    train_target = train_target.squeeze()
+    train_out = train_out.squeeze()
+    
+    name_plot = log_name + '_' + str(epoch) + '_train_' + '{:.1e}'.format(train_loss) + '.png'
+    
+    make_histogram(train_out, train_target, name_plot, path)
+    make_heatmap(train_out, train_target, name_plot, path)
+
 
 if __name__ == '__main__': 
     main()
