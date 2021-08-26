@@ -47,13 +47,13 @@ def create_vocab_dict(vocab):
 
 if __name__ == "__main__":
     #add consol output to show progress
-    df, num_smile0, num_smile1 = load_data('Input_Reduced')
+    df, num_smile0, num_smile1 = load_data('InputData')
     print("Find Vocab")
     vocab = find_vocab(df)
     print("Create Vocab Dict")
     vocab_dict = create_vocab_dict(vocab)
     # save vocab_dict into TrainingData\
-    with open('Vocab/vocab_dict.csv', 'w') as f:
+    with open('Vocab/vocab_dict_full.csv', 'w') as f:
         for key, value in vocab_dict.items():
             f.write(key + ' ' + str(value) + '\n')
         
