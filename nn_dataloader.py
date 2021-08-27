@@ -9,11 +9,12 @@ import numpy as np
 ## load data from training_data\ trainig data called train_XXX and validation data calld val_xxx into dataloader.
 
 class gamma_dataset(Dataset):  
-    def __init__(self, root, data_type):
+    def __init__(self, root, data_type, config):
         self.root = root
         self.data_type = data_type
         self.train_data, self.train_target = self.load_data()
-        
+        if not config.mode == 'reg':
+            self.bin_data(config)
 
     def load_data(self):
         #laods the data from sefl.root  acroidng to type from batches in current direcory plus root
@@ -44,13 +45,45 @@ class gamma_dataset(Dataset):
         target = target.view((target.shape[0],1,1))
         #return the data and target
         return data, target
-                    
+
+    def bin_data(self, config):
+        bound = config.bound
+        n_bins = config.bins
+        bins = np.linspace(-bound, bound, n_bins)
+        bins = np.append(bins, np.inf)
+        bins = np.append(-np.inf, bins)
+        self.train_target = np.digitize(self.train_target, bins)
     
     def __getitem__(self, index): 
         return self.train_data[index], self.train_target[index]
 
     def __len__(self):
         return len(self.train_data)
+
+def load_data(config,local,test):
+
+    if local:
+        data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
+    else:
+        data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
+
+    train_dataset = gamma_dataset(data_path, 'train', config)
+    val_dataset = gamma_dataset(data_path, 'val', config)
+
+    if test:
+        train_dataset.train_data = train_dataset.train_data[0:500]
+        train_dataset.train_target = train_dataset.train_target[0:500]
+
+        val_dataset.train_data = val_dataset.train_data[0:2]
+        val_dataset.train_target = val_dataset.train_target[0:2]
+
+    training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+
+    return training_data, val_data
+
+
+
 
 if __name__ == '__main__':
     train_dataset = gamma_dataset('TrainingData/', 'train')

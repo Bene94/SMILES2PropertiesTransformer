@@ -47,7 +47,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
             src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
             
-            with autocast(True):
+            with autocast(False):
                 output = model(data) 
                 loss = criterion(output.squeeze(), target.squeeze())
                 loss = loss / len(data_chunks)
@@ -113,11 +113,14 @@ def evaluate(eval_model, val_dataloader, criterion, config):
 
                     data = data.to(config.device)
                     target = target.to(config.device)
+                    
+                    if config.mode == 'reg':
+                        data = data.type(torch.IntTensor).to(config.device)
+                        target = target.type(torch.FloatTensor).to(config.device)
+                        target = target.view((target.shape[0],1,1))
+                    else:
+                        target = target.type(torch.LongTensor).to(config.device)
 
-                    data = data.type(torch.IntTensor).to(config.device)
-                    target = target.type(torch.FloatTensor).to(config.device)
-                    target = target.view((target.shape[0],1,1))
-                   
                     output = eval_model(data)
                     total_loss += criterion(output.squeeze(), target.squeeze()).item()/len(data_chunks)
                     
