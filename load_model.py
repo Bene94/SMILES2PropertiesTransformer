@@ -58,11 +58,11 @@ if __name__ == '__main__':
     val_dataset = gamma_dataset(data_path, 'val')
 
     if True:
-        train_dataset.train_data = train_dataset.train_data[0:]
-        train_dataset.train_target = train_dataset.train_target[0:]
+        train_dataset.train_data = -train_dataset.train_data[0:1000]
+        train_dataset.train_target = -train_dataset.train_target[0:1000]
 
-        val_dataset.train_data = val_dataset.train_data[0:]
-        val_dataset.train_target = val_dataset.train_target[0:]
+        val_dataset.train_data = val_dataset.train_data[0:100]
+        val_dataset.train_target = val_dataset.train_target[0:100]
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
     val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
@@ -81,5 +81,8 @@ if __name__ == '__main__':
 
     make_scatter(train_out, train_target, name = "train", save = True)
     make_scatter(val_out, val_target, name = "val", save = True)
+
+    make_MSE_x(val_out, val_target, name = "val", save = True)
+    make_MSE_x(train_out, train_target, name = "train", save = True)
 
 

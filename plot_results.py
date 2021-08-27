@@ -51,6 +51,24 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
         plt.savefig(path + 'scatter_' + name)
     else:
         plt.show()
+
+def make_MSE_x(prediciton, target, name = '', path = '', save=False):
+    # devide data in bins with bound -20,20
+    bins = np.linspace(-20,20,100)
+    # calculate the mean squared error for each bin
+    MSE = np.zeros(len(bins)-1)
+    for i in range(len(bins)-1):
+        MSE[i] = np.mean( (target[(target>bins[i]) & (target<bins[i+1])] - prediciton[(target>bins[i]) & (target<bins[i+1])])**2 )
+    # plot the mean squared error
+    plt.clf()
+    plt.plot(bins[:-1], MSE)
+    plt.ylabel('MSE')
+    plt.xlabel('bin')
+    plt.xlim(-20,20)
+    # set the xticks to be the middle of the bins
+    plt.xticks(bins[:-1] + 0.5)
+    if save:
+        plt.savefig(path + 'MSE_' + name)
  
 def makeColours( vals ):
 
