@@ -42,7 +42,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '2021082514_minGPT'
+    name = '2021082614_minGPT'
     model, config = load_model(path,name)
     print("done")
 
@@ -58,11 +58,11 @@ if __name__ == '__main__':
     val_dataset = gamma_dataset(data_path, 'val')
 
     if True:
-        train_dataset.train_data = train_dataset.train_data[0:500]
-        train_dataset.train_target = train_dataset.train_target[0:500]
+        train_dataset.train_data = train_dataset.train_data[0:]
+        train_dataset.train_target = train_dataset.train_target[0:]
 
-        val_dataset.train_data = val_dataset.train_data[:]
-        val_dataset.train_target = val_dataset.train_target[:]
+        val_dataset.train_data = val_dataset.train_data[0:]
+        val_dataset.train_target = val_dataset.train_target[0:]
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
     val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)

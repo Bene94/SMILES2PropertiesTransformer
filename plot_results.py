@@ -54,8 +54,9 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
  
 def makeColours( vals ):
 
-    # sample 100000 points from vals
-    vals = np.random.choice(vals, size=100000, replace=True)
+    # sample 100000 points from vals 
+    #vals[0] = np.random.choice(vals[0], size=1000, replace=True)
+    #vals[1] = np.random.choice(vals[1], size=1000, replace=True)
     densObj = kde( vals )    
     vals = densObj.evaluate( vals )
 
