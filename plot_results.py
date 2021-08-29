@@ -65,8 +65,7 @@ def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     plt.ylabel('MSE')
     plt.xlabel('bin')
     plt.xlim(-20,20)
-    # set the xticks to be the middle of the bins
-    plt.xticks(bins[:-1] + 0.5)
+
     if save:
         plt.savefig(path + 'MSE_' + name)
  

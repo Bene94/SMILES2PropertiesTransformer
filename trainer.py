@@ -49,7 +49,7 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
 
             src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
             
-            with autocast(False):
+            with autocast(True):
                 output = model(data) 
                 loss = criterion(output.squeeze(), target.squeeze())
                 loss = loss / len(data_chunks)

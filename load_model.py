@@ -92,10 +92,19 @@ if __name__ == '__main__':
     print("Validation loss: ", val_loss)
     print("Training loss: ", train_loss)
 
-    #make_scatter(train_out, train_target, name = "train", save = True)
-    #make_scatter(val_out, val_target, name = "val", save = True)
+    # %% 
+
 
     make_MSE_x(val_out, val_target, name = "val", save = True)
     make_MSE_x(train_out, train_target, name = "train", save = True)
+
+
+
+    print('-' * 89)
+    print('Make Scatter...')
+    print('-' * 89)
+
+    make_scatter(train_out, train_target, name = "train", save = True)
+    make_scatter(val_out, val_target, name = "val", save = True)
 
 
