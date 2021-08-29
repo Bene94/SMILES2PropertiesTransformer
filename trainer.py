@@ -1,5 +1,6 @@
 import math
 import time
+import numpy as np
 
 import torch
 from torch.functional import Tensor
@@ -9,6 +10,7 @@ from torch.nn import TransformerEncoder, TransformerEncoderLayer
 from torch.cuda.amp import GradScaler
 from torch.cuda.amp import autocast
 from torch.nn.modules import activation
+
 
 
 
@@ -94,8 +96,8 @@ def evaluate(eval_model, val_dataloader, criterion, config):
     eval_model.eval() # Turn on the evaluation mode
     total_loss = 0.
     chunk_size = config.max_btch
-    total_output = Tensor([]).to(config.device)
-    total_target = Tensor([]).to(config.device)
+    total_output = np.array([])
+    total_target = np.array([])
 
     with torch.no_grad():
 
@@ -124,11 +126,8 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                     output = eval_model(data)
                     total_loss += criterion(output.squeeze(), target.squeeze()).item()/len(data_chunks)
                     
-                    total_output = torch.cat((total_output, output), dim=0)
-                    total_target = torch.cat((total_target, target), dim=0)
-
-    total_output = total_output.cpu().numpy()
-    total_target = total_target.cpu().numpy()
+                    total_output = np.append(total_output, output.cpu().numpy())
+                    total_target = np.append(total_target, target.cpu().numpy())
     
     return total_loss / (len(val_dataloader)), total_output, total_target
 

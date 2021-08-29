@@ -28,6 +28,7 @@ def load_model(path, name):
     config = pickle.load(open(path + config_file + '.pkl', 'rb'))
 
     config = convert_config(config)
+    config.mode = 'reg'
 
     # load model
     model = minGPT.GPT(config)
@@ -42,9 +43,8 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '2021082614_minGPT'
+    name = '2021082712_minGPT'
     model, config = load_model(path,name)
-    print("done")
 
     #model to devide
     model = model.to('cuda')
@@ -54,20 +54,33 @@ if __name__ == '__main__':
 
     data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
 
-    train_dataset = gamma_dataset(data_path, 'train')
-    val_dataset = gamma_dataset(data_path, 'val')
+    print('-' * 89)
+    print('Loading Data...')
+    print('-' * 89)
+
+    train_dataset = gamma_dataset(data_path, 'train', config)
+    val_dataset = gamma_dataset(data_path, 'val', config)
 
     if True:
-        train_dataset.train_data = -train_dataset.train_data[0:1000]
-        train_dataset.train_target = -train_dataset.train_target[0:1000]
+        train_dataset.train_data = train_dataset.train_data[:]
+        train_dataset.train_target = train_dataset.train_target[:]
 
-        val_dataset.train_data = val_dataset.train_data[0:100]
-        val_dataset.train_target = val_dataset.train_target[0:100]
+        val_dataset.train_data = val_dataset.train_data[:]
+        val_dataset.train_target = val_dataset.train_target[:]
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
     val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
 
+    print('-' * 89)
+    print('Calculating Validation...')
+    print('-' * 89)
+
     val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
+
+    print('-' * 89)
+    print('Calculating Traning...')
+    print('-' * 89)
+
     train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
 
     val_target = val_target.squeeze()
@@ -79,8 +92,8 @@ if __name__ == '__main__':
     print("Validation loss: ", val_loss)
     print("Training loss: ", train_loss)
 
-    make_scatter(train_out, train_target, name = "train", save = True)
-    make_scatter(val_out, val_target, name = "val", save = True)
+    #make_scatter(train_out, train_target, name = "train", save = True)
+    #make_scatter(val_out, val_target, name = "val", save = True)
 
     make_MSE_x(val_out, val_target, name = "val", save = True)
     make_MSE_x(train_out, train_target, name = "train", save = True)
