@@ -92,6 +92,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.bins = bins
     config.bound = 20
 
+    config.shift = shift
+
     ## load training and validation data
 
     print('-' * 89)
