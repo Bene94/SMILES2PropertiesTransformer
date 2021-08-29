@@ -13,6 +13,9 @@ class gamma_dataset(Dataset):
         self.root = root
         self.data_type = data_type
         self.train_data, self.train_target = self.load_data()
+        if config.shift != 0:
+            self.train_target = self.train_target + config.shift
+
         if not config.mode == 'reg':
             self.bin_data(config)
 

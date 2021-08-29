@@ -46,51 +46,69 @@ if __name__ == '__main__':
     name = '2021082712_minGPT'
     model, config = load_model(path,name)
 
-    #model to devide
-    model = model.to('cuda')
+    calc = False
 
-    if config.criterion == 'MSELoss()':
-        criterion = nn.MSELoss()
+    if calc:
+        #model to devide
+        model = model.to('cuda')
 
-    data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
+        if config.criterion == 'MSELoss()':
+            criterion = nn.MSELoss()
 
-    print('-' * 89)
-    print('Loading Data...')
-    print('-' * 89)
+        data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
 
-    train_dataset = gamma_dataset(data_path, 'train', config)
-    val_dataset = gamma_dataset(data_path, 'val', config)
+        print('-' * 89)
+        print('Loading Data...')
+        print('-' * 89)
 
-    if True:
-        train_dataset.train_data = train_dataset.train_data[:]
-        train_dataset.train_target = train_dataset.train_target[:]
+        train_dataset = gamma_dataset(data_path, 'train', config)
+        val_dataset = gamma_dataset(data_path, 'val', config)
 
-        val_dataset.train_data = val_dataset.train_data[:]
-        val_dataset.train_target = val_dataset.train_target[:]
 
-    training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
-    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+        x = 100
 
-    print('-' * 89)
-    print('Calculating Validation...')
-    print('-' * 89)
+        if True:
+            train_dataset.train_data = train_dataset.train_data[:]
+            train_dataset.train_target = train_dataset.train_target[:]
 
-    val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
+            val_dataset.train_data = val_dataset.train_data[:]
+            val_dataset.train_target = val_dataset.train_target[:]
 
-    print('-' * 89)
-    print('Calculating Traning...')
-    print('-' * 89)
+        training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+        val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
 
-    train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+        print('-' * 89)
+        print('Calculating Validation...')
+        print('-' * 89)
 
-    val_target = val_target.squeeze()
-    val_out = val_out.squeeze()
+        val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
 
-    train_target = train_target.squeeze()
-    train_out = train_out.squeeze()
+        print('-' * 89)
+        print('Calculating Traning...')
+        print('-' * 89)
 
-    print("Validation loss: ", val_loss)
-    print("Training loss: ", train_loss)
+        train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+
+        val_target = val_target.squeeze()
+        val_out = val_out.squeeze()
+
+        train_target = train_target.squeeze()
+        train_out = train_out.squeeze()
+
+        print("Validation loss: ", val_loss)
+        print("Training loss: ", train_loss)
+
+        # save the results to a file
+        np.save('val_out.npy', val_out)
+        np.save('val_target.npy', val_target)
+        np.save('train_out.npy', train_out)
+        np.save('train_target.npy', train_target)
+    else:
+        val_out = np.load('val_out.npy')
+        val_target = np.load('val_target.npy')
+        train_out = np.load('train_out.npy')
+        train_target = np.load('train_target.npy')
+
 
     # %% 
 
@@ -104,7 +122,5 @@ if __name__ == '__main__':
     print('Make Scatter...')
     print('-' * 89)
 
-    make_scatter(train_out, train_target, name = "train", save = True)
-    make_scatter(val_out, val_target, name = "val", save = True)
-
-
+    make_heatmap(val_out, val_target, name = "val", save = True)
+    make_heatmap(train_out, train_target, name = "train", save = True)

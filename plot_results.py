@@ -1,6 +1,6 @@
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, LogNorm
 from matplotlib import cm
 import numpy as np
 
@@ -25,14 +25,20 @@ def make_histogram(prediciton, target, name, path):
     plt.title(name)
     plt.savefig(path + 'hist_' + name)
 
-def make_heatmap(prediciton, target, name, path):
+def make_heatmap(prediciton, target, name = '', path = '', save=False):
+    # make histogram of the output, use a normalised histogram constant bin width
+    plt.clf()
+    plt.hist2d(target, prediciton, bins=200, norm=LogNorm())
     heatmap, xedges, yedges = np.histogram2d(target.squeeze(), prediciton.squeeze(), bins=2000)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    plt.clf()
     plt.imshow(heatmap.T, extent=extent, origin='lower')
     plt.show()
-    plt.xlim(-2.5,2.5)
-    plt.ylim(-2.5,2.5)
+    plt.xlim(-20,20)
+    plt.ylim(-20,20)
+    plt.colorbar()
+    # set title to MSE of the prediction scientific notation two decimal places
+    MSE = np.around(np.mean( (target - prediciton)**2 ),2)
+    plt.title('MSE: ' + str(MSE))
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
     plt.savefig(path + 'heat_' + name)
@@ -55,16 +61,28 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
 def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     # devide data in bins with bound -20,20
     bins = np.linspace(-20,20,100)
-    # calculate the mean squared error for each bin
+    # calculate the relative mean squared error for each bin
     MSE = np.zeros(len(bins)-1)
     for i in range(len(bins)-1):
         MSE[i] = np.mean( (target[(target>bins[i]) & (target<bins[i+1])] - prediciton[(target>bins[i]) & (target<bins[i+1])])**2 )
     # plot the mean squared error
     plt.clf()
+
     plt.plot(bins[:-1], MSE)
     plt.ylabel('MSE')
     plt.xlabel('bin')
     plt.xlim(-20,20)
+    plt.ylim(0,max(MSE))
+
+    #add second axis with a histogram of the target
+    plt.twinx()
+    plt.hist(target, bins=100, alpha=0.5, label='target', range=(-20,20))
+    plt.legend(loc='upper right')
+    plt.ylabel('count')
+    
+    # set title to MSE of the prediction scientific notation two decimal places
+    MSE = np.around(np.mean( (target - prediciton)**2 ),2)
+    plt.title('MSE: ' + str(MSE))
 
     if save:
         plt.savefig(path + 'MSE_' + name)

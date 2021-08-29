@@ -11,6 +11,9 @@ Input_Reduced/**
 data_*
 data/*
 
+heat_*
+val_*
+
 # Standard for python in vs code
 
 .DS_Store
