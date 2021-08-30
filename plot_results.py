@@ -63,8 +63,10 @@ def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     bins = np.linspace(-20,20,100)
     # calculate the relative mean squared error for each bin
     MSE = np.zeros(len(bins)-1)
+    RMSE = np.zeros(len(bins)-1)
     for i in range(len(bins)-1):
         MSE[i] = np.mean( (target[(target>bins[i]) & (target<bins[i+1])] - prediciton[(target>bins[i]) & (target<bins[i+1])])**2 )
+        RMSE[i] = np.mean( ((target[(target>bins[i]) & (target<bins[i+1])] - prediciton[(target>bins[i]) & (target<bins[i+1])]) / (np.mean((target[(target>bins[i]) & (target<bins[i+1])]))) **2))
     # plot the mean squared error
     plt.clf()
 
@@ -83,6 +85,13 @@ def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     # set title to MSE of the prediction scientific notation two decimal places
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     plt.title('MSE: ' + str(MSE))
+    # add a third axis with the relative mean squared error per bin
+    ax2 = plt.twinx()
+    ax2.plot(bins[:-1], RMSE, color='r')
+    ax2.set_ylabel('RMSE', color='r')
+    ax2.tick_params('y', colors='r')
+    ax2.set_ylim(0,max(RMSE))
+    
 
     if save:
         plt.savefig(path + 'MSE_' + name)

@@ -43,7 +43,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '2021082712_minGPT'
+    name = '2021082803_minGPT'
     model, config = load_model(path,name)
 
     calc = False
