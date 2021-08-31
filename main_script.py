@@ -1,4 +1,5 @@
 import datetime
+import pickle
 
 import torch
 import torch.nn as nn
@@ -14,30 +15,38 @@ from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 
 
 @click.command()
+
 @click.option('--emb', default=512, help='Embedding size')
 @click.option('--hid', default=1024, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transformer layers')
 @click.option('--nhead', default=8, help='Number of heads')
+@click.option('--wdecay', default=0.1, help='Weight decay')
 @click.option('--drp', default=0.1, help='Dropout rate')
+
+@click.option('--mode', default="reg", help='Determines the mode: reg: does a regresstion; class: does a classification')
+@click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
+
 @click.option('--lr', default= 0.0001, help='Learning rate')
 @click.option('--epo', default=10, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
-@click.option('--set', default='data_red', help='Location of dataset')
-@click.option('--wdecay', default=0.1, help='Weight decay')
-@click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--max_btch', default=128, help='Maximum batch size')
-@click.option('--cuda', default=True, help='Using GPU')
-@click.option('--log_name', default='', help='Using GPU')
-@click.option('--n_dense', default=2, help='Number of dense layers')
-@click.option('--dense_drp', default=0.0, help='Number of dense layers')
-@click.option('--modle_type', default="minGPT", help='Selected Modle')
+
 @click.option('--warmup_epo', default=1, help='Number of warmup epochs')
 @click.option('--warmup_lr', default=10, help='Reduciton of LR in the warmup')
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 
+@click.option('--set', default='data', help='Location of dataset')
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, n_dense, dense_drp, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma):
+@click.option('--modle_type', default="minGPT", help='Selected Modle')
+
+@click.option('--cuda', default=True, help='Using GPU')
+@click.option('--log_name', default='', help='Using GPU')
+@click.option('--local' , default=True, help='Using training data from local folder')
+@click.option('--test', default=False, help='If true smale dataset is used')
+
+
+def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins):
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -53,7 +62,12 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.criterion = nn.MSELoss()
     
     config.padding_idx = 0
-    config.vocab_size =  23
+    
+    if set =='data':
+        config.vocab_size = 40
+    else:
+        config.vocab_size =  23
+
     config.block_size = 128
 
     config.embed_size = emb
@@ -62,42 +76,34 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.num_heads = nhead
     config.dropout =  drp
     config.lr = lr
-    config.betas = [0.9,0.99]
+    config.betas = [0.9,0.98]
     config.weight_decay = wdecay
 
     config.warmup_epochs = warmup_epo
     
-    config.n_dense = n_dense
-    config.dense_dropout = dense_drp
-
     config.data_path = set
     config.batch_size  = btch
     config.max_btch = max_btch
     config.epoch =  epo
 
+    config.mode = mode
+    config.bins = bins
+    config.bound = 20
+
     ## load training and validation data
 
-    if local:
-        data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
-    else:
-        data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
+    print('-' * 89)
+    print('Loading Data...')
+    print('-' * 89)
 
-    train_dataset = gamma_dataset(data_path, 'train')
-    val_dataset = gamma_dataset(data_path, 'val')
-
-    if True:
-        train_dataset.train_data = train_dataset.train_data[0:500]
-        train_dataset.train_target = train_dataset.train_target[0:500]
-
-        val_dataset.train_data = val_dataset.train_data[0:2]
-        val_dataset.train_target = val_dataset.train_target[0:2]
-
-    training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
-    val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+    training_data, val_data = load_data(config,local,test)
 
     ## create model
 
-    criterion = nn.MSELoss() 
+    if mode == "reg":
+        criterion = nn.MSELoss()
+    else:
+        criterion = nn.CrossEntropyLoss()
 
     if modle_type == 'minGPT':
         model = minGPT.GPT(config)
@@ -107,12 +113,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
     
     model = model.to(config.device)
-    
+    config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     wandb.watch(model)
-
-    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    pytorch_total_params = pytorch_total_params - emb *config.vocab_size
-    config.params = pytorch_total_params
 
     ## set up scheduler
     total_steps = len(training_data) * config.epoch
@@ -149,10 +151,11 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             best_val_loss = val_loss
             best_model = model
 
-        plot_interval = 5
+        plot_interval = 1
 
         if epoch % plot_interval == 0:
-            plot_results(val_target, val_out, local, log_name, epoch, val_loss)
+            train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+            plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target)
             
     ## End Training
 
@@ -168,10 +171,18 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     date = datetime.datetime.now().strftime("%Y%m%d%H")
     torch.save(best_model.state_dict(), path + date + '_' + name +'.pth')
+    config_dict = config.as_dict()
+    config_dict['val_loss'] = best_val_loss
+    config_dict['epoch'] = epoch
+    config_dict['name'] = name
+    config_dict['date'] = date
+    # save config dict with pickle
+    with open(path + date + '_' + name + '.pkl', 'wb') as f:
+        pickle.dump(config_dict, f)
+    
 
-def plot_results(val_target, val_out, local, log_name, epoch, val_loss):
-    val_target = val_target.squeeze()
-    val_out = val_out.squeeze()
+def plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target):
+
 
     if local:
         path = '/home/bene/NNGamma/Plot/'
@@ -180,10 +191,11 @@ def plot_results(val_target, val_out, local, log_name, epoch, val_loss):
 
     name_plot = log_name + '_' +  str(epoch) + '_val_' + '{:.1e}'.format(val_loss) +'.png'
 
+    val_target = val_target.squeeze()
+    val_out = val_out.squeeze()
+
     make_histogram(val_out, val_target, name_plot, path)
     make_heatmap(val_out, val_target, name_plot, path)
-
-    train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
     
     train_target = train_target.squeeze()
     train_out = train_out.squeeze()

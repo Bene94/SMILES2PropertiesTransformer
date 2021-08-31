@@ -16,24 +16,6 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 
-class GPTConfig:
-    """ base GPT config, params common to all GPT versions """
-    embd_pdrop = 0.1
-    resid_pdrop = 0.1
-    attn_pdrop = 0.1
-
-    def __init__(self, vocab_size, block_size, **kwargs):
-        self.vocab_size = vocab_size
-        self.block_size = block_size
-        for k,v in kwargs.items():
-            setattr(self, k, v)
-
-class GPT1Config(GPTConfig):
-    """ GPT-1 like network roughly 125M params """
-    n_layer = 12
-    n_head = 12
-    n_embd = 768
-
 class CausalSelfAttention(nn.Module):
     """
     A vanilla multi-head masked self-attention layer with a projection at the end.
@@ -104,6 +86,7 @@ class GPT(nn.Module):
     def __init__(self, config):
         super().__init__()
 
+        self.regression = config.mode == 'reg'
         # input embedding stem
         self.tok_emb = nn.Embedding(config.vocab_size, config.embed_size)
         self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.embed_size))
@@ -113,8 +96,12 @@ class GPT(nn.Module):
         # decoder head
         self.ln_f = nn.LayerNorm(config.embed_size)
         self.decoder = nn.Linear(config.embed_size, config.embed_size)
-        self.head = nn.Linear(config.embed_size, 1)
-
+        
+        if self.regression:
+            self.head = nn.Linear(config.embed_size, 1)
+        else:
+            self.head = nn.Linear(config.embed_size, config.bins + 2)
+        
         self.block_size = config.block_size
         self.apply(self._init_weights)
 
@@ -132,7 +119,7 @@ class GPT(nn.Module):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
         
-        self.head.bias.data.fill_(0.5) # this is only for current data
+        self.head.bias.data.fill_(0) # this is only for current data
 
     def configure_optimizers(self, config):
         """
@@ -195,5 +182,7 @@ class GPT(nn.Module):
         x = self.decoder(x)
         x = F.relu(x)
         logits = self.head(x)
+        if not self.regression:
+            logits = F.softmax(logits, dim=-1)
 
         return logits
