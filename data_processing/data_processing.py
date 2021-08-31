@@ -43,7 +43,7 @@ def create_vocab_dict(vocab):
 
 def load_vocab(file_path,vocab_name):
     #load the vocab from a .cvs file and adds it to a dictoinary
-    with open(file_path + '\\' +vocab_name + '.csv') as csv_file:
+    with open(file_path + vocab_name + '.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=' ')
         vocab_dict = {}
         for row in csv_reader:
@@ -81,6 +81,7 @@ def load_data_test_val(folder_path, val_dict_0, val_dict_1):
     df_val_1 = pd.DataFrame()
     print("load datasets")
     bar = pb.ProgressBar(maxval=len(files), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
+    bar.start()
     for i, file in enumerate(files):
         bar.update(i)
         file_path = os.path.join(folder_path, file)
@@ -119,6 +120,7 @@ def apply_vocab(df, vocab_dict):
     temp = np.zeros([df.shape[0], 128])
     remove_index = []
     padd_char = list(vocab_dict.keys())[0]
+    bar.start()
     for i in range(df.shape[0]):
         bar.update(i)
         # if data longer than 128 chars then add to remove index
@@ -160,6 +162,7 @@ def make_batches(data, batch_size):
 def save_batches(batches, folder_path, type):
     # save batches to csv for either train or val batches are numpy arrays
     bar = pb.ProgressBar(maxval=len(batches), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
+    bar.start()
     for i, batch in enumerate(batches):
         bar.update(i)
         file_path = os.path.join(folder_path, type + '_' +str(i) + '.csv')
@@ -170,13 +173,13 @@ def save_batches(batches, folder_path, type):
 
 if __name__ == "__main__":
 
-    file_path = "InputData/"
-    file_out = "data"
+    file_path = "../raw_data/"
+    file_out = "../data_DD"
 
     # make os path
 
     print("Data Loading")
-    vocab_dict = load_vocab('Vocab','vocab_dict_full')
+    vocab_dict = load_vocab('../vocab/','vocab_dict_full')
     list_smile0, list_smile1  = get_smiles(file_path)
     val_dict_0, val_dict_1 = get_smiles_test_val(list_smile0, list_smile1, 0.2)
 
