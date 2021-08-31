@@ -64,11 +64,12 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.criterion = nn.MSELoss()
     
     config.padding_idx = 0
-    
-    if set =='data' | set == 'data_DD':
-        config.vocab_size = 40
+
+   # check if set containts red
+    if 'red' in set:
+        config.vocab_size = 23
     else:
-        config.vocab_size =  23
+        config.vocab_size =  40
 
     config.block_size = 128
 
