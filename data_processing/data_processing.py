@@ -143,7 +143,7 @@ def apply_vocab(df, vocab_dict):
     # remove the rows that are too long
     data = np.delete(data, remove_index, axis=0)
     # remove all data where gamma < -10 or > 10
-    #data = data[np.logical_and(data[:,0] > -10, data[:,0] < 10)]
+    data = data[np.logical_and(data[:,0] > -5, data[:,0] < 16)]
     return data
 
 

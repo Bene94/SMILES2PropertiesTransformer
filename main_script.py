@@ -36,7 +36,7 @@ from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 
-@click.option('--set', default='data', help='Location of dataset')
+@click.option('--set', default='data_DD', help='Location of dataset')
 
 @click.option('--modle_type', default="minGPT", help='Selected Modle')
 
@@ -65,7 +65,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     
     config.padding_idx = 0
     
-    if set =='data':
+    if set =='data' | set == 'data_DD':
         config.vocab_size = 40
     else:
         config.vocab_size =  23
