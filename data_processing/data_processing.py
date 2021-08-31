@@ -62,21 +62,23 @@ def get_smiles(file_path):
 
 def get_smiles_test_val(list_smile0, list_smile1,frac):
     # creates a dictorary where the key is a smile and the value is a bool if the smile is not in the test set
-    val_dict = {}
+    val_dict_0 = {}
+    val_dict_1 = {}
     list_smile0_test = list_smile0.sample(frac=frac, random_state=42)
     list_smile1_test = list_smile1.sample(frac=frac, random_state=42)
 
     for i in range(list_smile0_test.shape[0]):
-        val_dict[list_smile0_test.iloc[i][0]] = False
+        val_dict_0[list_smile0_test.iloc[i][0]] = False
     for i in range(list_smile1_test.shape[0]):
-        val_dict[list_smile1_test.iloc[i][0]] = False
-    return val_dict
+        val_dict_1[list_smile1_test.iloc[i][0]] = False
+    return val_dict_0, val_dict_1 
 
-def load_data_test_val(folder_path, val_dict):
+def load_data_test_val(folder_path, val_dict_0, val_dict_1):
     files = os.listdir(folder_path)
     #load all files into a panda
     df_train = pd.DataFrame()
-    df_val = pd.DataFrame()
+    df_val_0 = pd.DataFrame()
+    df_val_1 = pd.DataFrame()
     print("load datasets")
     bar = pb.ProgressBar(maxval=len(files), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
     for i, file in enumerate(files):
@@ -84,11 +86,16 @@ def load_data_test_val(folder_path, val_dict):
         file_path = os.path.join(folder_path, file)
         temp_df = pd.read_csv(file_path, sep=',', index_col=None)
         #add to validation set if colum 0 or 1 is in val_dict else add to training set
-        temp_df_val = temp_df.loc[(temp_df.iloc[:,0].isin(val_dict.keys())) | (temp_df.iloc[:,1].isin(val_dict.keys()))]
-        temp_df_train = temp_df.loc[~temp_df.index.isin(temp_df_val.index)]
+
+        temp_df_val_0 = temp_df.loc[(temp_df.iloc[:,0].isin(val_dict_0.keys())) & (temp_df.iloc[:,1].isin(val_dict_1.keys()))]
+        temp_df_val_1 = temp_df.loc[(temp_df.iloc[:,0].isin(val_dict_0.keys())) ^ (temp_df.iloc[:,1].isin(val_dict_1.keys()))]
+
+        temp_df_train = temp_df.loc[ ~temp_df.index.isin(temp_df_val_0.index) & ~temp_df.index.isin(temp_df_val_1.index)]
         df_train = df_train.append(temp_df_train)
-        df_val = df_val.append(temp_df_val)
-    return df_train, df_val
+        df_val_0 = df_val_0.append(temp_df_val_0)
+        df_val_1 = df_val_1.append(temp_df_val_1)
+    
+    return df_train, df_val_0, df_val_1
 
 def join_input_data(df, vocab_dict):
     #takes the smiles and adds them together wiht a space between them for the combination 0 ,1 collume 2 is the value otherwise collume 3
@@ -126,7 +133,7 @@ def apply_vocab(df, vocab_dict):
     data = np.array(df.iloc[:,1])
     # make data an 2d array
     data = data.reshape(data.shape[0],1)
-    data = -data
+    #data = -data
     # add data and temp to as single array
     data = np.concatenate((data, temp), axis=1)
     #negate data
@@ -134,7 +141,7 @@ def apply_vocab(df, vocab_dict):
     # remove the rows that are too long
     data = np.delete(data, remove_index, axis=0)
     # remove all data where gamma < -10 or > 10
-    data = data[np.logical_and(data[:,0] > -10, data[:,0] < 10)]
+    #data = data[np.logical_and(data[:,0] > -10, data[:,0] < 10)]
     return data
 
 
@@ -171,19 +178,25 @@ if __name__ == "__main__":
     print("Data Loading")
     vocab_dict = load_vocab('Vocab','vocab_dict_full')
     list_smile0, list_smile1  = get_smiles(file_path)
-    val_dict = get_smiles_test_val(list_smile0, list_smile1, 0.2)
-    df_train,df_val = load_data_test_val(file_path, val_dict)
+    val_dict_0, val_dict_1 = get_smiles_test_val(list_smile0, list_smile1, 0.2)
+
+    df_train, df_val_0, df_val_1  = load_data_test_val(file_path, val_dict_0, val_dict_1)
+    
     df_train_joined = join_input_data(df_train, vocab_dict)
-    df_val_joined = join_input_data(df_val, vocab_dict)
+    df_val_0_joined = join_input_data(df_val_0, vocab_dict)
+    df_val_1_joined = join_input_data(df_val_1, vocab_dict)
     print("Data Loaded")
     
     # apply vocab
     print("Applying Vocab")
     df_train_joined = apply_vocab(df_train_joined, vocab_dict)
-    df_val_joined = apply_vocab(df_val_joined, vocab_dict)
+    df_val_0_joined = apply_vocab(df_val_0_joined, vocab_dict)
+    df_val_1_joined = apply_vocab(df_val_1_joined, vocab_dict)
     #save batches
     print("Saving Batches")
     batches = make_batches(df_train_joined, 100000)
     save_batches(batches, file_out, "train")
-    batches = make_batches(df_val_joined, 100000)
-    save_batches(batches, file_out, "val")
+    batches = make_batches(df_val_0_joined, 100000)
+    save_batches(batches, file_out, "val_0")
+    batches = make_batches(df_val_1_joined, 100000)
+    save_batches(batches, file_out, "val_1")
