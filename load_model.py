@@ -44,6 +44,7 @@ def convert_config(config):
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
     name = '2021082803_minGPT'
+    save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
     calc = False
@@ -99,15 +100,16 @@ if __name__ == '__main__':
         print("Training loss: ", train_loss)
 
         # save the results to a file
-        np.save('val_out.npy', val_out)
-        np.save('val_target.npy', val_target)
-        np.save('train_out.npy', train_out)
-        np.save('train_target.npy', train_target)
+        np.save(save_path + 'val_out.npy', val_out)
+        np.save(save_path + 'val_target.npy', val_target)
+        np.save(save_path + 'train_out.npy', train_out)
+        np.save(save_path + 'train_target.npy', train_target)
     else:
-        val_out = np.load('val_out.npy')
-        val_target = np.load('val_target.npy')
-        train_out = np.load('train_out.npy')
-        train_target = np.load('train_target.npy')
+        val_out = np.load(save_path + 'val_out.npy')
+        val_target = np.load(save_path + 'val_target.npy')
+        train_out = np.load(save_path + 'train_out.npy')
+        train_target = np.load(save_path + 'train_target.npy')
+
 
 
     # %% 
