@@ -143,15 +143,17 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         torch.cuda.empty_cache()
 
         val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
+        wandb.log({"val_0_loss": val_loss})
         val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
-
+        wandb.log({"val_1_loss": val_loss})
+        
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
             .format(epoch, (time.time() - epoch_start_time),
                                         val_loss))
         print('-' * 89)
         
-        wandb.log({"val_loss": val_loss})
+        
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
