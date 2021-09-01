@@ -4,8 +4,54 @@ import os
 import csv
 import progressbar as pb
 import numpy as np
+import click
 
 from pandas.core.frame import DataFrame
+
+@click.command()
+
+@click.option('--file_path', default="raw_data", help='Location of raw data')
+@click.option('--save_path', default="data", help='Location of output data')
+@click.option('--vocab_path', default="vocab", help='Location of vocab')
+@click.option('--ul', default=np.inf, help='upper limit of gamma')
+@click.option('--ll', default=-np.inf, help='lower limit of gamma')
+
+def main(file_path, save_path, vocab_path, ul, ll):
+    file_path = "../" + file_path + "/"
+    file_out = "../" + save_path
+    vocab_path = "../" + vocab_path + "/"
+    # make os path
+
+    print("Data Loading")
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_full')
+    list_smile0, list_smile1  = get_smiles(file_path)
+    val_dict_0, val_dict_1 = get_smiles_test_val(list_smile0, list_smile1, 0.1)
+
+    df_train, df_val_0, df_val_1  = load_data_test_val(file_path, val_dict_0, val_dict_1)
+    
+    df_train_joined = join_input_data(df_train, vocab_dict)
+    df_val_0_joined = join_input_data(df_val_0, vocab_dict)
+    df_val_1_joined = join_input_data(df_val_1, vocab_dict)
+    print("Length train: " + str(df_train_joined.shape[0]))
+    print("Length val 0: " + str(df_val_0_joined.shape[0]))
+    print("Length val 1: " + str(df_val_1_joined.shape[0]))
+    print("Data Loaded")
+    
+    # apply vocab
+    print("Applying Vocab")
+    df_train_joined = apply_vocab(df_train_joined, vocab_dict, ul, ll)
+    df_val_0_joined = apply_vocab(df_val_0_joined, vocab_dict, ul, ll)
+    df_val_1_joined = apply_vocab(df_val_1_joined, vocab_dict, ul, ll)
+    
+    #save batches
+    print("Saving Batches")
+    batches = make_batches(df_train_joined, 100000)
+    save_batches(batches, file_out, "train")
+    batches = make_batches(df_val_0_joined, 100000)
+    save_batches(batches, file_out, "val_0")
+    batches = make_batches(df_val_1_joined, 100000)
+    save_batches(batches, file_out, "val_1")
+
 
 def load_data(folder_path):
     # list all files in InputData
@@ -54,8 +100,11 @@ def load_vocab(file_path,vocab_name):
 def get_smiles(file_path):
     # smile0 is the name of all files in file path
     list_smile0 = pd.DataFrame(os.listdir(file_path))
+    # remove .txt from the end of entries in list_smile0
+    list_smile0 = list_smile0[0].str.split('.',expand=True)[0]
+
     #read first csv in file path
-    smile1 = pd.read_csv(file_path+'/'+list_smile0.iloc[0][0])
+    smile1 = pd.read_csv(file_path+'/'+list_smile0.iloc[0] + '.txt')
     #smile1 is the second column
     list_smile1 = pd.DataFrame(smile1.iloc[:,1])
     return list_smile0, list_smile1 
@@ -68,7 +117,7 @@ def get_smiles_test_val(list_smile0, list_smile1,frac):
     list_smile1_test = list_smile1.sample(frac=frac, random_state=42)
 
     for i in range(list_smile0_test.shape[0]):
-        val_dict_0[list_smile0_test.iloc[i][0]] = False
+        val_dict_0[list_smile0_test.iloc[i]] = False
     for i in range(list_smile1_test.shape[0]):
         val_dict_1[list_smile1_test.iloc[i][0]] = False
     return val_dict_0, val_dict_1 
@@ -114,7 +163,7 @@ def join_input_data(df, vocab_dict):
     df_joined = df_joined.append(temp_df)
     return df_joined
 
-def apply_vocab(df, vocab_dict):
+def apply_vocab(df, vocab_dict, ul, ll):
     # apply the vocab to the dataframe and padd the data
     bar = pb.ProgressBar(maxval=df.shape[0], widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
     temp = np.zeros([df.shape[0], 128])
@@ -143,7 +192,7 @@ def apply_vocab(df, vocab_dict):
     # remove the rows that are too long
     data = np.delete(data, remove_index, axis=0)
     # remove all data where gamma < -10 or > 10
-    data = data[np.logical_and(data[:,0] > -5, data[:,0] < 16)]
+    data = data[np.logical_and(data[:,0] > ll, data[:,0] < ul)]
     return data
 
 
@@ -172,34 +221,4 @@ def save_batches(batches, folder_path, type):
 
 
 if __name__ == "__main__":
-
-    file_path = "../raw_data/"
-    file_out = "../data_DD"
-
-    # make os path
-
-    print("Data Loading")
-    vocab_dict = load_vocab('../vocab/','vocab_dict_full')
-    list_smile0, list_smile1  = get_smiles(file_path)
-    val_dict_0, val_dict_1 = get_smiles_test_val(list_smile0, list_smile1, 0.2)
-
-    df_train, df_val_0, df_val_1  = load_data_test_val(file_path, val_dict_0, val_dict_1)
-    
-    df_train_joined = join_input_data(df_train, vocab_dict)
-    df_val_0_joined = join_input_data(df_val_0, vocab_dict)
-    df_val_1_joined = join_input_data(df_val_1, vocab_dict)
-    print("Data Loaded")
-    
-    # apply vocab
-    print("Applying Vocab")
-    df_train_joined = apply_vocab(df_train_joined, vocab_dict)
-    df_val_0_joined = apply_vocab(df_val_0_joined, vocab_dict)
-    df_val_1_joined = apply_vocab(df_val_1_joined, vocab_dict)
-    #save batches
-    print("Saving Batches")
-    batches = make_batches(df_train_joined, 100000)
-    save_batches(batches, file_out, "train")
-    batches = make_batches(df_val_0_joined, 100000)
-    save_batches(batches, file_out, "val_0")
-    batches = make_batches(df_val_1_joined, 100000)
-    save_batches(batches, file_out, "val_1")
+    main()

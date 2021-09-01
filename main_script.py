@@ -146,7 +146,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         wandb.log({"val_0_loss": val_loss})
         val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
         wandb.log({"val_1_loss": val_loss})
-        
+
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
             .format(epoch, (time.time() - epoch_start_time),
