@@ -101,7 +101,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     print('Loading Data...')
     print('-' * 89)
 
-    training_data, val_data = load_data(config,local,test)
+    training_data, val_0_data, val_1_data = load_data(config,local,test)
 
     ## create model
 
@@ -142,7 +142,8 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         train(model, criterion, optimizer, training_data, scheduler, epoch, wandb)
         torch.cuda.empty_cache()
 
-        val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
+        val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
+        val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
 
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
@@ -156,7 +157,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
             best_val_loss = val_loss
             best_model = model
 
-        plot_interval = 1
+        plot_interval = 1000
 
         if epoch % plot_interval == 0:
             train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
