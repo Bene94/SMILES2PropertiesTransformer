@@ -15,8 +15,9 @@ from pandas.core.frame import DataFrame
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
+@click.option('--frac', default=0.2, help='fraction of data to be used for testing and validation')
 
-def main(file_path, save_path, vocab_path, ul, ll):
+def main(file_path, save_path, vocab_path, ul, ll, frac):
     file_path = "../" + file_path + "/"
     file_out = "../" + save_path
     vocab_path = "../" + vocab_path + "/"
