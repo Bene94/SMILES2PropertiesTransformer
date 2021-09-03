@@ -13,6 +13,8 @@ data/*
 
 heat_*
 val_*
+MSE_*
+scatter_*
 
 # Standard for python in vs code
 
