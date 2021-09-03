@@ -57,8 +57,10 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     config = wandb.config
 
-    if not local:
-        config.xp_name = os.environ['XPRUN_NAME']
+
+    config.xp_name = os.environ['XPRUN_NAME']
+
+    print(config.xp_name)
 
     if cuda:
         config.device = torch.device('cuda')
