@@ -58,7 +58,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config = wandb.config
 
     if not local:
-        config.name = os.environ['XPRUN_NAME']
+        config.xp_name = os.environ['XPRUN_NAME']
 
     if cuda:
         config.device = torch.device('cuda')
@@ -181,14 +181,14 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
         path = "/mnt/xprun/out/"
 
     date = datetime.datetime.now().strftime("%Y%m%d%H")
-    torch.save(best_model.state_dict(), path + date + '_' + name +'.pth')
+    torch.save(best_model.state_dict(), path + config.xp_name +'.pth')
     config_dict = config.as_dict()
     config_dict['val_loss'] = best_val_loss
     config_dict['epoch'] = epoch
     config_dict['name'] = name
     config_dict['date'] = date
     # save config dict with pickle
-    with open(path + config.name + '.pkl', 'wb') as f:
+    with open(path + config.xp_name + '.pkl', 'wb') as f:
         pickle.dump(config_dict, f)
     
 
