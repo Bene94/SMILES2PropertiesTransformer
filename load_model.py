@@ -43,14 +43,15 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '2021082803_minGPT'
+    name = '2021090123_minGPT'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
-    calc = False
+    calc = True
 
     if calc:
         #model to devide
+        print(config.data_path)
         model = model.to('cuda')
 
         if config.criterion == 'MSELoss()':
@@ -63,12 +64,13 @@ if __name__ == '__main__':
         print('-' * 89)
 
         train_dataset = gamma_dataset(data_path, 'train', config)
-        val_dataset = gamma_dataset(data_path, 'val', config)
+        val_0_dataset = gamma_dataset(data_path, 'val_0', config)
+        val_1_dataset = gamma_dataset(data_path, 'val_1', config)
 
 
         x = 100
 
-        if True:
+        if False:
             train_dataset.train_data = train_dataset.train_data[:]
             train_dataset.train_target = train_dataset.train_target[:]
 
@@ -76,13 +78,10 @@ if __name__ == '__main__':
             val_dataset.train_target = val_dataset.train_target[:]
 
         training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
-        val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+        val_0_data = DataLoader(val_0_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+        val_1_data = DataLoader(val_1_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
 
-        print('-' * 89)
-        print('Calculating Validation...')
-        print('-' * 89)
 
-        val_loss, val_out, val_target = evaluate(model, val_data, criterion, config)
 
         print('-' * 89)
         print('Calculating Traning...')
@@ -90,39 +89,49 @@ if __name__ == '__main__':
 
         train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
 
-        val_target = val_target.squeeze()
-        val_out = val_out.squeeze()
+        print('-' * 89)
+        print('Calculating Validation...')
+        print('-' * 89)
+
+        val_0_loss, val_0_out, val_0_target = evaluate(model, val_0_data, criterion, config)
+        val_1_loss, val_1_out, val_1_target = evaluate(model, val_1_data, criterion, config)
 
         train_target = train_target.squeeze()
         train_out = train_out.squeeze()
 
-        print("Validation loss: ", val_loss)
+        val_0_target = val_0_target.squeeze()
+        val_0_out = val_0_out.squeeze()
+        val_1_target = val_1_target.squeeze()
+        val_1_out = val_1_out.squeeze()
+
         print("Training loss: ", train_loss)
+        print("Validation loss: ", val_0_loss)
+        print("Validation loss: ", val_1_loss)
 
         # save the results to a file
-        np.save(save_path + 'val_out.npy', val_out)
-        np.save(save_path + 'val_target.npy', val_target)
         np.save(save_path + 'train_out.npy', train_out)
         np.save(save_path + 'train_target.npy', train_target)
+
+        np.save(save_path + 'val_0_out.npy', val_0_out)
+        np.save(save_path + 'val_0_target.npy', val_0_target)
+
     else:
-        val_out = np.load(save_path + 'val_out.npy')
-        val_target = np.load(save_path + 'val_target.npy')
+
         train_out = np.load(save_path + 'train_out.npy')
         train_target = np.load(save_path + 'train_target.npy')
+        val_0_out = np.load(save_path + 'val_0_out.npy')
+        val_0_target = np.load(save_path + 'val_0_target.npy')
+        val_1_out = np.load(save_path + 'val_1_out.npy')
+        val_1_target = np.load(save_path + 'val_1_target.npy')
 
-
-
-    # %% 
-
-
-    make_MSE_x(val_out, val_target, name = "val", save = True)
     make_MSE_x(train_out, train_target, name = "train", save = True)
-
-
+    make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
+    make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
 
     print('-' * 89)
     print('Make Scatter...')
     print('-' * 89)
 
-    make_heatmap(val_out, val_target, name = "val", save = True)
     make_heatmap(train_out, train_target, name = "train", save = True)
+    make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
+    make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)

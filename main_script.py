@@ -1,5 +1,6 @@
 import datetime
 import pickle
+import os
 
 import torch
 import torch.nn as nn
@@ -56,13 +57,15 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
 
     config = wandb.config
 
+    if not local:
+        config.name = os.environ['XPRUN_NAME']
+
     if cuda:
         config.device = torch.device('cuda')
     else:
         config.device = torch.device('cpu')
 
     config.criterion = nn.MSELoss()
-    
     config.padding_idx = 0
 
    # check if set containts red
@@ -185,7 +188,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config_dict['name'] = name
     config_dict['date'] = date
     # save config dict with pickle
-    with open(path + date + '_' + name + '.pkl', 'wb') as f:
+    with open(path + config.name + '.pkl', 'wb') as f:
         pickle.dump(config_dict, f)
     
 
