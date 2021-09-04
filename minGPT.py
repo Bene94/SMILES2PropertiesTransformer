@@ -69,7 +69,7 @@ class Block(nn.Module):
         self.ln2 = nn.LayerNorm(config.embed_size)
         self.attn = CausalSelfAttention(config)
         self.mlp = nn.Sequential(
-            nn.Linear(config.embed_size, config.hid_fac * config.embed_size),
+            nn.Linear(config.embed_size, config.hidden_factor * config.embed_size),
             nn.GELU(),
             nn.Linear(4 * config.embed_size, config.embed_size),
             nn.Dropout(config.dropout),
