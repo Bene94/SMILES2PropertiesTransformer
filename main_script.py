@@ -18,7 +18,7 @@ from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 @click.command()
 
 @click.option('--emb', default=512, help='Embedding size')
-@click.option('--hid', default=1024, help='Hidden layer size')
+@click.option('--hid_fac', default=4, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transformer layers')
 @click.option('--nhead', default=8, help='Number of heads')
 @click.option('--wdecay', default=0.1, help='Weight decay')
@@ -49,7 +49,7 @@ from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 @click.option('--shift', default=0, help='Shift the data')
 
 
-def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -79,7 +79,7 @@ def main(emb, hid, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch
     config.block_size = 128
 
     config.embed_size = emb
-    config.hidden_size = hid
+    config.hidden_factor = hid_fac
     config.num_layers = nlay
     config.num_heads = nhead
     config.dropout =  drp
