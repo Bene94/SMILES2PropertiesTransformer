@@ -43,7 +43,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '2021090123_minGPT'
+    name = '200905-071911'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -58,6 +58,7 @@ if __name__ == '__main__':
             criterion = nn.MSELoss()
 
         data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
+        #data_path = os.path.join('/home/bene/NNGamma/data_exp/')
 
         print('-' * 89)
         print('Loading Data...')
