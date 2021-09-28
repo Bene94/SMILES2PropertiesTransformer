@@ -14,6 +14,7 @@ from trainer import *
 import minGPT
 from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 from load_model import *
+from config import *
 
 
 @click.command()
@@ -44,7 +45,7 @@ from load_model import *
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--local' , default=False, help='Using training data from local folder')
+@click.option('--local' , default=True, help='Using training data from local folder')
 @click.option('--test', default=False, help='If true smale dataset is used')
 
 @click.option('--shift', default=0, help='Shift the data')
@@ -56,53 +57,29 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
-    wandb.init(project= 'gamma', entity='bene94', name=name)
-
-    config = wandb.config
-
-
-    config.xp_name = os.environ['XPRUN_NAME']
-
-    print(config.xp_name)
+    if local:
+        xp_name = "NaN"
+    else:
+        xp_name = os.environ['XPRUN_NAME']
 
     if cuda:
-        config.device = torch.device('cuda')
+        device = torch.device('cuda')
     else:
-        config.device = torch.device('cpu')
+        device = torch.device('cpu')
 
-    config.criterion = nn.MSELoss()
-    config.padding_idx = 0
+    criterion = nn.MSELoss()
 
    # check if set containts red
     if 'red' in set:
-        config.vocab_size = 23
+        vocab_size = 23
     else:
-        config.vocab_size =  40
+        vocab_size =  40
 
-    config.block_size = 128
-
-    config.embed_size = emb
-    config.hidden_factor = hid_fac
-    config.num_layers = nlay
-    config.num_heads = nhead
-    config.dropout =  drp
-
-    config.lr = lr
-    config.betas = [0.9,0.98]
-    config.weight_decay = wdecay
-
-    config.warmup_epochs = warmup_epo
-    
-    config.data_path = set
-    config.batch_size  = btch
-    config.max_btch = max_btch
-    config.epoch =  epo
-
-    config.mode = mode
-    config.bins = bins
-    config.bound = 20
-
-    config.shift = shift
+    config = NN_config(xp_name=xp_name, device=device, criterion=criterion, padding_idx=0, 
+        vocab_size=vocab_size, block_size=128, embed_size=emb, hidden_factor=hid_fac, num_layers=nlay, 
+        num_heads=nhead, dropout=drp, lr=lr, betas=[0.99 , 0.98], weight_decay=wdecay, data_path=set,
+        batch_size=btch, max_btch=max_btch, epoch=epo, warmup_epochs=warmup_epo, 
+        mode=mode, bins=bins, bound=20, shift=shift)
 
     ## load training and validation data
 
@@ -119,7 +96,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     if not fine_tune == 'NO':
         
         if local:
-            path = '../Models/'
+            path = '/home/bene/NNGamma/Models/'
         else:
             path = "/mnt/xprun/out/"
         
@@ -149,6 +126,8 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     model = model.to(config.device)
     config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
+    wandb.init(project= 'gamma', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
     ## set up scheduler
@@ -209,14 +188,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     date = datetime.datetime.now().strftime("%Y%m%d%H")
     torch.save(best_model.state_dict(), path + config.xp_name +'.pth')
-    config_dict = config.as_dict()
-    config_dict['val_loss'] = best_val_loss
-    config_dict['epoch'] = epoch
-    config_dict['name'] = name
-    config_dict['date'] = date
     # save config dict with pickle
     with open(path + config.xp_name + '.pkl', 'wb') as f:
-        pickle.dump(config_dict, f)
+        pickle.dump(config, f)
     
 
 def plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target):

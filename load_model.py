@@ -28,7 +28,6 @@ def load_model(path, name):
     config = pickle.load(open(path + config_file + '.pkl', 'rb'))
 
     config = convert_config(config)
-    config.mode = 'reg'
 
     # load model
     model = minGPT.GPT(config)
@@ -39,7 +38,9 @@ def load_model(path, name):
 def convert_config(config):
     wandb.init(config=config)
     config = wandb.config
+    wandb.finish()
     return config
+
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
