@@ -58,7 +58,7 @@ if __name__ == '__main__':
             criterion = nn.MSELoss()
 
         data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
-        #data_path = os.path.join('/home/bene/NNGamma/data_exp/')
+        #data_path = os.path.join('/home/bene/NNGamma/data_no_tail/')
 
         print('-' * 89)
         print('Loading Data...')

@@ -3,8 +3,13 @@ XpV0(
     containers: {
         "main": (
             command: ["python", "main_script.py"],
-            dockerfile: "Dockerfile",
-            copy_repo: true,
+            
+            build: [
+                BaseImage("nvcr.io/nvidia/pytorch:21.03-py3"),
+                Repo(path: "requirements.txt", cd: true),
+                Run("pip install -r requirements.txt"),
+                Repo(keep: true, cd: true),
+            ],
 
             gpu: 1,
             gpu_mem: "11GB",
