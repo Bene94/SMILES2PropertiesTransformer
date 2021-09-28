@@ -25,7 +25,7 @@ XpV0(
                 "/home/bene/NNGamma/data_red_neg": "/mnt/xprun/data_red_neg", 
                 "/home/bene/NNGamma/data_red_no_tail_neg": "/mnt/xprun/data_red_no_tail_neg", 
                 "/home/bene/NNGamma/Models": "/mnt/xprun/out",
-                "/home/bene/NNGamma/Plot": "/mnt/xprun/plot"
+                "/home/bene/NNGamma/Plot": "/mnt/xprun/plot",
                 "/home/bene/NNGamma/data_exp": "/mnt/xprun/data_exp"
             },
         ),
