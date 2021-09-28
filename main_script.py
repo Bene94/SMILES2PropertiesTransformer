@@ -45,7 +45,7 @@ from config import *
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--local' , default=True, help='Using training data from local folder')
+@click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--test', default=False, help='If true smale dataset is used')
 
 @click.option('--shift', default=0, help='Shift the data')
