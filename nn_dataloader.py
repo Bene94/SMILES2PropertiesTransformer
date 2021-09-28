@@ -63,7 +63,7 @@ class gamma_dataset(Dataset):
     def __len__(self):
         return len(self.train_data)
 
-def load_data(config,local,test):
+def load_data(config,local = False,test = False):
 
     if local:
         data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')

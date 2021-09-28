@@ -13,6 +13,7 @@ from plot_results import *
 from trainer import *
 import minGPT
 from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
+from load_model import *
 
 
 @click.command()
@@ -48,8 +49,10 @@ from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 
 @click.option('--shift', default=0, help='Shift the data')
 
+@click.option('--fine_tune', default='NO', help='load a privious modle and finetune it, name the modle to load here')
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
+
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, fine_tune):
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -83,6 +86,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     config.num_layers = nlay
     config.num_heads = nhead
     config.dropout =  drp
+
     config.lr = lr
     config.betas = [0.9,0.98]
     config.weight_decay = wdecay
@@ -99,6 +103,26 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     config.bound = 20
 
     config.shift = shift
+
+        # load a previous model
+    if not fine_tune == 'NO':
+        if local:
+            path = '../Models/'
+        else:
+            path = "/mnt/xprun/out/"
+        
+        config_loaded, model = load_model(path, fine_tune)
+
+        # set the architecure of the loaded model
+        config.embed_size = config_loaded.embed_size
+        config.hidden_factor = config_loaded.hidden_factor
+        config.num_layers = config_loaded.num_layers
+        config.num_heads = config_loaded.num_heads
+        config.dropout = config_loaded.dropout
+        
+
+
+
 
     ## load training and validation data
 
