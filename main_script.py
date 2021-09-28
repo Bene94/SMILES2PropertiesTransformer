@@ -104,8 +104,20 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     config.shift = shift
 
+    ## load training and validation data
+
+    print('-' * 89)
+    print('Loading Data...')
+    print('-' * 89)
+
+    training_data, val_0_data, val_1_data = load_data(config,local,test)
+
+    ## create model
+
+
         # load a previous model
     if not fine_tune == 'NO':
+        
         if local:
             path = '../Models/'
         else:
@@ -119,33 +131,22 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
         config.num_layers = config_loaded.num_layers
         config.num_heads = config_loaded.num_heads
         config.dropout = config_loaded.dropout
-        
-
-
-
-
-    ## load training and validation data
-
-    print('-' * 89)
-    print('Loading Data...')
-    print('-' * 89)
-
-    training_data, val_0_data, val_1_data = load_data(config,local,test)
-
-    ## create model
-
-    if mode == "reg":
-        criterion = nn.MSELoss()
     else:
-        criterion = nn.CrossEntropyLoss()
+        if mode == "reg":
+            criterion = nn.MSELoss()
+        else:
+            criterion = nn.CrossEntropyLoss()
 
-    if modle_type == 'minGPT':
-        model = minGPT.GPT(config)
-        optimizer = model.configure_optimizers(config)
-    elif modle_type == 'pytorch':
-        model = TransformerModel(config)
-        optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+        if modle_type == 'minGPT':
+            model = minGPT.GPT(config)
+            optimizer = model.configure_optimizers(config)
+        elif modle_type == 'pytorch':
+            model = TransformerModel(config)
+            optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
     
+
+
+
     model = model.to(config.device)
     config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     wandb.watch(model)
