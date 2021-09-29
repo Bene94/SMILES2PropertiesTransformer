@@ -18,15 +18,9 @@ XpV0(
                 "WANDB_API_KEY": "wandb-api-key",
             },
             volumes: 
-                {"/home/bene/NNGamma/data_red": "/mnt/xprun/data_red",
-                "/home/bene/NNGamma/data": "/mnt/xprun/data",
-                "/home/bene/NNGamma/data_DD": "/mnt/xprun/data_DD",
-                "/home/bene/NNGamma/data_red_no_tail": "/mnt/xprun/data_red_no_tail", 
-                "/home/bene/NNGamma/data_red_neg": "/mnt/xprun/data_red_neg", 
-                "/home/bene/NNGamma/data_red_no_tail_neg": "/mnt/xprun/data_red_no_tail_neg", 
+                {"/home/bene/NNGamma/data": "/mnt/xprun", 
                 "/home/bene/NNGamma/Models": "/mnt/xprun/out",
                 "/home/bene/NNGamma/Plot": "/mnt/xprun/plot",
-                "/home/bene/NNGamma/data_exp": "/mnt/xprun/data_exp"
             },
         ),
     }
