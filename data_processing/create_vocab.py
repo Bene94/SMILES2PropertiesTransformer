@@ -48,7 +48,7 @@ def create_vocab_dict(vocab):
 
 if __name__ == "__main__":
     #add consol output to show progress
-    df, num_smile0, num_smile1 = load_data('../raw_data/cosmo_001/')
+    df, num_smile0, num_smile1 = load_data('../raw_data/exp/')
     print("Find Vocab")
     vocab = find_vocab(df)
     vocab = sorted(vocab)
