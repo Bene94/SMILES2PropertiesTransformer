@@ -127,7 +127,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     model = model.to(config.device)
     config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
-    wandb.init(project= 'gamma', entity='bene94', name=name, config=config)
+    wandb.init(project='GNN_001', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
     ## set up scheduler
