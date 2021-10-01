@@ -1,7 +1,6 @@
 import datetime
 import pickle
 import os
-from path import Path
 
 import torch
 import torch.nn as nn
