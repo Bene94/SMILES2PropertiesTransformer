@@ -1,11 +1,13 @@
 import datetime
 import pickle
 import os
+from path import Path
 
 import torch
 import torch.nn as nn
 import wandb
 import click
+
 
 from nn_model import * 
 from nn_dataloader import *
@@ -41,8 +43,6 @@ from config import *
 
 @click.option('--set', default='data', help='Location of dataset')
 
-@click.option('--modle_type', default="minGPT", help='Selected Modle')
-
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
 @click.option('--local' , default=False, help='Using training data from local folder')
@@ -53,7 +53,7 @@ from config import *
 @click.option('--fine_tune', default='NO', help='load a privious modle and finetune it, name the modle to load here')
 
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, modle_type, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, fine_tune):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, fine_tune):
     
     name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -91,12 +91,19 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     ## create model
 
+    ## check if checkpoint exists
 
-        # load a previous model
+    if local:
+        path = '../temp/'
+    else:
+        path = "/mnt/xprun/temp/"
+
+
+    # load a previous model
     if not fine_tune == 'NO':
         
         if local:
-            path = '/home/bene/NNGamma/Models/'
+            path = '../Models/'
         else:
             path = "/mnt/xprun/out/"
         
@@ -114,15 +121,8 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
         else:
             criterion = nn.CrossEntropyLoss()
 
-        if modle_type == 'minGPT':
-            model = minGPT.GPT(config)
-            optimizer = model.configure_optimizers(config)
-        elif modle_type == 'pytorch':
-            model = TransformerModel(config)
-            optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
-    
-
-
+        model = minGPT.GPT(config)
+        optimizer = model.configure_optimizers(config)
 
     model = model.to(config.device)
     config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -144,7 +144,14 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     overall_start_time = time.time()
 
-    for epoch in range(1, config.epoch + 1):
+            # see if file with name xp_name exists
+    if os.path.isfile(path + xp_name + '.pth'):
+        model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
+    else:
+        epoch_start = 0
+
+
+    for epoch in range(epoch_start, config.epoch + 1):
 
         epoch_start_time = time.time()
 
@@ -168,11 +175,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
             best_val_loss = val_loss
             best_model = model
 
-        plot_interval = 1000
+        # save checkpoint to resume training
+        save_checkpoint(model, config, epoch, optimizer, scheduler)
 
-        if epoch % plot_interval == 0:
-            train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
-            plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target)
             
     ## End Training
 
@@ -186,12 +191,56 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     else:
         path = "/mnt/xprun/out/"
 
-    date = datetime.datetime.now().strftime("%Y%m%d%H")
     torch.save(best_model.state_dict(), path + config.xp_name +'.pth')
     # save config dict with pickle
     with open(path + config.xp_name + '.pkl', 'wb') as f:
         pickle.dump(config, f)
     
+def save_checkpoint(model, config, epoch, optimizer, scheduler):
+    """
+    Saves model checkpoint.
+    """
+    if config.local:
+        path = '../temp/'
+    else:
+        path = "/mnt/xprun/temp/"
+
+    torch.save(model.state_dict(), path + config.xp_name + '.pth')
+    # save config dict with pickle
+    with open(path + config.xp_name + '.pkl', 'wb') as f:
+        pickle.dump(config, f)
+    # save optimizer state dict with pickle
+    with open(path + config.xp_name + '_optimizer.pkl', 'wb') as f:
+        pickle.dump(optimizer.state_dict(), f)
+    # save scheduler state dict with pickle
+    with open(path + config.xp_name + '_scheduler.pkl', 'wb') as f:
+        pickle.dump(scheduler.state_dict(), f)
+    # save epoch with pickle
+    with open(path + config.xp_name + '_epoch.pkl', 'wb') as f:
+        pickle.dump(epoch, f)
+
+def load_checkpoint(config):
+    """
+    Loads model checkpoint.
+    """
+    if config.local:
+        path = '../temp/'
+    else:
+        path = "/mnt/xprun/temp/"
+
+    model = minGPT(config)
+    model.load_state_dict(torch.load(path + config.xp_name + '.pth'))
+    with open(path + config.xp_name + '.pkl', 'rb') as f:
+        config = pickle.load(f)
+    with open(path + config.xp_name + '_optimizer.pkl', 'rb') as f:
+        optimizer = pickle.load(f)
+    with open(path + config.xp_name + '_scheduler.pkl', 'rb') as f:
+        scheduler = pickle.load(f)
+    with open(path + config.xp_name + '_epoch.pkl', 'rb') as f:
+        epoch = pickle.load(f)
+    return model, config, optimizer, scheduler, epoch
+
+
 
 def plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target):
 
