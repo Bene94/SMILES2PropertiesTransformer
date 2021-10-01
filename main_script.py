@@ -171,24 +171,16 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     print('-' * 89)
     print("Best validation loss {:.4f}".format(best_val_loss))
 
-    if local:
-        path = '../Models/'
-    else:
-        path = "/mnt/xprun/out/"
-
-    torch.save(best_model.state_dict(), path + config.xp_name +'.pth')
+    torch.save(best_model.state_dict(), path_model + config.xp_name +'.pth')
     # save config dict with pickle
-    with open(path + config.xp_name + '.pkl', 'wb') as f:
+    with open(path_model + config.xp_name + '.pkl', 'wb') as f:
         pickle.dump(config, f)
     
 def save_checkpoint(model, config, epoch, optimizer, scheduler):
     """
     Saves model checkpoint.
     """
-    if config.local:
-        path = '../temp/'
-    else:
-        path = "/mnt/xprun/temp/"
+    path = config.path_temp
 
     torch.save(model.state_dict(), path + config.xp_name + '.pth')
     # save config dict with pickle
@@ -208,10 +200,7 @@ def load_checkpoint(config):
     """
     Loads model checkpoint.
     """
-    if config.local:
-        path = '../temp/'
-    else:
-        path = "/mnt/xprun/temp/"
+    path = config.path_temp
 
     model = minGPT(config)
     model.load_state_dict(torch.load(path + config.xp_name + '.pth'))
