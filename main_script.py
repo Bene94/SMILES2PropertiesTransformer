@@ -174,6 +174,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     # save config dict with pickle
     with open(path_model + config.xp_name + '.pkl', 'wb') as f:
         pickle.dump(config, f)
+
+    delete_checkpoint(config)
+
     
 def save_checkpoint(model, config, epoch, optimizer, scheduler):
     """
@@ -213,6 +216,17 @@ def load_checkpoint(config):
         epoch = pickle.load(f)
     return model, config, optimizer, scheduler, epoch
 
+def delete_checkpoint(config):
+    """
+    Deletes model checkpoint.
+    """
+    path = config.path_temp
+
+    os.remove(path + config.xp_name + '.pth')
+    os.remove(path + config.xp_name + '.pkl')
+    os.remove(path + config.xp_name + '_optimizer.pkl')
+    os.remove(path + config.xp_name + '_scheduler.pkl')
+    os.remove(path + config.xp_name + '_epoch.pkl')
 
 
 def plotting(val_target, val_out, local, log_name, epoch, val_loss, train_loss, train_out, train_target):
