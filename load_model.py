@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '200905-071911'
+    name = '211001-105937'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -58,8 +58,8 @@ if __name__ == '__main__':
         if config.criterion == 'MSELoss()':
             criterion = nn.MSELoss()
 
-        data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
-        #data_path = os.path.join('/home/bene/NNGamma/data_no_tail/')
+        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
+        data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
 
         print('-' * 89)
         print('Loading Data...')
@@ -137,3 +137,9 @@ if __name__ == '__main__':
     make_heatmap(train_out, train_target, name = "train", save = True)
     make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
     make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)
+
+    if len(train_out) < 10000:
+        # concatenate the resutls
+        train_out = np.concatenate((train_out, val_0_out, val_1_out), axis=0)
+        train_target = np.concatenate((train_target, val_0_target, val_1_target), axis=0)
+        make_scatter(train_out, train_target, name = "train", save = True)

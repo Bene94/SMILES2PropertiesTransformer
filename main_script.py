@@ -55,11 +55,16 @@ from config import *
 
 def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, fine_tune):
     
-    name = modle_type + '_' + str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
+    name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
+
     if local:
-        xp_name = "NaN"
+        path_temp = '../temp/'
+        path_model = '../Models/'
+        xp_name = "local_test"
     else:
+        path_temp = "/mnt/xprun/temp/"
+        path_model = "/mnt/xprun/out/"
         xp_name = os.environ['XPRUN_NAME']
 
     if cuda:
@@ -67,18 +72,17 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     else:
         device = torch.device('cpu')
 
-    criterion = nn.MSELoss()
-
-   # check if set containts red
-    if 'red' in set:
-        vocab_size = 23
+    if mode == "reg":
+        criterion = nn.MSELoss()
     else:
-        vocab_size =  40
+        criterion = nn.CrossEntropyLoss()
+
+    vocab_size =  40
 
     config = NN_config(xp_name=xp_name, device=device, criterion=criterion, padding_idx=0, 
         vocab_size=vocab_size, block_size=128, embed_size=emb, hidden_factor=hid_fac, num_layers=nlay, 
-        num_heads=nhead, dropout=drp, lr=lr, betas=[0.99 , 0.98], weight_decay=wdecay, data_path=set,
-        batch_size=btch, max_btch=max_btch, epoch=epo, warmup_epochs=warmup_epo, 
+        num_heads=nhead, dropout=drp, lr=lr, warmup_lr = warmup_lr, warmup_cycle=warmup_cycle, betas=[0.99 , 0.98],
+        weight_decay=wdecay, data_path=set, batch_size=btch, max_btch=max_btch, epoch=epo, warmup_epochs=warmup_epo, 
         mode=mode, bins=bins, bound=20, shift=shift)
 
     ## load training and validation data
@@ -89,25 +93,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     training_data, val_0_data, val_1_data = load_data(config,local,test)
 
-    ## create model
-
-    ## check if checkpoint exists
-
-    if local:
-        path = '../temp/'
-    else:
-        path = "/mnt/xprun/temp/"
-
-
     # load a previous model
-    if not fine_tune == 'NO':
-        
-        if local:
-            path = '../Models/'
-        else:
-            path = "/mnt/xprun/out/"
-        
-        config_loaded, model = load_model(path, fine_tune)
+    if fine_tune != 'NO':
+        config_loaded, model = load_model(path_model, fine_tune)
 
         # set the architecure of the loaded model
         config.embed_size = config_loaded.embed_size
@@ -116,13 +104,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
         config.num_heads = config_loaded.num_heads
         config.dropout = config_loaded.dropout
     else:
-        if mode == "reg":
-            criterion = nn.MSELoss()
-        else:
-            criterion = nn.CrossEntropyLoss()
-
         model = minGPT.GPT(config)
         optimizer = model.configure_optimizers(config)
+
 
     model = model.to(config.device)
     config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -130,11 +114,12 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     wandb.init(project='GNN_001', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
+
     ## set up scheduler
     total_steps = len(training_data) * config.epoch
-    min_lr = config.lr / warmup_lr
+    min_lr = config.lr / config.warmup_lr
     warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
-    first_cycle_steps = int(total_steps / warmup_cycle)
+    first_cycle_steps = int(total_steps / config.warmup_cycle)
     
     scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
 
@@ -144,8 +129,8 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     overall_start_time = time.time()
 
-            # see if file with name xp_name exists
-    if os.path.isfile(path + xp_name + '.pth'):
+    # see if file with name xp_name exists
+    if os.path.isfile(path_temp + xp_name + '.pth'):
         model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
     else:
         epoch_start = 0

@@ -21,10 +21,12 @@ class NN_config:
     dropout:float
 
     lr: float
+    warmup_lr: float
+    warmup_cycle: int
+    warmup_epochs: int
     betas:  list
     weight_decay: float
 
-    warmup_epochs: int
         
     data_path: str
     batch_size: int
