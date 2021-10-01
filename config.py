@@ -9,6 +9,9 @@ class NN_config:
     xp_name: str
     device: torch.device
     criterion: nn.MSELoss
+
+    path_temp: str
+    path_model: str
     
     padding_idx: int
     block_size:int
