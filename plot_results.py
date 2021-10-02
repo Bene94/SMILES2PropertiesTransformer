@@ -50,7 +50,8 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
     vals.append(prediciton)
     colors = makeColours(vals)
 
-    plt.scatter(target, prediciton, color=colors)
+    # use smaller dots for the points
+    plt.scatter(target, prediciton, c=colors, s=1)
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
     if save:

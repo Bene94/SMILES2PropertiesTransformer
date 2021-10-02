@@ -27,7 +27,7 @@ def load_model(path, name):
     config_file = config_file[:-4]
     config = pickle.load(open(path + config_file + '.pkl', 'rb'))
 
-    config = convert_config(config)
+    #config = convert_config(config)
 
     # load model
     model = minGPT.GPT(config)
@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '211001-105937'
+    name = '211001-184612'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -55,11 +55,11 @@ if __name__ == '__main__':
         print(config.data_path)
         model = model.to('cuda')
 
-        if config.criterion == 'MSELoss()':
-            criterion = nn.MSELoss()
+        criterion = nn.MSELoss()
 
         data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
         data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
+        #data_path = os.path.join('/home/bene/NNGamma/data/data_no_tail/')
 
         print('-' * 89)
         print('Loading Data...')
