@@ -94,7 +94,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     # load a previous model
     if fine_tune != 'NO':
-        config_loaded, model = load_model(path_model, fine_tune)
+        model, config_loaded = load_model(path_model, fine_tune)
 
         # set the architecure of the loaded model
         config.embed_size = config_loaded.embed_size
