@@ -104,7 +104,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
         config.dropout = config_loaded.dropout
     else:
         model = minGPT.GPT(config)
-        optimizer = model.configure_optimizers(config)
 
 
     model = model.to(config.device)
@@ -115,6 +114,8 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
 
     ## set up scheduler
+    optimizer = model.configure_optimizers(config)
+    
     total_steps = len(training_data) * config.epoch
     min_lr = config.lr / config.warmup_lr
     warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
