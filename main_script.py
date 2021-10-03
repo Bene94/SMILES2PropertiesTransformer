@@ -49,10 +49,8 @@ from config import *
 
 @click.option('--shift', default=0, help='Shift the data')
 
-@click.option('--fine_tune', default='NO', help='load a privious modle and finetune it, name the modle to load here')
 
-
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, fine_tune):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
     
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -92,20 +90,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     training_data, val_0_data, val_1_data = load_data(config,local,test)
 
-    # load a previous model
-    if fine_tune != 'NO':
-        model, config_loaded = load_model(path_model, fine_tune)
-
-        # set the architecure of the loaded model
-        config.embed_size = config_loaded.embed_size
-        config.hidden_factor = config_loaded.hidden_factor
-        config.num_layers = config_loaded.num_layers
-        config.num_heads = config_loaded.num_heads
-        config.dropout = config_loaded.dropout
-    else:
-        model = minGPT.GPT(config)
-
-
+    model = minGPT.GPT(config)
     model = model.to(config.device)
     config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
@@ -115,7 +100,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     ## set up scheduler
     optimizer = model.configure_optimizers(config)
-    
+
     total_steps = len(training_data) * config.epoch
     min_lr = config.lr / config.warmup_lr
     warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
