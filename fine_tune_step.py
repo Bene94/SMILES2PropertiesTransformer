@@ -30,7 +30,7 @@ from config import *
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
 @click.option('--cuda', default=True, help='Use cuda')
-@click.option('--local', default=True, help='Use local')
+@click.option('--local', default=False, help='Use local')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local):
