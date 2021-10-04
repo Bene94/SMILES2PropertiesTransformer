@@ -5,7 +5,7 @@ XpV0(
             command: ["python", "main_script.py"],
             
             build: [
-                BaseImage("nvcr.io/nvidia/pytorch:21.03-py3"),
+                From("nvcr.io/nvidia/pytorch:21.03-py3"),
                 Repo(path: "requirements.txt", cd: true),
                 Run("pip install -r requirements.txt"),
                 Repo(keep: true, cd: true),
