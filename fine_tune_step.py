@@ -38,6 +38,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     name = model_name
 
     # load model and config
+    local = False
+    
     if local:
         path_temp = '../temp/'
         path_model = '../Models/'
