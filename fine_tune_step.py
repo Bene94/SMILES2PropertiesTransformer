@@ -30,7 +30,7 @@ from config import *
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
 @click.option('--cuda', default=True, help='Use cuda')
-@click.option('--local', default=False, help='Use local')
+@click.option('--local', default=True, help='Use local')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local):
@@ -52,14 +52,6 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     else:
         device = torch.device('cpu')
 
-    local = False
-
-    path_temp = "/mnt/xprun/temp/"
-    path_model = "/mnt/xprun/out/"
-    xp_name = os.environ['XPRUN_NAME']
-
-
-    
     model, config = load_model(path_model,model_name)
     model = model.to(config.device)
 
@@ -77,7 +69,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     wandb.watch(model)
 
     if local:
-        data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
+        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
     else:
         data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
 
@@ -131,6 +123,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
             train_dataset.train_target = comp_dataset.train_target[idx,:]
 
             val_dataset.train_data = comp_dataset.train_data[idx_other,:]
+            val_dataset.train_target = comp_dataset.train_target[idx_other,:]
             
             train_dataloader_list[i].append(DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0))
             val_dataloader_list[i].append(DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0))
