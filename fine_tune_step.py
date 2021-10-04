@@ -52,6 +52,11 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     else:
         device = torch.device('cpu')
 
+    path_temp = "/mnt/xprun/temp/"
+    path_model = "/mnt/xprun/out/"
+    xp_name = os.environ['XPRUN_NAME']
+
+
     
     model, config = load_model(path_model,model_name)
     model = model.to(config.device)
