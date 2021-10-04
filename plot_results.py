@@ -23,7 +23,7 @@ def make_histogram(prediciton, target, name, path):
     plt.ylabel('count')
     plt.xlim(-10,10)
     plt.title(name)
-    plt.savefig(path + 'hist_' + name)
+    plt.savefig(path + 'plot/hist_' + name)
 
 def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
@@ -36,12 +36,13 @@ def make_heatmap(prediciton, target, name = '', path = '', save=False):
     plt.xlim(-20,20)
     plt.ylim(-20,20)
     plt.colorbar()
-    # set title to MSE of the prediction scientific notation two decimal places
-    MSE = np.around(np.mean( (target - prediciton)**2 ),2)
-    plt.title('MSE: ' + str(MSE))
+    # set title to RMSE of the prediction scientific notation two decimal places
+
+    RMSE = np.around(np.mean( np.sqrt((target - prediciton)**2 )),2)
+    plt.title('RMSE: ' + str(RMSE))
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
-    plt.savefig(path + 'heat_' + name)
+    plt.savefig(path + 'plot/heat_' + name)
 
 def make_scatter(prediciton, target, name = '', path = '', save=False):
     plt.clf()
@@ -54,8 +55,11 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
     plt.scatter(target, prediciton, c=colors, s=1)
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
+    RMSE = np.around(np.sqrt(((target - prediciton)**2).mean()),2)
+    plt.title('RMSE: ' + str(RMSE))
+
     if save:
-        plt.savefig(path + 'scatter_' + name)
+        plt.savefig(path + 'plot/scatter_' + name)
     else:
         plt.show()
 
@@ -92,7 +96,7 @@ def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     
 
     if save:
-        plt.savefig(path + 'MSE_' + name)
+        plt.savefig(path + 'plot/MSE_' + name)
  
 def makeColours( vals ):
 

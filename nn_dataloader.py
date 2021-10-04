@@ -61,7 +61,9 @@ class gamma_dataset(Dataset):
         return self.train_data[index], self.train_target[index]
 
     def __len__(self):
-        return len(self.train_data)
+        if len(self.train_data.shape) == 1:
+            return 1
+        return self.train_data.shape[0]
 
 def load_data(config,local = False,test = False):
 
@@ -73,6 +75,7 @@ def load_data(config,local = False,test = False):
     train_dataset = gamma_dataset(data_path, 'train', config)
     val_0_dataset = gamma_dataset(data_path, 'val_0', config)
     val_1_dataset = gamma_dataset(data_path, 'val_1', config)
+    val_2_dataset = gamma_dataset(data_path, 'val_2', config)
 
     if test:
         train_dataset.train_data = train_dataset.train_data[0:500]
@@ -88,8 +91,9 @@ def load_data(config,local = False,test = False):
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     val_0_data = DataLoader(val_0_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     val_1_data = DataLoader(val_1_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+    val_2_data = DataLoader(val_2_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
 
-    return training_data, val_0_data, val_1_data
+    return training_data, val_0_data, val_1_data, val_2_data
 
 
 

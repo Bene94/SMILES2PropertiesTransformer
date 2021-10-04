@@ -88,7 +88,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     print('Loading Data...')
     print('-' * 89)
 
-    training_data, val_0_data, val_1_data = load_data(config,local,test)
+    training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test)
 
     model = minGPT.GPT(config)
     model = model.to(config.device)
@@ -126,12 +126,15 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
         epoch_start_time = time.time()
 
         train(model, criterion, optimizer, training_data, scheduler, epoch, wandb)
+
         torch.cuda.empty_cache()
 
         val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
         wandb.log({"val_0_loss": val_loss})
         val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
         wandb.log({"val_1_loss": val_loss})
+        val_loss, val_out, val_target = evaluate(model, val_2_data, criterion, config)
+        wandb.log({"val_2_loss": val_loss})
 
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '

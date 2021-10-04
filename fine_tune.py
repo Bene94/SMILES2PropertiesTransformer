@@ -1,0 +1,181 @@
+import datetime
+import pickle
+import os
+from copy import deepcopy
+
+import torch
+from torch._C import _log_api_usage_once
+import torch.nn as nn
+import wandb
+import click
+
+
+from nn_model import * 
+from nn_dataloader import *
+from plot_results import *
+from trainer import *
+import minGPT
+from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
+from load_model import *
+from config import *
+
+@click.command()
+
+@click.option('--model_name', default='211003-111953', help='Name of the model')
+@click.option('--data_path', default='data/data_exp', help='Path to the data')
+
+@click.option('--batch_size', default=32, help='Batch size')
+@click.option('--epochs', default=1, help='Number of epochs')
+@click.option('--lr', default=1e-5, help='Learning rate')
+@click.option('--weight_decay', default=0.0, help='Weight decay')
+
+@click.option('--cuda', default=True, help='Use cuda')
+@click.option('--local', default=True, help='Use local')
+
+@click.option('--one_out', default=True, help='Use leave one out validation')
+
+
+def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local, one_out):
+
+    name = model_name
+
+    # load model and config
+    if local:
+        path_temp = '../temp/'
+        path_model = '../Models/'
+        xp_name = "local_test"
+    else:
+        path_temp = "/mnt/xprun/temp/"
+        path_model = "/mnt/xprun/out/"
+        xp_name = os.environ['XPRUN_NAME']
+
+    if cuda:
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+
+    
+    model, config = load_model(path_model,model_name)
+    model = model.to(config.device)
+
+    # overide old config
+    config.data_path = data_path
+    config.batch_size = batch_size
+    config.epoch = epochs
+    config.lr = lr
+    config.wdcay = weight_decay
+    config.device = device
+    config.local = local
+    config.xp_name = xp_name
+
+    wandb.init(project='GNN_001_FT', entity='bene94', name=name, config=config)
+    wandb.watch(model)
+
+    
+    training_data, val_0_data, val_1_data, __ = load_data(config,local,test=False)
+
+    ## set up scheduler
+    criterion = nn.MSELoss()
+
+    optimizer = model.configure_optimizers(config)
+
+    total_steps = len(training_data) * config.epoch
+        
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=total_steps, gamma=1)
+
+    epoch_start = 0
+    best_val_loss = float('inf')
+
+    if one_out:
+        
+        if local:
+            data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
+        else:
+            data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
+
+        comp_dataset = gamma_dataset(data_path, '', config)
+
+        outer_loop = len(comp_dataset)
+        val_loss_array = np.zeros((outer_loop,config.epoch))
+        val_prediction_array = np.zeros((outer_loop,config.epoch))
+        val_target_array = np.zeros((outer_loop,config.epoch))
+    
+    else:
+        outer_loop = 0
+    
+
+    for i in range(0,outer_loop):
+        
+        if one_out:
+            # load data new to resett suffle
+
+            val_dataset = deepcopy(comp_dataset)
+            train_dataset = deepcopy(comp_dataset)
+
+            train_dataset.train_data = torch.cat((comp_dataset.train_data[:i,:], comp_dataset.train_data[i+1:,:]))
+            train_dataset.train_target = torch.cat((comp_dataset.train_target[:i,:],comp_dataset.train_target[i+1:,:]))
+
+            val_dataset.train_data = comp_dataset.train_data[i,:].unsqueeze(0)
+            val_dataset.train_target = comp_dataset.train_target[i,:].unsqueeze(0)
+
+            training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+            val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+            
+            model, __ = load_model(path_model,model_name)
+            model = model.to(config.device)
+
+            optimizer = model.configure_optimizers(config)
+
+            total_steps = len(training_data) * config.epoch
+                
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=total_steps, gamma=1)
+
+            epoch_start = 0
+            best_val_loss = float('inf')
+
+
+        for epoch in range(epoch_start, config.epoch):
+
+            epoch_start_time = time.time()
+
+            train(model, criterion, optimizer, training_data, scheduler, epoch, wandb)
+            
+            torch.cuda.empty_cache()
+
+            if not one_out:
+                val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
+                wandb.log({"val_0_loss": val_loss})
+                val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
+                wandb.log({"val_1_loss": val_loss})
+
+                print('-' * 89)
+                print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
+                    .format(epoch, (time.time() - epoch_start_time),
+                                                val_loss))
+                print('-' * 89)
+            else:
+                val_loss_array[i,epoch], val_prediction_array[i,epoch], val_target_array[i,epoch] = evaluate(model, val_data, criterion, config)
+                wandb.log({"I": i})
+    
+        
+    if one_out:
+        wandb.log({"val_loss_log":np.mean(val_loss_array,axis=0)}) 
+
+                ## End Training
+
+    # save val arrays
+    if one_out:
+        np.save(path_temp + 'val_loss_array_' + name + '.npy', val_loss_array)
+        np.save(path_temp + 'val_prediction_array_' + name + '.npy', val_prediction_array)
+        np.save(path_temp + 'val_target_array_' + name + '.npy', val_target_array)
+    #torch.save(best_model.state_dict(), path_model + config.xp_name +'.pth')
+    # save config dict with pickle
+    #with open(path_model + config.xp_name + '.pkl', 'wb') as f:
+     #   pickle.dump(config, f)
+
+
+
+
+
+if __name__ == '__main__':
+    main()
