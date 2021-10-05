@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '211003-111953'
+    name = '211004-141758'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         criterion = nn.MSELoss()
 
         data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
-        data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
+        #data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
         #data_path = os.path.join('/home/bene/NNGamma/data/data_no_tail/')
 
         print('-' * 89)
@@ -101,6 +101,7 @@ if __name__ == '__main__':
 
         val_0_loss, val_0_out, val_0_target = evaluate(model, val_0_data, criterion, config)
         val_1_loss, val_1_out, val_1_target = evaluate(model, val_1_data, criterion, config)
+        val_2_loss, val_2_out, val_2_target = evaluate(model, val_2_data, criterion, config)
 
         train_target = train_target.squeeze()
         train_out = train_out.squeeze()
@@ -109,17 +110,26 @@ if __name__ == '__main__':
         val_0_out = val_0_out.squeeze()
         val_1_target = val_1_target.squeeze()
         val_1_out = val_1_out.squeeze()
+        val_2_target = val_2_target.squeeze()
+        val_2_out = val_2_out.squeeze()
 
         print("Training loss: ", train_loss)
         print("Validation loss: ", val_0_loss)
         print("Validation loss: ", val_1_loss)
+        print("Validation loss: ", val_2_loss)
+
 
         # save the results to a file
         np.save(save_path + 'train_out.npy', train_out)
         np.save(save_path + 'train_target.npy', train_target)
 
+
         np.save(save_path + 'val_0_out.npy', val_0_out)
         np.save(save_path + 'val_0_target.npy', val_0_target)
+        np.save(save_path + 'val_1_out.npy', val_1_out)
+        np.save(save_path + 'val_1_target.npy', val_1_target)
+        np.save(save_path + 'val_2_out.npy', val_2_out)
+        np.save(save_path + 'val_2_target.npy', val_2_target)
 
     else:
 
@@ -129,6 +139,8 @@ if __name__ == '__main__':
         val_0_target = np.load(save_path + 'val_0_target.npy')
         val_1_out = np.load(save_path + 'val_1_out.npy')
         val_1_target = np.load(save_path + 'val_1_target.npy')
+        val_2_out = np.load(save_path + 'val_2_out.npy')
+        val_2_target = np.load(save_path + 'val_2_target.npy')
 
     make_MSE_x(train_out, train_target, name = "train", save = True)
     make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
@@ -141,6 +153,7 @@ if __name__ == '__main__':
     make_heatmap(train_out, train_target, name = "train", save = True)
     make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
     make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)
+    make_heatmap(val_2_out, val_2_target, name = "val_2", save = True)
 
     if len(train_out) < 10000:
         # concatenate the resutls
