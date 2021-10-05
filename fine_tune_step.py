@@ -40,7 +40,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     name = name + "_20_50"
 
     # load model and config
-    local = True
+    local = False
     
     if local:
         path_temp = '../temp/'
