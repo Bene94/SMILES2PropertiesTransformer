@@ -40,7 +40,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     name = name + "_20_50"
 
     # load model and config
-    local = False
+    local = True
     
     if local:
         path_temp = '../temp/'
@@ -194,14 +194,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
 
         # save val arrays
 
-        np.save(path_temp + 'val_loss_array_' + name + '.npy', val_loss_array)
-        np.save(path_temp + 'val_prediction_array_' + name + '.npy', val_prediction_array)
-        np.save(path_temp + 'val_target_array_' + name + '.npy', val_target_array)
-
-
-
-
-
+        np.save(path_temp + 'val_loss_array_step_' + name + '.npy', val_loss_array)
+        np.save(path_temp + 'val_prediction_array_setp_' + name + '.npy', val_prediction_array)
+        np.save(path_temp + 'val_target_array_step_' + name + '.npy', val_target_array)
 
 if __name__ == '__main__':
     main()
