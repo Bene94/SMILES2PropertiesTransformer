@@ -82,7 +82,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     sample_sizes = np.array([10, 100, 1000])
     min_epoch = 2
     min_sampels = 10
-    sampels = np.array([100, 20, 10])
+    sampels = np.array([100, 100, 100])
     epochs = np.array([10, 5, 2])
 
     # create the datasets
@@ -111,6 +111,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
         val_dataloader_list.append([])
  
         for j in range(sampels[i]):
+
             val_dataset = deepcopy(comp_dataset)
             train_dataset = deepcopy(comp_dataset)
 
@@ -181,6 +182,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
                 val_loss_array[i][j][epoch], val_prediction_array[i][j][epoch], val_target_array[i][j][epoch] = evaluate(model, validation_data, criterion, config)
                 
                 wandb.log({"I": i})
+                wandb.log({"J": j})
                 wandb.log({"val_loss_log":np.mean(val_loss_array[i][j][epoch])}) 
 
                 ## End Training
