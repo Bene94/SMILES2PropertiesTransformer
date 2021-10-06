@@ -95,8 +95,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     if os.path.isfile(path_temp + xp_name + '.pth'):
         model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
         model = model.to(config.device)
-        wandb.init(id=xp_name)
-        wandb.watch(model)
 
     else:
         model = minGPT.GPT(config)
@@ -112,10 +110,10 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
         first_cycle_steps = int(total_steps / config.warmup_cycle)
         scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
 
-        wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=xp_name)
-        wandb.watch(model)
-
         epoch_start = 0
+
+    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=xp_name)
+    wandb.watch(model)
 
     ## train model
     best_val_loss = float("inf")
