@@ -74,15 +74,12 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     wandb.init(project='GNN_001_FT', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
-    
-    training_data, val_0_data, val_1_data, __ = load_data(config,local,test=False)
-
     ## set up scheduler
     criterion = nn.MSELoss()
 
     optimizer = model.configure_optimizers(config)
 
-    total_steps = len(training_data) * config.epoch
+    total_steps = 100000 * config.epoch
         
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=total_steps, gamma=1)
 
@@ -104,6 +101,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
         val_target_array = np.zeros((outer_loop,config.epoch))
     
     else:
+        training_data, val_0_data, val_1_data, __ = load_data(config,local,test=False)
         outer_loop = 0
     
 
