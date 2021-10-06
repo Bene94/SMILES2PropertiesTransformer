@@ -97,6 +97,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, max_btch, c
     # see if file with name xp_name exists
     if os.path.isfile(path_temp + config.xp_name + '_epoch.pkl'):
         model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
+        path_wandb = path_wandb +"wandb/"
 
     else:
         model = minGPT.GPT(config)
