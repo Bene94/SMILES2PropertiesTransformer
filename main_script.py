@@ -94,7 +94,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     # see if file with name xp_name exists
     if os.path.isfile(path_temp + config.xp_name + '_epoch.pkl'):
         model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
-        model = model.to(config.device)
 
     else:
         model = minGPT.GPT(config)
@@ -196,6 +195,7 @@ def load_checkpoint(config):
 
     model = minGPT.GPT(config)
     model.load_state_dict(torch.load(path + config.xp_name + '.pth'))
+    model.to(config.device)
     with open(path + config.xp_name + '.pkl', 'rb') as f:
         config = pickle.load(f)
     with open(path + config.xp_name + '_optimizer.pkl', 'rb') as f:
