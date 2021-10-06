@@ -199,7 +199,7 @@ def load_checkpoint(config):
     with open(path + config.xp_name + '.pkl', 'rb') as f:
         config = pickle.load(f)
     with open(path + config.xp_name + '_optimizer.pkl', 'rb') as f:
-        optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+        optimizer = model.configure_optimizers(config)
         optimizer.load_state_dict(pickle.load(f))
     with open(path + config.xp_name + '_scheduler.pkl', 'rb') as f:
         scheduler = pickle.load(f)
