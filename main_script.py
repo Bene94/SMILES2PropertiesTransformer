@@ -170,7 +170,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     delete_checkpoint(config)
 
     
-def save_checkpoint(model, config, epoch, optimizer, scheduler, wandb=None):
+def save_checkpoint(model, config, epoch, optimizer, scheduler):
     """
     Saves model checkpoint.
     """
@@ -188,8 +188,6 @@ def save_checkpoint(model, config, epoch, optimizer, scheduler, wandb=None):
         pickle.dump(scheduler, f)
     with open (path + config.xp_name + '_epoch.pkl', 'wb') as f:
         pickle.dump(epoch, f)
-    if wandb is not None:
-        pickle.dump(wandb, open(path + config.xp_name + '_wandb.pkl', 'wb'))
 
 
 def load_checkpoint(config):
@@ -208,9 +206,7 @@ def load_checkpoint(config):
         scheduler = pickle.load(f)
     with open(path + config.xp_name + '_epoch.pkl', 'rb') as f:
         epoch = pickle.load(f)
-    with open(path + config.xp_name + '_wandb.pkl', 'rb') as f:
-        wandb = pickle.load(f)
-    return model, config, optimizer, scheduler, epoch, wandb
+    return model, config, optimizer, scheduler, epoch
 
 def delete_checkpoint(config):
     """
