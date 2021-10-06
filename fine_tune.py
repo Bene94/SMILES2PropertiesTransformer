@@ -21,11 +21,11 @@ from config import *
 
 @click.command()
 
-@click.option('--model_name', default='211003-111953', help='Name of the model')
+@click.option('--model_name', default='211004-141758', help='Name of the model')
 @click.option('--data_path', default='data/data_exp', help='Path to the data')
 
 @click.option('--batch_size', default=32, help='Batch size')
-@click.option('--epochs', default=1, help='Number of epochs')
+@click.option('--epochs', default=5, help='Number of epochs')
 @click.option('--lr', default=1e-5, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
