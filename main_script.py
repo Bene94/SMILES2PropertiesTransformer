@@ -45,25 +45,28 @@ from config import *
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--local' , default=False, help='Using training data from local folder')
 @click.option('--test', default=False, help='If true smale dataset is used')
 
 @click.option('--shift', default=0, help='Shift the data')
 
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
     
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
 
-    if local:
-        path_temp = '../temp/'
-        path_model = '../Models/'
-        xp_name = "local_test"
-    else:
+    if os.environ.get('XPRUN_NAME') is not None:
+        local = False
         path_temp = "/mnt/xprun/temp/"
         path_model = "/mnt/xprun/out/"
+        path_wandb = "/mnt/xprun/wandb/"
         xp_name = os.environ['XPRUN_NAME']
+    else:
+        local = True
+        path_temp = '../temp/'
+        path_model = '../Models/'
+        path_wandb = '../wandb/'
+        xp_name = "local_test"
 
     if cuda:
         device = torch.device('cuda')
@@ -114,7 +117,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
         config.id = wandb.util.generate_id()
 
     
-    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="must", id=config.id)
+    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="must", id=config.id, dir=path_wandb)
     wandb.watch(model)
 
     ## train model
