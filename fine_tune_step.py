@@ -30,17 +30,20 @@ from config import *
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
 @click.option('--cuda', default=True, help='Use cuda')
-@click.option('--local', default=True, help='Use local')
 
 
-def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local):
+def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda):
 
     name = model_name
     
     name = name + "_20_50"
 
     # load model and config
-    local = False
+    
+    if os.environ.get('XPRUN_NAME') is not None:
+        local = False
+    else:
+        local = True
     
     if local:
         path_temp = '../temp/'
@@ -82,8 +85,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     ## determin the datasets:
 
     sample_sizes = np.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 1000, 2000])
-    sampels = np.ones(len(sample_sizes)) *200
-    epochs = np.ones(len(sample_sizes)) *10
+    sampels = np.ones(len(sample_sizes),dtype=int) *200
+    epochs = np.ones(len(sample_sizes), dtype=int) *10
     
         # create the datasets
 
