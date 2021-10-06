@@ -193,7 +193,7 @@ def load_checkpoint(config):
     """
     path = config.path_temp
 
-    model = minGPT(config)
+    model = minGPT.GPT(config)
     model.load_state_dict(torch.load(path + config.xp_name + '.pth'))
     with open(path + config.xp_name + '.pkl', 'rb') as f:
         config = pickle.load(f)
