@@ -81,16 +81,11 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
 
     ## determin the datasets:
 
-    sample_sizes = np.array([10, 20, 50, 100, 500, 1000])
-    sample_sizes = np.array([ 20, 50])
-    min_epoch = 2
-    min_sampels = 10
-    sampels = np.array([100, 100, 100, 100, 100, 100])
-    sampels = np.array([100, 100])
-    epochs = np.array([20, 20, 10, 10, 4, 2])
-    epochs = np.array([10, 10])
-
-    # create the datasets
+    sample_sizes = np.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 1000, 2000])
+    sampels = np.ones(len(sample_sizes)) *200
+    epochs = np.ones(len(sample_sizes)) *10
+    
+        # create the datasets
 
     train_dataloader_list =  []
     val_dataloader_list = []

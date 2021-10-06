@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 data_path = "../temp/val_loss_array_211003-111953.npy"
-data_path_20_50 = "../temp/val_loss_array_211003-111953_20_50.npy"
+data_path_20_50 = "../temp/val_loss_array_step_211003-111953_20_50.npy"
 
 # load data
 data = np.load(data_path, allow_pickle=True)
@@ -72,7 +72,7 @@ n_1000_loss = n_1000_loss[:,min_loss_index]
 # take mean over ax 2
 
 # make box plot of the data
-plt.boxplot(n_0_loss,[n_10_loss, n_20_loss, n_50_loss, n_100_loss, n_500_loss, n_1000_loss, n_one_out_loss], labels=['0','10', '20', '50', '100', '500', '1000','2000'])
+plt.boxplot([n_0_loss,n_10_loss, n_20_loss, n_50_loss, n_100_loss, n_500_loss, n_1000_loss, n_one_out_loss], labels=['0','10', '20', '50', '100', '500', '1000','2000'])
 plt.title("Box Plot of Validation Loss")
 plt.ylabel("Validation Loss")
 plt.xlabel("# Experiment Data")
