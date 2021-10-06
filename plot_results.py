@@ -30,6 +30,8 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
 
+    perc_data = np.around(np.sum( (target - prediciton)**2 < 0.3**2 ) / len(target) * 100,2)
+
     delta = target - prediciton
     weights = np.ones_like(delta)/float(len(delta))
     plt.clf()
@@ -37,7 +39,7 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     plt.ylabel('count')
     plt.xlabel('delta ln g')
     plt.xlim(-2,2)
-    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
+    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
     plt.savefig(path + 'plot/hist_delta_' + name)
 
 
@@ -72,7 +74,7 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
     plt.scatter(target, prediciton, c=colors, s=1)
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
-    
+
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
     plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
