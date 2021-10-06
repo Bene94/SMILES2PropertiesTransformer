@@ -39,15 +39,18 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
 
     name = model_name
 
-    # load model and config
-    if local:
-        path_temp = '../temp/'
-        path_model = '../Models/'
-        xp_name = "local_test"
-    else:
+    if os.environ.get('XPRUN_NAME') is not None:
+        local = False
         path_temp = "/mnt/xprun/temp/"
         path_model = "/mnt/xprun/out/"
+        path_wandb = "/mnt/xprun/wandb/"
         xp_name = os.environ['XPRUN_NAME']
+    else:
+        local = True
+        path_temp = '../temp/'
+        path_model = '../Models/'
+        path_wandb = '../wandb/'
+        xp_name = "local_test"
 
     if cuda:
         device = torch.device('cuda')
