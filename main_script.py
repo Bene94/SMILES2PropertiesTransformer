@@ -111,7 +111,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
         epoch_start = 0
 
-    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=xp_name)
+    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="must", id=xp_name)
     wandb.watch(model)
 
     ## train model
