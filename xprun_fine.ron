@@ -1,5 +1,5 @@
 XpV0(
-    project: "NNgamma",
+    project: "GNN_FT",
     containers: {
         "main": (
             command: ["python", "fine_tune_step.py"],

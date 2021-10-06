@@ -1,5 +1,5 @@
 XpV0(
-    project: "NNgamma",
+    project: "GNN_T",
     containers: {
         "main": (
             command: ["python", "main_script.py"],
