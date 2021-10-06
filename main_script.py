@@ -88,7 +88,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     print('Loading Data...')
     print('-' * 89)
 
-    training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test)
+    training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=test)
 
     model = minGPT.GPT(config)
     model = model.to(config.device)

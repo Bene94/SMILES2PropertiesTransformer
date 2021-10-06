@@ -87,6 +87,9 @@ def load_data(config,local = False,test = False):
         val_1_dataset.train_data = val_1_dataset.train_data[0:2]
         val_1_dataset.train_target = val_1_dataset.train_target[0:2]
 
+        val_2_dataset.train_data = val_2_dataset.train_data[0:2]
+        val_2_dataset.train_target = val_2_dataset.train_target[0:2]
+
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     val_0_data = DataLoader(val_0_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
