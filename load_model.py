@@ -48,7 +48,7 @@ if __name__ == '__main__':
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
-    calc = True
+    calc = False
 
     if calc:
         #model to devide
@@ -70,24 +70,10 @@ if __name__ == '__main__':
         val_1_dataset = gamma_dataset(data_path, 'val_1', config)
         val_2_dataset = gamma_dataset(data_path, 'val_2', config)
 
-        dataset = gamma_dataset(data_path, '', config)
-
-
-        x = 100
-
-        if False:
-            train_dataset.train_data = train_dataset.train_data[:]
-            train_dataset.train_target = train_dataset.train_target[:]
-
-            val_dataset.train_data = val_dataset.train_data[:]
-            val_dataset.train_target = val_dataset.train_target[:]
-
         training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
         val_0_data = DataLoader(val_0_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
         val_1_data = DataLoader(val_1_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
         val_2_data = DataLoader(val_2_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
-
-
 
         print('-' * 89)
         print('Calculating Traning...')
@@ -146,16 +132,22 @@ if __name__ == '__main__':
     make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
     make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
 
-    print('-' * 89)
-    print('Make Scatter...')
-    print('-' * 89)
+
 
     make_heatmap(train_out, train_target, name = "train", save = True)
     make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
     make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)
     make_heatmap(val_2_out, val_2_target, name = "val_2", save = True)
 
+    make_historgam_delta(train_out, train_target, name = "train", save = True)
+    make_historgam_delta(val_0_out, val_0_target, name = "val_0", save = True)
+    make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True)
+    make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True)
+
     if len(train_out) < 10000:
+        print('-' * 89)
+        print('Make Scatter...')
+        print('-' * 89)
         # concatenate the resutls
         train_out = np.concatenate((train_out, val_0_out, val_1_out), axis=0)
         train_target = np.concatenate((train_target, val_0_target, val_1_target), axis=0)

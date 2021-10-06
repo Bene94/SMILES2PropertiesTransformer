@@ -10,6 +10,7 @@ Models/**
 Input_Reduced/**
 data_*
 data/*
+plot/*
 
 heat_*
 val_*

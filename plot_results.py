@@ -25,6 +25,22 @@ def make_histogram(prediciton, target, name, path):
     plt.title(name)
     plt.savefig(path + 'plot/hist_' + name)
 
+def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
+
+    MSE = np.around(np.mean( (target - prediciton)**2 ),2)
+    MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
+
+    delta = target - prediciton
+    weights = np.ones_like(delta)/float(len(delta))
+    plt.clf()
+    plt.hist(delta, bins=21, alpha=0.5, label='delta', range=(-2,2), weights=weights)
+    plt.ylabel('count')
+    plt.xlabel('delta ln g')
+    plt.xlim(-2,2)
+    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
+    plt.savefig(path + 'plot/hist_delta_' + name)
+
+
 def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
@@ -36,10 +52,11 @@ def make_heatmap(prediciton, target, name = '', path = '', save=False):
     plt.xlim(-20,20)
     plt.ylim(-20,20)
     plt.colorbar()
-    # set title to RMSE of the prediction scientific notation two decimal places
 
-    RMSE = np.around(np.mean( np.sqrt((target - prediciton)**2 )),2)
-    plt.title('RMSE: ' + str(RMSE))
+    MSE = np.around(np.mean( (target - prediciton)**2 ),2)
+    MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
+    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
+    
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
     plt.savefig(path + 'plot/heat_' + name)
@@ -55,8 +72,10 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
     plt.scatter(target, prediciton, c=colors, s=1)
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
-    RMSE = np.around(np.sqrt(((target - prediciton)**2).mean()),2)
-    plt.title('RMSE: ' + str(RMSE))
+    
+    MSE = np.around(np.mean( (target - prediciton)**2 ),2)
+    MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
+    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
 
     if save:
         plt.savefig(path + 'plot/scatter_' + name)
