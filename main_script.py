@@ -92,7 +92,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=test)
 
     # see if file with name xp_name exists
-    if os.path.isfile(path_temp + xp_name + 'epoch.pkl'):
+    if os.path.isfile(path_temp + config.xp_name + '_epoch.pkl'):
         model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
         model = model.to(config.device)
 
