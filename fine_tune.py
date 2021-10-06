@@ -22,7 +22,7 @@ from config import *
 @click.command()
 
 @click.option('--model_name', default='211004-141758', help='Name of the model')
-@click.option('--data_path', default='data/data_exp', help='Path to the data')
+@click.option('--data_path', default='data_exp', help='Path to the data')
 
 @click.option('--batch_size', default=32, help='Batch size')
 @click.option('--epochs', default=5, help='Number of epochs')
