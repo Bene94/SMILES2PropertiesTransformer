@@ -180,7 +180,7 @@ def save_checkpoint(model, config, epoch, optimizer, scheduler):
         pickle.dump(config, f)
     # save optimizer state dict with pickle
     with open(path + config.xp_name + '_optimizer.pkl', 'wb') as f:
-        pickle.dump(optimizer, f)
+        pickle.dump(optimizer.state_dict(), f)
     # save scheduler state dict with pickle
     with open(path + config.xp_name + '_scheduler.pkl', 'wb') as f:
         pickle.dump(scheduler, f)
@@ -199,7 +199,8 @@ def load_checkpoint(config):
     with open(path + config.xp_name + '.pkl', 'rb') as f:
         config = pickle.load(f)
     with open(path + config.xp_name + '_optimizer.pkl', 'rb') as f:
-        optimizer = pickle.load(f)
+        optimizer = nn.optim.Adam(model.parameters(), lr=config.lr)
+        optimizer.load_state_dict(pickle.load(f))
     with open(path + config.xp_name + '_scheduler.pkl', 'rb') as f:
         scheduler = pickle.load(f)
     with open(path + config.xp_name + '_epoch.pkl', 'rb') as f:
