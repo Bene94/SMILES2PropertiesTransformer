@@ -1,6 +1,7 @@
 import datetime
 import pickle
 import os
+from six import with_metaclass
 
 import torch
 import torch.nn as nn
@@ -90,35 +91,37 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
 
     training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=test)
 
-    model = minGPT.GPT(config)
-    model = model.to(config.device)
-    config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    
-    wandb.init(project='GNN_001', entity='bene94', name=name, config=config)
-    wandb.watch(model)
+    # see if file with name xp_name exists
+    if os.path.isfile(path_temp + xp_name + '.pth'):
+        model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
+        model = model.to(config.device)
+        wandb.init(id=xp_name)
+        wandb.watch(model)
 
+    else:
+        model = minGPT.GPT(config)
+        model = model.to(config.device)
+        config.params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        
+        optimizer = model.configure_optimizers(config)
 
-    ## set up scheduler
-    optimizer = model.configure_optimizers(config)
+        ## set up scheduler
+        total_steps = len(training_data) * config.epoch
+        min_lr = config.lr / config.warmup_lr
+        warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
+        first_cycle_steps = int(total_steps / config.warmup_cycle)
+        scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
 
-    total_steps = len(training_data) * config.epoch
-    min_lr = config.lr / config.warmup_lr
-    warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
-    first_cycle_steps = int(total_steps / config.warmup_cycle)
-    
-    scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
+        wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=xp_name)
+        wandb.watch(model)
+
+        epoch_start = 0
 
     ## train model
     best_val_loss = float("inf")
     best_model = None
 
     overall_start_time = time.time()
-
-    # see if file with name xp_name exists
-    if os.path.isfile(path_temp + xp_name + '.pth'):
-        model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
-    else:
-        epoch_start = 0
 
 
     for epoch in range(epoch_start, config.epoch + 1):
@@ -167,7 +170,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, local, max_
     delete_checkpoint(config)
 
     
-def save_checkpoint(model, config, epoch, optimizer, scheduler):
+def save_checkpoint(model, config, epoch, optimizer, scheduler, wandb=None):
     """
     Saves model checkpoint.
     """
@@ -183,9 +186,11 @@ def save_checkpoint(model, config, epoch, optimizer, scheduler):
     # save scheduler state dict with pickle
     with open(path + config.xp_name + '_scheduler.pkl', 'wb') as f:
         pickle.dump(scheduler, f)
-    # save epoch with pickle
-    with open(path + config.xp_name + '_epoch.pkl', 'wb') as f:
+    with open (path + config.xp_name + '_epoch.pkl', 'wb') as f:
         pickle.dump(epoch, f)
+    if wandb is not None:
+        pickle.dump(wandb, open(path + config.xp_name + '_wandb.pkl', 'wb'))
+
 
 def load_checkpoint(config):
     """
@@ -203,7 +208,9 @@ def load_checkpoint(config):
         scheduler = pickle.load(f)
     with open(path + config.xp_name + '_epoch.pkl', 'rb') as f:
         epoch = pickle.load(f)
-    return model, config, optimizer, scheduler, epoch
+    with open(path + config.xp_name + '_wandb.pkl', 'rb') as f:
+        wandb = pickle.load(f)
+    return model, config, optimizer, scheduler, epoch, wandb
 
 def delete_checkpoint(config):
     """
