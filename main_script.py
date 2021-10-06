@@ -179,10 +179,10 @@ def save_checkpoint(model, config, epoch, optimizer, scheduler):
         pickle.dump(config, f)
     # save optimizer state dict with pickle
     with open(path + config.xp_name + '_optimizer.pkl', 'wb') as f:
-        pickle.dump(optimizer.state_dict(), f)
+        pickle.dump(optimizer, f)
     # save scheduler state dict with pickle
     with open(path + config.xp_name + '_scheduler.pkl', 'wb') as f:
-        pickle.dump(scheduler.state_dict(), f)
+        pickle.dump(scheduler, f)
     # save epoch with pickle
     with open(path + config.xp_name + '_epoch.pkl', 'wb') as f:
         pickle.dump(epoch, f)
