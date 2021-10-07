@@ -5,13 +5,18 @@ from plot_results import *
 
 # load data
 
-name = '211003-111953'
+name = '211004-141758'
 
 val_loss_array = np.load('../temp/'+ 'val_loss_array_' + name + '.npy', allow_pickle=True)
 val_prediction_array = np.load('../temp/'+ 'val_prediction_array_' + name + '.npy', allow_pickle=True)
 val_target_array = np.load('../temp/'+ 'val_target_array_' + name + '.npy', allow_pickle=True)
 
-val_prediction_array = val_prediction_array.squeeze()
-val_target_array = val_target_array.squeeze()
+mean_loss = np.mean(val_loss_array, axis=0)
 
-make_scatter(val_prediction_array, val_target_array, '', save=True)
+print(mean_loss)
+
+val_prediction_array = val_prediction_array[:,-1]
+val_target_array = val_target_array[:,-1]
+
+make_scatter(val_prediction_array, val_target_array, 'EXP', save=True)
+make_historgam_delta(val_prediction_array, val_target_array, 'EXP', save=True)

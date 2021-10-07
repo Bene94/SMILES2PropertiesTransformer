@@ -48,7 +48,8 @@ if __name__ == '__main__':
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
-    calc = False
+    calc = True
+    save = False
 
     if calc:
         #model to devide
@@ -58,7 +59,7 @@ if __name__ == '__main__':
         criterion = nn.MSELoss()
 
         data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
-        #data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
+        data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
         #data_path = os.path.join('/home/bene/NNGamma/data/data_no_tail/')
 
         print('-' * 89)
@@ -105,17 +106,18 @@ if __name__ == '__main__':
         print("Validation loss: ", val_2_loss)
 
 
-        # save the results to a file
-        np.save(save_path + 'train_out.npy', train_out)
-        np.save(save_path + 'train_target.npy', train_target)
+        if save:
+            # save the results to a file
+            np.save(save_path + 'train_out.npy', train_out)
+            np.save(save_path + 'train_target.npy', train_target)
 
 
-        np.save(save_path + 'val_0_out.npy', val_0_out)
-        np.save(save_path + 'val_0_target.npy', val_0_target)
-        np.save(save_path + 'val_1_out.npy', val_1_out)
-        np.save(save_path + 'val_1_target.npy', val_1_target)
-        np.save(save_path + 'val_2_out.npy', val_2_out)
-        np.save(save_path + 'val_2_target.npy', val_2_target)
+            np.save(save_path + 'val_0_out.npy', val_0_out)
+            np.save(save_path + 'val_0_target.npy', val_0_target)
+            np.save(save_path + 'val_1_out.npy', val_1_out)
+            np.save(save_path + 'val_1_target.npy', val_1_target)
+            np.save(save_path + 'val_2_out.npy', val_2_out)
+            np.save(save_path + 'val_2_target.npy', val_2_target)
 
     else:
 
