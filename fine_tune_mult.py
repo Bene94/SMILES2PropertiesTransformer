@@ -91,8 +91,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
 
         model, config = load_model(path_model,model_name)
         model = model.to(config.device)
+        wandb.watch(model)
 
-            ## set up scheduler
+        ## set up scheduler
         criterion = nn.MSELoss()
 
         optimizer = model.configure_optimizers(config)
