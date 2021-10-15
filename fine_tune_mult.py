@@ -98,7 +98,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
 
 
     for i in range(0,outer_loop):
-        
+
+        model, config = load_model(path_model,model_name)
+        model = model.to(config.device)
         
         training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=False)
 
