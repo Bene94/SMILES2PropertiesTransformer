@@ -46,7 +46,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         xp_name = os.environ['XPRUN_NAME']
     else:
         local = True
-        path_temp = '../temp/'
+        path_temp = '../out_fine_tuen/'
         path_model = '../Models/'
         path_wandb = '../wandb/'
         xp_name = "local_test"
@@ -89,7 +89,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
 
     for i in range(0,outer_loop):
 
-        model, config = load_model(path_model,model_name)
+        model, __ = load_model(path_model,model_name)
         model = model.to(config.device)
         wandb.watch(model)
 
@@ -104,6 +104,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
 
         epoch_start = 0
         
+        config.data_path = data_path + '/'  + str(i)
         training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=False)
 
         for epoch in range(epoch_start, config.epoch):
@@ -135,14 +136,14 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         wandb.log({"I": i})
     
 
-        np.save(path_temp + 'val_prediction_array_0' + name + '.npy', val_predction_0)
-        np.save(path_temp + 'val_target_array_0' + name + '.npy', val_target_0)
+    np.save(path_temp + 'val_prediction_array_0_' + name + '.npy', val_predction_0)
+    np.save(path_temp + 'val_target_array_0' + name + '.npy', val_target_0)
 
-        np.save(path_temp + 'val_prediction_array_1' + name + '.npy', val_predction_1)
-        np.save(path_temp + 'val_target_array_1' + name + '.npy', val_target_1)
+    np.save(path_temp + 'val_prediction_array_1' + name + '.npy', val_predction_1)
+    np.save(path_temp + 'val_target_array_1' + name + '.npy', val_target_1)
 
-        np.save(path_temp + 'val_prediction_array_2' + name + '.npy', val_predction_2)
-        np.save(path_temp + 'val_target_array_2' + name + '.npy', val_target_2)
+    np.save(path_temp + 'val_prediction_array_2' + name + '.npy', val_predction_2)
+    np.save(path_temp + 'val_target_array_2' + name + '.npy', val_target_2)
         
 
 if __name__ == '__main__':
