@@ -31,7 +31,7 @@ from config import *
 
 @click.option('--cuda', default=True, help='Use cuda')
 
-@click.option('--mult', default=100, help='Uses multibel val/train splits')
+@click.option('--mult', default=200, help='Uses multibel val/train splits')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult):
