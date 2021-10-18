@@ -303,6 +303,7 @@ def argument_data(df,alias_path):
     bar = pb.ProgressBar(maxval=len(df), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
     bar.start()
     for i in range(len(df)):
+        print(str(i) + " / " + str(len(df)))
         bar.update(i)
         solute_alias = alias_dict[df['solute'].iloc[i]]
         solvent_alias = alias_dict[df['solvent'].iloc[i]]
