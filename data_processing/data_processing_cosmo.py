@@ -34,10 +34,12 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
         file_path = "/mnt/xprun/" + file_path + "/"
         file_out = "/mnt/xprun/" + save_path
         vocab_path = "/mnt/xprun/" + vocab_path + "/"
+        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
     else:
         file_path = "../" + file_path + "/"
         file_out = "../" + save_path
         vocab_path = "../" + vocab_path + "/"
+        alias_path = '../raw_data/alias/alias_dict.npy'
     
 
 
@@ -80,10 +82,10 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
                 seed = seed + 200
 
         if aug:
-            df_train =   argument_data(df_train)
-            df_val_0 =   argument_data(df_val_0)
-            df_val_1 =   argument_data(df_val_1)
-            df_val_2 =   argument_data(df_val_2)
+            df_train =   argument_data(df_train, alias_path)
+            df_val_0 =   argument_data(df_val_0, alias_path)
+            df_val_1 =   argument_data(df_val_1, alias_path)
+            df_val_2 =   argument_data(df_val_2, alias_path)
 
         df_train_joined = join_input_data_exp(df_train, vocab_dict)
         df_val_0_joined = join_input_data_exp(df_val_0, vocab_dict)
@@ -292,9 +294,9 @@ def join_input_data_exp(df_val_1, vocab_dict):
 
     return df_joined
 
-def argument_data(df):
+def argument_data(df,alias_path):
 
-    alias_dict = np.load('../raw_data/alias/alias_dict.npy', allow_pickle=True).item()
+    alias_dict = np.load(alias_path, allow_pickle=True).item()
 
     df_new = pd.DataFrame()
 
