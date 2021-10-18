@@ -8,7 +8,6 @@ TrainingData_red/**
 Data_no_tail/*
 Models/**
 Input_Reduced/**
-data_*
 data/*
 plot/*
 
