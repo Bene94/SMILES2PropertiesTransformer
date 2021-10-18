@@ -1,5 +1,5 @@
 XpV0(
-    project: "GNN_T",
+    project: "data_processing",
     containers: {
         "main": (
             command: ["python", "data_processing/data_processing_cosmo.py"],
@@ -20,6 +20,7 @@ XpV0(
             volumes: 
                 {"/home/bene/NNGamma/data": "/mnt/xprun", 
                 "/home/bene/NNGamma/raw_data": "/mnt/xprun/raw_data",
+                "/home/bene/NNGamma/vocab": "/mnt/xprun/vocab",
                 "/home/bene/NNGamma/Models": "/mnt/xprun/out",
                 "/home/bene/NNGamma/Plot": "/mnt/xprun/plot",
                 "/home/bene/NNGamma/temp": "/mnt/xprun/temp",
