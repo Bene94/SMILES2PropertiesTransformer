@@ -301,6 +301,7 @@ def argument_data(df,alias_path):
     df_new = pd.DataFrame()
 
     bar = pb.ProgressBar(maxval=len(df), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
+    bar.start()
     for i in range(len(df)):
         bar.update(i)
         solute_alias = alias_dict[df['solute'].iloc[i]]
