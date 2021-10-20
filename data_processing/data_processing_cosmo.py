@@ -81,34 +81,67 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
             else:
                 seed = seed + 200
 
+
+
         if aug:
-            df_train =   argument_data(df_train, alias_path)
-            df_val_0 =   argument_data(df_val_0, alias_path)
-            df_val_1 =   argument_data(df_val_1, alias_path)
-            df_val_2 =   argument_data(df_val_2, alias_path)
 
-        df_train_joined = join_input_data_exp(df_train, vocab_dict)
-        df_val_0_joined = join_input_data_exp(df_val_0, vocab_dict)
-        df_val_1_joined = join_input_data_exp(df_val_1, vocab_dict)
-        df_val_2_joined = join_input_data_exp(df_val_2, vocab_dict)
+            # make batches of dfs
+            df_train_batches = make_batches(df_train, 3000)
+            df_val_0_batches = make_batches(df_val_0, 3000)
+            df_val_1_batches = make_batches(df_val_1, 3000)
+            df_val_2_batches = make_batches(df_val_2, 3000)
 
-    # apply vocab
-    print("Applying Vocab")
-    df_train_joined = apply_vocab(df_train_joined, vocab_dict, ul, ll)
-    df_val_0_joined = apply_vocab(df_val_0_joined, vocab_dict, ul, ll)
-    df_val_1_joined = apply_vocab(df_val_1_joined, vocab_dict, ul, ll)
-    df_val_2_joined = apply_vocab(df_val_2_joined, vocab_dict, ul, ll)
-    
-    #save batches
-    print("Saving Batches")
-    batches = make_batches(df_train_joined, 100000)
-    save_batches(batches, file_out, "train")
-    batches = make_batches(df_val_0_joined, 100000)
-    save_batches(batches, file_out, "val_0")
-    batches = make_batches(df_val_1_joined, 100000)
-    save_batches(batches, file_out, "val_1")
-    batches = make_batches(df_val_2_joined, 100000)
-    save_batches(batches, file_out, "val_2")
+            for i in range(len(df_train_batches)):
+                print("Processing batch train: ", i, "/", len(df_train_batches), end="\r")
+                df_train_batches[i] = argument_data(df_train_batches[i], alias_path)
+                df_train_batches[i] = join_input_data_exp(df_train_batches[i], vocab_dict)
+                df_train_batches[i] = apply_vocab(df_train_batches[i], vocab_dict, ul, ll)
+            save_batches(df_train_batches, file_out, "train")
+           
+            for i in range(len(df_val_0_batches)):
+                print("Processing batch val0: ", i, "/", len(df_val_0_batches), end="\r")
+                df_val_0_batches[i] = argument_data(df_val_0_batches[i], alias_path)
+                df_val_0_batches[i] = join_input_data_exp(df_val_0_batches[i], vocab_dict)
+                df_val_0_batches[i] = apply_vocab(df_val_0_batches[i], vocab_dict, ul, ll)
+            save_batches(df_val_0_batches, file_out, "val_0")
+            
+            for i in range(len(df_val_1_batches)):
+                print("Processing batch val1: ", i, "/", len(df_val_1_batches), end="\r")
+                df_val_1_batches[i] = argument_data(df_val_1_batches[i], alias_path)
+                df_val_1_batches[i] = join_input_data_exp(df_val_1_batches[i], vocab_dict)
+                df_val_1_batches[i] = apply_vocab(df_val_1_batches[i], vocab_dict, ul, ll)
+            save_batches(df_val_1_batches, file_out, "val_1")
+            
+            for i in range(len(df_val_2_batches)):
+                print("Processing batch val2: ", i, "/", len(df_val_2_batches), end="\r")
+                df_val_2_batches[i] = argument_data(df_val_2_batches[i], alias_path)
+                df_val_2_batches[i] = join_input_data_exp(df_val_2_batches[i], vocab_dict)
+                df_val_2_batches[i] = apply_vocab(df_val_2_batches[i], vocab_dict, ul, ll)
+                save_batches(df_val_2_batches, file_out, "val_2")
+
+        else:
+            df_train_joined = join_input_data_exp(df_train, vocab_dict)
+            df_val_0_joined = join_input_data_exp(df_val_0, vocab_dict)
+            df_val_1_joined = join_input_data_exp(df_val_1, vocab_dict)
+            df_val_2_joined = join_input_data_exp(df_val_2, vocab_dict)
+
+            # apply vocab
+            print("Applying Vocab")
+            df_train_joined = apply_vocab(df_train_joined, vocab_dict, ul, ll)
+            df_val_0_joined = apply_vocab(df_val_0_joined, vocab_dict, ul, ll)
+            df_val_1_joined = apply_vocab(df_val_1_joined, vocab_dict, ul, ll)
+            df_val_2_joined = apply_vocab(df_val_2_joined, vocab_dict, ul, ll)
+
+            #save batches
+            print("Saving Batches")
+            batches = make_batches(df_train_joined, 100000)
+            save_batches(batches, file_out, "train")
+            batches = make_batches(df_val_0_joined, 100000)
+            save_batches(batches, file_out, "val_0")
+            batches = make_batches(df_val_1_joined, 100000)
+            save_batches(batches, file_out, "val_1")
+            batches = make_batches(df_val_2_joined, 100000)
+            save_batches(batches, file_out, "val_2")
 
 
 def load_exp_data(path):
@@ -300,11 +333,10 @@ def argument_data(df,alias_path):
 
     df_new = pd.DataFrame()
 
-    bar = pb.ProgressBar(maxval=len(df), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
-    bar.start()
+    #bar = pb.ProgressBar(maxval=len(df), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
+    #bar.start()
     for i in range(len(df)):
-        print(str(i) + " / " + str(len(df)))
-        bar.update(i)
+        #bar.update(i)
         solute_alias = alias_dict[df['solute'].iloc[i]]
         solvent_alias = alias_dict[df['solvent'].iloc[i]]
         temp_df = df.iloc[i:i+len(solute_alias)*len(solvent_alias)].copy()
@@ -320,13 +352,13 @@ def argument_data(df,alias_path):
 
 def apply_vocab(df, vocab_dict, ul, ll):
     # apply the vocab to the dataframe and padd the data
-    bar = pb.ProgressBar(maxval=df.shape[0], widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
+    #bar = pb.ProgressBar(maxval=df.shape[0], widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
     temp = np.zeros([df.shape[0], 128])
     remove_index = []
     padd_char = list(vocab_dict.keys())[0]
-    bar.start()
+    #bar.start()
     for i in range(df.shape[0]):
-        bar.update(i)
+        #bar.update(i)
         # if data longer than 128 chars then add to remove index
         if len(df.iloc[i][0]) > 128:
             remove_index.append(i)
