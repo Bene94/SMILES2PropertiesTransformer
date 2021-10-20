@@ -339,7 +339,7 @@ def argument_data(df,alias_path):
         #bar.update(i)
         solute_alias = alias_dict[df['solute'].iloc[i]]
         solvent_alias = alias_dict[df['solvent'].iloc[i]]
-        temp_df = df.iloc[i:i+len(solute_alias)*len(solvent_alias)].copy()
+        temp_df = df.iloc[0:1+len(solute_alias)*len(solvent_alias)].copy()
         for j in range(len(solute_alias)):
             for k in range(len(solvent_alias)):
                 # add all cominations of solute and solvent to the dataframe
