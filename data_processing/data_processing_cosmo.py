@@ -343,9 +343,9 @@ def argument_data(df,alias_path):
         for j in range(len(solute_alias)):
             for k in range(len(solvent_alias)):
                 # add all cominations of solute and solvent to the dataframe
-                temp_df.iloc[j*len(solvent_alias) + k,0] = list(solute_alias)[j]
-                temp_df.iloc[j*len(solvent_alias) + k,1] = list(solvent_alias)[k]
-                temp_df.iloc[j*len(solvent_alias) + k,2] = df['lnGamma'].iloc[i]
+                temp_df.iloc[j*len(solvent_alias) + k, 0] = list(solute_alias)[j]
+                temp_df.iloc[j*len(solvent_alias) + k, 1] = list(solvent_alias)[k]
+                temp_df.iloc[j*len(solvent_alias) + k, 2] = df['lnGamma'].iloc[i]
             
         df_new = df_new.append(temp_df)
     return df_new

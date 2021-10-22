@@ -1,5 +1,4 @@
 import torch
-from torch.utils.data import DataLoader
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 import os

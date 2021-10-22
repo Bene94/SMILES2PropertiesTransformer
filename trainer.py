@@ -14,7 +14,7 @@ from torch.nn.modules import activation
 
 
 
-def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb):
+def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, scheduler, epoch, wandb):
     
     model.train() # Turn on the train mode
     total_loss = 0.
@@ -30,6 +30,13 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
     scaler = GradScaler(init_scale=8192) 
 
     n_steps = len(train_dataloader)
+
+    iter_val_dataloader_list  = []
+    val_step = []  
+    for i in range(len(val_dataloader_list)):
+        iter_val_dataloader_list.append(iter(val_dataloader_list[i]))
+        val_step.append(int(np.ceil(len(train_dataloader) /len(val_dataloader_list[i]))))
+
 
     for i, batch in enumerate(train_dataloader):
         
@@ -91,6 +98,38 @@ def train(model, criterion, optimizer, train_dataloader, scheduler, epoch, wandb
                     cur_loss))
             total_loss = 0
             start_time = time.time()
+
+        # check if we should validate run validation
+        for h , step in enumerate(val_step):
+            if i % step == 0 and i > 0:
+                with torch.no_grad():
+                    val_loss = 0.
+                    batch = next(iter_val_dataloader_list[h])
+                    data_batch, target_batch = batch[0], batch[1]
+                    data_chunks = torch.split(data_batch,chunk_size)
+                    target_chunks = torch.split(target_batch,chunk_size)
+                        
+                    for j, data in enumerate(data_chunks):
+                
+                        target = target_chunks[j]
+
+                        data = data.to(config.device)
+                        target = target.to(config.device)
+                        
+                        if config.mode == 'reg':
+                            data = data.type(torch.IntTensor).to(config.device)
+                            target = target.type(torch.FloatTensor).to(config.device)
+                            target = target.view((target.shape[0],1,1))
+                        else:
+                            target = target.type(torch.LongTensor).to(config.device)
+                        output = model(data)
+                        val_loss += criterion(output.squeeze(), target.squeeze()).item()/len(data_chunks)
+                    val_log_name = 'val_' + str(h) + '_loss'
+                    wandb.log({val_log_name : val_loss})
+
+
+            
+
 
 def evaluate(eval_model, val_dataloader, criterion, config):
     eval_model.eval() # Turn on the evaluation mode

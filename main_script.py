@@ -41,7 +41,7 @@ from config import *
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 
-@click.option('--set', default='data', help='Location of dataset')
+@click.option('--set', default='data/data_aug/', help='Location of dataset')
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
@@ -117,7 +117,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, max_btch, c
         config.id = wandb.util.generate_id()
 
     
-    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=config.id, dir=path_wandb)
+    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=config.id)
     wandb.watch(model)
 
     ## train model
@@ -126,38 +126,38 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, max_btch, c
 
     overall_start_time = time.time()
 
-
+    val_data_list = []
+    val_data_list.append(val_0_data) 
+    val_data_list.append(val_1_data)
+    val_data_list.append(val_2_data)
+    
     for epoch in range(epoch_start, config.epoch + 1):
 
         epoch_start_time = time.time()
 
-        train(model, criterion, optimizer, training_data, scheduler, epoch, wandb)
+        train(model, criterion, optimizer, training_data, val_data_list, scheduler, epoch, wandb)
 
         torch.cuda.empty_cache()
-
-        val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
-        wandb.log({"val_0_loss": val_loss})
-        val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
-        wandb.log({"val_1_loss": val_loss})
-        val_loss, val_out, val_target = evaluate(model, val_2_data, criterion, config)
-        wandb.log({"val_2_loss": val_loss})
-
-        print('-' * 89)
-        print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
-            .format(epoch, (time.time() - epoch_start_time),
-                                        val_loss))
-        print('-' * 89)
-        
-        
-
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_model = model
 
         # save checkpoint to resume training
         save_checkpoint(model, config, epoch, optimizer, scheduler)
 
-            
+
+    val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
+    wandb.log({"val_0_loss": val_loss})
+    val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
+    wandb.log({"val_1_loss": val_loss})
+    val_loss, val_out, val_target = evaluate(model, val_2_data, criterion, config)
+    wandb.log({"val_2_loss": val_loss})
+
+    print('-' * 89)
+    print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
+        .format(epoch, (time.time() - epoch_start_time),
+                                    val_loss))
+    print('-' * 89)
+        
+    best_model = model  
+
     ## End Training
 
     print('-' * 89)
