@@ -108,7 +108,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, max_btch, c
         ## set up scheduler
         total_steps = len(training_data) * config.epoch
         min_lr = config.lr / config.warmup_lr
-        warumup_steps = int(total_steps * config.warmup_epochs / config.epoch)
+        warumup_steps = int(total_steps * (config.warmup_epochs / config.epoch) +1)
         first_cycle_steps = int(total_steps / config.warmup_cycle)
         scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
 
