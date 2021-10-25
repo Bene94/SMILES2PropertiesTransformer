@@ -12,14 +12,14 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="raw_data/cosmo_002", help='Location of raw data')
-@click.option('--save_path', default="data/data_aug/", help='Location of output data')
+@click.option('--file_path', default="raw_data/cosmo_002_x", help='Location of raw data')
+@click.option('--save_path', default="data/data_x/", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
 @click.option('--frac', default=0.2, help='fraction of data to be used for testing and validation')
 @click.option('--cosmo', default="exp", help='is loaded data from cosmo or form experiments')
-@click.option('--aug', default=True, help='augment the smile data')
+@click.option('--aug', default=False, help='augment the smile data')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
 
 def main(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed):
@@ -28,8 +28,6 @@ def main(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed):
 
 def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed):
     
-
-
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/" + file_path + "/"
         file_out = "/mnt/xprun/" + save_path
@@ -83,66 +81,43 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
 
 
 
-        if aug:
+        # make batches of dfs
+        df_train_batches = make_batches(df_train, 30000)
+        df_val_0_batches = make_batches(df_val_0, 30000)
+        df_val_1_batches = make_batches(df_val_1, 30000)
+        df_val_2_batches = make_batches(df_val_2, 30000)
 
-            # make batches of dfs
-            df_train_batches = make_batches(df_train, 3000)
-            df_val_0_batches = make_batches(df_val_0, 3000)
-            df_val_1_batches = make_batches(df_val_1, 3000)
-            df_val_2_batches = make_batches(df_val_2, 3000)
-
-            for i in range(len(df_train_batches)):
-                print("Processing batch train: ", i, "/", len(df_train_batches), end="\r")
+        for i in range(len(df_train_batches)):
+            print("Processing batch train: ", i, "/", len(df_train_batches), end="\r")
+            if aug:
                 df_train_batches[i] = argument_data(df_train_batches[i], alias_path)
-                df_train_batches[i] = join_input_data_exp(df_train_batches[i], vocab_dict)
-                df_train_batches[i] = apply_vocab(df_train_batches[i], vocab_dict, ul, ll)
-            save_batches(df_train_batches, file_out, "train")
-           
-            for i in range(len(df_val_0_batches)):
-                print("Processing batch val0: ", i, "/", len(df_val_0_batches), end="\r")
+            df_train_batches[i] = join_input_data_exp(df_train_batches[i], vocab_dict)
+            df_train_batches[i] = apply_vocab(df_train_batches[i], vocab_dict, ul, ll)
+        save_batches(df_train_batches, file_out, "train")
+    
+        for i in range(len(df_val_0_batches)):
+            print("Processing batch val0: ", i, "/", len(df_val_0_batches), end="\r")
+            if aug:
                 df_val_0_batches[i] = argument_data(df_val_0_batches[i], alias_path)
-                df_val_0_batches[i] = join_input_data_exp(df_val_0_batches[i], vocab_dict)
-                df_val_0_batches[i] = apply_vocab(df_val_0_batches[i], vocab_dict, ul, ll)
-            save_batches(df_val_0_batches, file_out, "val_0")
-            
-            for i in range(len(df_val_1_batches)):
-                print("Processing batch val1: ", i, "/", len(df_val_1_batches), end="\r")
+            df_val_0_batches[i] = join_input_data_exp(df_val_0_batches[i], vocab_dict)
+            df_val_0_batches[i] = apply_vocab(df_val_0_batches[i], vocab_dict, ul, ll)
+        save_batches(df_val_0_batches, file_out, "val_0")
+        
+        for i in range(len(df_val_1_batches)):
+            print("Processing batch val1: ", i, "/", len(df_val_1_batches), end="\r")
+            if aug:
                 df_val_1_batches[i] = argument_data(df_val_1_batches[i], alias_path)
-                df_val_1_batches[i] = join_input_data_exp(df_val_1_batches[i], vocab_dict)
-                df_val_1_batches[i] = apply_vocab(df_val_1_batches[i], vocab_dict, ul, ll)
-            save_batches(df_val_1_batches, file_out, "val_1")
-            
-            for i in range(len(df_val_2_batches)):
-                print("Processing batch val2: ", i, "/", len(df_val_2_batches), end="\r")
+            df_val_1_batches[i] = join_input_data_exp(df_val_1_batches[i], vocab_dict)
+            df_val_1_batches[i] = apply_vocab(df_val_1_batches[i], vocab_dict, ul, ll)
+        save_batches(df_val_1_batches, file_out, "val_1")
+        
+        for i in range(len(df_val_2_batches)):
+            print("Processing batch val2: ", i, "/", len(df_val_2_batches), end="\r")
+            if aug:
                 df_val_2_batches[i] = argument_data(df_val_2_batches[i], alias_path)
-                df_val_2_batches[i] = join_input_data_exp(df_val_2_batches[i], vocab_dict)
-                df_val_2_batches[i] = apply_vocab(df_val_2_batches[i], vocab_dict, ul, ll)
-                save_batches(df_val_2_batches, file_out, "val_2")
-
-        else:
-            df_train_joined = join_input_data_exp(df_train, vocab_dict)
-            df_val_0_joined = join_input_data_exp(df_val_0, vocab_dict)
-            df_val_1_joined = join_input_data_exp(df_val_1, vocab_dict)
-            df_val_2_joined = join_input_data_exp(df_val_2, vocab_dict)
-
-            # apply vocab
-            print("Applying Vocab")
-            df_train_joined = apply_vocab(df_train_joined, vocab_dict, ul, ll)
-            df_val_0_joined = apply_vocab(df_val_0_joined, vocab_dict, ul, ll)
-            df_val_1_joined = apply_vocab(df_val_1_joined, vocab_dict, ul, ll)
-            df_val_2_joined = apply_vocab(df_val_2_joined, vocab_dict, ul, ll)
-
-            #save batches
-            print("Saving Batches")
-            batches = make_batches(df_train_joined, 100000)
-            save_batches(batches, file_out, "train")
-            batches = make_batches(df_val_0_joined, 100000)
-            save_batches(batches, file_out, "val_0")
-            batches = make_batches(df_val_1_joined, 100000)
-            save_batches(batches, file_out, "val_1")
-            batches = make_batches(df_val_2_joined, 100000)
-            save_batches(batches, file_out, "val_2")
-
+            df_val_2_batches[i] = join_input_data_exp(df_val_2_batches[i], vocab_dict)
+            df_val_2_batches[i] = apply_vocab(df_val_2_batches[i], vocab_dict, ul, ll)
+            save_batches(df_val_2_batches, file_out, "val_2")
 
 def load_exp_data(path):
     #load the data from the experiment 
@@ -159,8 +134,8 @@ def load_exp_data(path):
     solvent_list = df['solvent'].unique()
     solute_list = df['solute'].unique()
 
-    solute_list.astype(str)
-    solvent_list.astype(str)    
+    solute_list = solute_list.astype(str)
+    solvent_list = solvent_list.astype(str)    
     #remove duplicates from solvent and solute list
     solvent_list = np.unique(solvent_list)
     solute_list = np.unique(solute_list)
@@ -322,6 +297,12 @@ def join_input_data_exp(df_val_1, vocab_dict):
     temp_df = pd.DataFrame()
     temp_df['SMILES'] = list(vocab_dict.keys())[1] + df_val_1.iloc[:,0] + list(vocab_dict.keys())[2] + df_val_1.iloc[:,1] + list(vocab_dict.keys())[3]
     temp_df['gamma'] = df_val_1.iloc[:,2]
+    
+    # check if field x or T exists and read that column
+    if 'x' in df_val_1.columns:
+        temp_df['x'] = df_val_1.iloc[:,3]
+    elif 'T' in df_val_1.columns:
+        temp_df['T'] = df_val_1.iloc[:,4]
 
     df_joined = df_joined.append(temp_df)
 
