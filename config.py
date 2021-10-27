@@ -41,5 +41,6 @@ class NN_config:
     bound: int
 
     shift: int
+    test: bool
 
     

@@ -50,7 +50,7 @@ class CausalSelfAttention(nn.Module):
 
         # causal self-attention; Self-attend: (B, nh, T, hs) x (B, nh, hs, T) -> (B, nh, T, T)
         att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
-        att = att.masked_fill(self.mask[:,:,:T,:T] == 0, float('-inf'))
+        #att = att.masked_fill(self.mask[:,:,:T,:T] == 0, float('-inf'))
         att = F.softmax(att, dim=-1)
         att = self.attn_drop(att)
         y = att @ v # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
@@ -91,6 +91,8 @@ class GPT(nn.Module):
         self.tok_emb = nn.Embedding(config.vocab_size, config.embed_size)
         self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.embed_size))
         self.drop = nn.Dropout(config.dropout)
+        # xT linear
+        self.xT_lin = nn.Linear(2, config.embed_size)
         # transformer
         self.blocks = nn.Sequential(*[Block(config) for _ in range(config.num_layers)])
         # decoder head
@@ -167,15 +169,21 @@ class GPT(nn.Module):
         optimizer = torch.optim.AdamW(optim_groups, lr=config.lr, betas=config.betas)
         return optimizer
 
-    def forward(self, idx, targets=None):
+    def forward(self, idx, xT, targets=None):
         b, t = idx.size()
-        assert t <= self.block_size, "Cannot forward, model block size is exhausted."
+        #assert t <= self.block_size, "Cannot forward, model block size is exhausted."
 
         # forward the GPT model
-        idx = idx.type(torch.cuda.IntTensor)
         token_embeddings = self.tok_emb(idx) # each index maps to a (learnable) vector
         position_embeddings = self.pos_emb[:, :t, :] # each position maps to a (learnable) vector
+        
+        xT = torch.unsqueeze(xT,1)
+        xT_proj = self.xT_lin(xT)
+        
+        #concat xT to token_embeddings
+
         x = self.drop(token_embeddings + position_embeddings)
+        x = torch.cat([x, xT_proj], dim=1)
         x = self.blocks(x)
         x = self.ln_f(x)
         x = torch.max(x, dim=1)[0]

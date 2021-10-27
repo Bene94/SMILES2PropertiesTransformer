@@ -117,7 +117,7 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
                 df_val_2_batches[i] = argument_data(df_val_2_batches[i], alias_path)
             df_val_2_batches[i] = join_input_data_exp(df_val_2_batches[i], vocab_dict)
             df_val_2_batches[i] = apply_vocab(df_val_2_batches[i], vocab_dict, ul, ll)
-            save_batches(df_val_2_batches, file_out, "val_2")
+        save_batches(df_val_2_batches, file_out, "val_2")
 
 def load_exp_data(path):
     #load the data from the experiment 
@@ -130,6 +130,9 @@ def load_exp_data(path):
         file_path = os.path.join(path, file)
         temp_df = pd.read_csv(file_path, sep=',', index_col=None)
         df = df.append(temp_df)
+
+    # remove all nan rows
+    df = df.dropna()
 
     solvent_list = df['solvent'].unique()
     solute_list = df['solute'].unique()
@@ -242,6 +245,9 @@ def load_data_test_val(folder_path, val_dict_0, val_dict_1):
         temp_df = pd.read_csv(file_path, sep=',', index_col=None)
         #add to validation set if colum 0 or 1 is in val_dict else add to training set
 
+
+
+
         temp_df_val_0 = temp_df.loc[(temp_df.iloc[:,0].isin(val_dict_0.keys())) & (temp_df.iloc[:,1].isin(val_dict_1.keys()))]
         temp_df_val_1 = temp_df.loc[(temp_df.iloc[:,0].isin(val_dict_0.keys())) ^ (temp_df.iloc[:,1].isin(val_dict_1.keys()))]
 
@@ -348,15 +354,24 @@ def apply_vocab(df, vocab_dict, ul, ll):
             text = df.iloc[i,0].ljust(128, padd_char)
             temp[i,:] = [vocab_dict [char] for char in text]
     
-    data = np.zeros([df.shape[0], 1])
-    data = np.array(df.iloc[:,1])
-    # make data an 2d array
-    data = data.reshape(data.shape[0],1)
-    #data = -data
-    # add data and temp to as single array
-    data = np.concatenate((data, temp), axis=1)
-    #negate data
     
+    target = np.array(df.iloc[:,1])
+
+    # check if field x or T exists
+    if 'x' in df.columns:
+        x = np.array(df['x'])
+    else:
+        x = np.zeros(df.shape[0])
+    if 'T' in df.columns:
+        T = np.array(df['T'])
+    else:
+        T = np.ones(df.shape[0]) * 298.15
+
+    # make data an 2d array
+    target = target.reshape(target.shape[0],1)
+
+    # add temp, target, x and T to a nested np array
+    data = np.concatenate((target, temp, x.reshape(x.shape[0],1), T.reshape(T.shape[0],1)), axis=1) 
     # remove the rows that are too long
     data = np.delete(data, remove_index, axis=0)
     # remove all data where gamma < -10 or > 10

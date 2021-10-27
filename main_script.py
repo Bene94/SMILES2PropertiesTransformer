@@ -41,7 +41,7 @@ from config import *
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 
-@click.option('--set', default='data/data_aug/', help='Location of dataset')
+@click.option('--data', default='data_x', help='Location of dataset')
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
@@ -50,7 +50,7 @@ from config import *
 @click.option('--shift', default=0, help='Shift the data')
 
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
     
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -83,8 +83,8 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, set, wdecay, max_btch, c
     config = NN_config(xp_name=xp_name, device=device, criterion=criterion, padding_idx=0, 
         vocab_size=vocab_size, block_size=128, embed_size=emb, hidden_factor=hid_fac, num_layers=nlay, 
         num_heads=nhead, dropout=drp, lr=lr, warmup_lr = warmup_lr, warmup_cycle=warmup_cycle, betas=[0.99 , 0.98],
-        weight_decay=wdecay, data_path=set, path_temp=path_temp, path_model=path_model, batch_size=btch, max_btch=max_btch, epoch=epo, warmup_epochs=warmup_epo, 
-        mode=mode, bins=bins, bound=20, shift=shift)
+        weight_decay=wdecay, data_path=data, path_temp=path_temp, path_model=path_model, batch_size=btch, max_btch=max_btch, epoch=epo, warmup_epochs=warmup_epo, 
+        mode=mode, bins=bins, bound=20, shift=shift, test=test)
 
     ## load training and validation data
 

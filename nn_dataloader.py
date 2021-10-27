@@ -11,14 +11,14 @@ class gamma_dataset(Dataset):
     def __init__(self, root, data_type, config):
         self.root = root
         self.data_type = data_type
-        self.train_data, self.train_target = self.load_data()
+        self.train_data, self.train_target, self.xT = self.load_data(config.test)
         if config.shift != 0:
            self.train_target = self.train_target + config.shift
 
         if not config.mode == 'reg':
             self.bin_data(config)
 
-    def load_data(self):
+    def load_data(self,test):
         #laods the data from sefl.root  acroidng to type from batches in current direcory plus root
         files = os.listdir(self.root)
         #load all files into a numpy array from a cvs file
@@ -35,18 +35,24 @@ class gamma_dataset(Dataset):
                     data = np.load(self.root + files[i])
                 else:
                     data = np.append(data, np.load(self.root + files[i]), axis=0)
+
+            if test and len(data) > 5000:
+                break
                     
         target = data[:, 0]
-        data = data[:, 1:]
+        smiles = data[:, 1:129]
+        xT = data[:,-2:]
 
-        data = torch.tensor(data)
+        smiles = torch.tensor(smiles)
         target = torch.from_numpy(target)
+        xT = torch.from_numpy(xT)
 
-        data = data.type(torch.ByteTensor)
+        smiles = smiles.type(torch.ByteTensor)
         target = target.type(torch.FloatTensor)
         target = target.view((target.shape[0],1,1))
+        xT = xT.type(torch.FloatTensor)
         #return the data and target
-        return data, target
+        return smiles, target, xT 
 
     def bin_data(self, config):
         bound = config.bound
@@ -57,7 +63,7 @@ class gamma_dataset(Dataset):
         self.train_target = np.digitize(self.train_target, bins)
     
     def __getitem__(self, index): 
-        return self.train_data[index], self.train_target[index]
+        return self.train_target[index],  [self.train_data[index], self.xT[index]]
 
     def __len__(self):
         if len(self.train_data.shape) == 1:

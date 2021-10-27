@@ -42,24 +42,35 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         
         optimizer.zero_grad()
 
-        data_batch, target_batch = batch[0], batch[1]
-        data_chunks = torch.split(data_batch,chunk_size)
+        target_batch, data_batch = batch[0], batch[1]
+        smile = data_batch[0]
+        xt = data_batch[1]
+        
         target_chunks = torch.split(target_batch,chunk_size)
+        smile_chunks = torch.split(smile,chunk_size)
+        xt_chunks = torch.split(xt,chunk_size)
+
         log_loss = 0.
 
-        for j, data in enumerate(data_chunks):
+        for j in range(len(target_chunks)):
             
             target = target_chunks[j]
+            smile = smile_chunks[j]
+            xt = xt_chunks[j]
 
-            data = data.to(wandb.config.device)
+            smile = smile.type(torch.IntTensor)
+
             target = target.to(wandb.config.device)
+            smile = smile.to(wandb.config.device)
+            xt = xt.to(wandb.config.device)
 
-            src_padding_mask = (data != wandb.config.padding_idx).transpose(0, 1)
-            
+            src_padding_mask = (smile != wandb.config.padding_idx).transpose(0, 1)
+
             with autocast(True):
-                output = model(data) 
+                #xt = xt.type(torch.half)
+                output = model(smile, xt) 
                 loss = criterion(output.squeeze(), target.squeeze())
-                loss = loss / len(data_chunks)
+                loss = loss / len(target_chunks)
             
             scaler.scale(loss).backward()
             
@@ -104,26 +115,32 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
             if i % step == 0 and i > 0:
                 with torch.no_grad():
                     val_loss = 0.
+
                     batch = next(iter_val_dataloader_list[h])
-                    data_batch, target_batch = batch[0], batch[1]
-                    data_chunks = torch.split(data_batch,chunk_size)
+                    target_batch, data_batch = batch[0], batch[1]
+                    smile = data_batch[0]
+                    xt = data_batch[1]
+                    
                     target_chunks = torch.split(target_batch,chunk_size)
+                    smile_chunks = torch.split(smile,chunk_size)
+                    xt_chunks = torch.split(xt,chunk_size)
                         
-                    for j, data in enumerate(data_chunks):
+                    for j in range(len(target_chunks)):
                 
                         target = target_chunks[j]
+                        smile = smile_chunks[j]
+                        xt = xt_chunks[j]
 
-                        data = data.to(config.device)
-                        target = target.to(config.device)
+                        smile = smile.type(torch.IntTensor)
+
+                        target = target.to(wandb.config.device)
+                        smile = smile.to(wandb.config.device)
+                        xt = xt.to(wandb.config.device)
                         
-                        if config.mode == 'reg':
-                            data = data.type(torch.IntTensor).to(config.device)
-                            target = target.type(torch.FloatTensor).to(config.device)
-                            target = target.view((target.shape[0],1,1))
-                        else:
-                            target = target.type(torch.LongTensor).to(config.device)
-                        output = model(data)
-                        val_loss += criterion(output.squeeze(), target.squeeze()).item()/len(data_chunks)
+                        output = model(smile, xt)
+
+                        val_loss += criterion(output.squeeze(), target.squeeze()).item()/len(target_chunks)
+                    
                     val_log_name = 'val_' + str(h) + '_loss'
                     wandb.log({val_log_name : val_loss})
 
@@ -144,26 +161,33 @@ def evaluate(eval_model, val_dataloader, criterion, config):
 
             for i, batch in enumerate(val_dataloader):
 
-                data_batch, target_batch = batch[0], batch[1]
-                data_chunks = torch.split(data_batch,chunk_size)
+                target_batch, data_batch = batch[0], batch[1]
+                smile = data_batch[0]
+                xt = data_batch[1]
+                
                 target_chunks = torch.split(target_batch,chunk_size)
+                smile_chunks = torch.split(smile,chunk_size)
+                xt_chunks = torch.split(xt,chunk_size)
                     
-                for j, data in enumerate(data_chunks):
+                for j in range(len(target_chunks)):
             
                     target = target_chunks[j]
+                    smile = smile_chunks[j]
+                    xt = xt_chunks[j]
 
-                    data = data.to(config.device)
+                    smile = smile.type(torch.IntTensor)
+
                     target = target.to(config.device)
+                    smile = smile.to(config.device)
+                    xt = xt.to(config.device)
                     
                     if config.mode == 'reg':
-                        data = data.type(torch.IntTensor).to(config.device)
-                        target = target.type(torch.FloatTensor).to(config.device)
                         target = target.view((target.shape[0],1,1))
                     else:
                         target = target.type(torch.LongTensor).to(config.device)
 
-                    output = eval_model(data)
-                    total_loss += criterion(output.squeeze(), target.squeeze()).item()/len(data_chunks)
+                    output = eval_model(smile, xt)
+                    total_loss += criterion(output.squeeze(), target.squeeze()).item()/len(target_chunks)
                     
                     total_output = np.append(total_output, output.cpu().numpy())
                     total_target = np.append(total_target, target.cpu().numpy())
