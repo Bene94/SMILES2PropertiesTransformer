@@ -1,6 +1,7 @@
 import datetime
 import pickle
 import os
+from numpy.random.mtrand import random
 from six import with_metaclass
 
 import torch
@@ -24,28 +25,28 @@ from config import *
 @click.option('--emb', default=512, help='Embedding size')
 @click.option('--hid_fac', default=4, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transformer layers')
-@click.option('--nhead', default=8, help='Number of heads')
-@click.option('--wdecay', default=0.1, help='Weight decay')
-@click.option('--drp', default=0.1, help='Dropout rate')
+@click.option('--nhead', default=16, help='Number of heads')
+@click.option('--wdecay', default=0.0, help='Weight decay')
+@click.option('--drp', default=0.0, help='Dropout rate')
 
 @click.option('--mode', default="reg", help='Determines the mode: reg: does a regresstion; class: does a classification')
 @click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
 
 @click.option('--lr', default= 0.0001, help='Learning rate')
-@click.option('--epo', default=10, help='Number of epochs')
+@click.option('--epo', default=1000, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
-@click.option('--max_btch', default=128, help='Maximum batch size')
+@click.option('--max_btch', default=256, help='Maximum batch size')
 
-@click.option('--warmup_epo', default=1, help='Number of warmup epochs')
+@click.option('--warmup_epo', default=2, help='Number of warmup epochs')
 @click.option('--warmup_lr', default=10, help='Reduciton of LR in the warmup')
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 
-@click.option('--data', default='data_x', help='Location of dataset')
+@click.option('--data', default='data', help='Location of dataset')
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--test', default=False, help='If true smale dataset is used')
+@click.option('--test', default=True, help='If true smale dataset is used')
 
 @click.option('--shift', default=0, help='Shift the data')
 
@@ -66,7 +67,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         path_temp = '../temp/'
         path_model = '../Models/'
         path_wandb = '../wandb/'
-        xp_name = "local_test"
+        xp_name = 'local_test' + str(random())
 
     if cuda:
         device = torch.device('cuda')
@@ -106,9 +107,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         optimizer = model.configure_optimizers(config)
 
         ## set up scheduler
-        total_steps = len(training_data) * config.epoch
+        total_steps = len(training_data) * (config.epoch +1)
         min_lr = config.lr / config.warmup_lr
-        warumup_steps = int(total_steps * (config.warmup_epochs / config.epoch) +1)
+        warumup_steps = int(total_steps * (config.warmup_epochs / config.epoch))
         first_cycle_steps = int(total_steps / config.warmup_cycle)
         scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
 
