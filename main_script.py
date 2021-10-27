@@ -49,9 +49,10 @@ from config import *
 @click.option('--test', default=False, help='If true smale dataset is used')
 
 @click.option('--shift', default=0, help='Shift the data')
+@click.option('--xT', default=1, help='If xT should be used')
 
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, xT):
     
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -85,7 +86,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         vocab_size=vocab_size, block_size=128, embed_size=emb, hidden_factor=hid_fac, num_layers=nlay, 
         num_heads=nhead, dropout=drp, lr=lr, warmup_lr = warmup_lr, warmup_cycle=warmup_cycle, betas=[0.99 , 0.98],
         weight_decay=wdecay, data_path=data, path_temp=path_temp, path_model=path_model, batch_size=btch, max_btch=max_btch, epoch=epo, warmup_epochs=warmup_epo, 
-        mode=mode, bins=bins, bound=20, shift=shift, test=test)
+        mode=mode, bins=bins, bound=20, shift=shift, test=test, xT=xT)
 
     ## load training and validation data
 

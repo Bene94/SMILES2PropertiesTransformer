@@ -86,10 +86,11 @@ class GPT(nn.Module):
     def __init__(self, config):
         super().__init__()
 
+        self.xT = config.xT
         self.regression = config.mode == 'reg'
         # input embedding stem
         self.tok_emb = nn.Embedding(config.vocab_size, config.embed_size)
-        self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size + 1, config.embed_size))
+        self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size + config.xT, config.embed_size))
         self.drop = nn.Dropout(config.dropout)
         # xT linear
         self.xT_lin = nn.Linear(2, config.embed_size)
@@ -175,13 +176,14 @@ class GPT(nn.Module):
 
         # forward the GPT model
         token_embeddings = self.tok_emb(idx) # each index maps to a (learnable) vector
-        position_embeddings = self.pos_emb[:, :t + 1, :] # each position maps to a (learnable) vector
+        position_embeddings = self.pos_emb[:, :t + self.xT, :] # each position maps to a (learnable) vector
         
         xT = torch.unsqueeze(xT,1)
         xT_proj = self.xT_lin(xT)
         
         #concat xT to token_embeddings
-        token_embeddings = torch.cat([token_embeddings, xT_proj], dim=1)
+        if self.xT > 0:
+            token_embeddings = torch.cat([token_embeddings, xT_proj], dim=1)
 
         x = self.drop(token_embeddings + position_embeddings)
         

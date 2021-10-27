@@ -42,5 +42,6 @@ class NN_config:
 
     shift: int
     test: bool
+    xT: int
 
     
