@@ -245,9 +245,6 @@ def load_data_test_val(folder_path, val_dict_0, val_dict_1):
         temp_df = pd.read_csv(file_path, sep=',', index_col=None)
         #add to validation set if colum 0 or 1 is in val_dict else add to training set
 
-
-
-
         temp_df_val_0 = temp_df.loc[(temp_df.iloc[:,0].isin(val_dict_0.keys())) & (temp_df.iloc[:,1].isin(val_dict_1.keys()))]
         temp_df_val_1 = temp_df.loc[(temp_df.iloc[:,0].isin(val_dict_0.keys())) ^ (temp_df.iloc[:,1].isin(val_dict_1.keys()))]
 
