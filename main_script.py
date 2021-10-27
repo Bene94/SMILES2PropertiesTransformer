@@ -33,11 +33,11 @@ from config import *
 @click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
 
 @click.option('--lr', default= 0.0005, help='Learning rate')
-@click.option('--epo', default=1000, help='Number of epochs')
+@click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
 @click.option('--max_btch', default=256, help='Maximum batch size')
 
-@click.option('--warmup_epo', default=2, help='Number of warmup epochs')
+@click.option('--warmup_epo', default=5, help='Number of warmup epochs')
 @click.option('--warmup_lr', default=100, help='Reduciton of LR in the warmup')
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
