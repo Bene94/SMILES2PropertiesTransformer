@@ -46,7 +46,7 @@ from config import *
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--test', default=True, help='If true smale dataset is used')
+@click.option('--test', default=False, help='If true smale dataset is used')
 
 @click.option('--shift', default=0, help='Shift the data')
 
