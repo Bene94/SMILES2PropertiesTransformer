@@ -58,6 +58,10 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
             smile = smile_chunks[j]
             xt = xt_chunks[j]
 
+            xt[:,0] = xt[:,0] - 0.5
+            xt[:,1] = xt[:,1] / 298.5 -1.
+
+
             smile = smile.type(torch.IntTensor)
 
             target = target.to(wandb.config.device)
@@ -131,6 +135,9 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
                         smile = smile_chunks[j]
                         xt = xt_chunks[j]
 
+                        xt[:,0] = xt[:,0] - 0.5
+                        xt[:,1] = xt[:,1] / 298.5 -1.
+
                         smile = smile.type(torch.IntTensor)
 
                         target = target.to(wandb.config.device)
@@ -174,6 +181,9 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                     target = target_chunks[j]
                     smile = smile_chunks[j]
                     xt = xt_chunks[j]
+
+                    xt[:,0] = xt[:,0] - 0.5
+                    xt[:,1] = xt[:,1] / 298.5 -1.
 
                     smile = smile.type(torch.IntTensor)
 
