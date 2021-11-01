@@ -12,8 +12,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="raw_data/cosmo_002", help='Location of raw data')
-@click.option('--save_path', default="data/data/", help='Location of output data')
+@click.option('--file_path', default="cosmo_002_x", help='Location of raw data')
+@click.option('--save_path', default="data_x/", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
@@ -34,8 +34,8 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
         vocab_path = "/mnt/xprun/" + vocab_path + "/"
         alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
     else:
-        file_path = "../" + file_path + "/"
-        file_out = "../" + save_path
+        file_path = "../raw_data/" + file_path + "/"
+        file_out = "../data/" + save_path
         vocab_path = "../" + vocab_path + "/"
         alias_path = '../raw_data/alias/alias_dict.npy'
     

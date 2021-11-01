@@ -1,11 +1,5 @@
-# %% 
+ x = range(10)
 
-from nn_dataloader import * 
+# list exprestion print x if i % 2 == 0
+print([i for i in x if i % 2 == 0])
 
-
-# %% 
-
-train_dataset = gamma_dataset('../data/data_x', 'train')
-
-
-# %%
