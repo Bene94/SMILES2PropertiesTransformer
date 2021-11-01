@@ -37,7 +37,7 @@ target = torch.squeeze(target)
 
 
 fig, ax = plt.subplots()
-ax.plot(x, target, 'b', label='target')
+ax.plot(x, target, '*b', label='target')
 ax.set_xlabel('x')
 ax.set_ylabel('target')
 ax.set_title('Target over x')
