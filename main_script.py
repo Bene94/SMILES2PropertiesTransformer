@@ -84,7 +84,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
 
     config = NN_config(xp_name=xp_name, device=device, criterion=criterion, padding_idx=0, 
         vocab_size=vocab_size, block_size=128, embed_size=emb, hidden_factor=hid_fac, num_layers=nlay, 
-        num_heads=nhead, dropout=drp, lr=lr, warmup_lr = warmup_lr, warmup_cycle=warmup_cycle, betas=[0.99 , 0.98],
+        num_heads=nhead, dropout=drp, lr=lr, warmup_lr = warmup_lr, warmup_cycle=warmup_cycle, betas=[0.90 , 0.95],
         weight_decay=wdecay, data_path=data, path_temp=path_temp, path_model=path_model, batch_size=btch, max_btch=max_btch, epoch=epo, warmup_epochs=warmup_epo, 
         mode=mode, bins=bins, bound=20, shift=shift, test=test, xT=xt)
 
