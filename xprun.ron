@@ -11,8 +11,8 @@ XpV0(
                 Repo(keep: true, cd: true),
             ],
 
-            gpu: 1,
-            gpu_mem: "11GB",
+            gpu: 0.5,
+            gpu_mem: "5GB",
             
             env_secrets: {
                 "WANDB_API_KEY": "wandb-api-key",
