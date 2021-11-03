@@ -119,9 +119,10 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         config.id = wandb.util.generate_id()
 
     
-    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=config.id, xp_name = config.xp_name)
+    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=config.id)
     wandb.watch(model)
 
+    wandb.log({"xp_name": config.xp_name})
     ## train model
     best_val_loss = float("inf")
     best_model = None
