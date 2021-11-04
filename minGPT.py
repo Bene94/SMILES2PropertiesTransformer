@@ -193,6 +193,7 @@ class GPT(nn.Module):
         x = self.decoder(x)
         x = F.relu(x)
         logits = self.head(x)
+        logits = logits * (1 - xT(0))
         if not self.regression:
             logits = F.softmax(logits, dim=-1)
 
