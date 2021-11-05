@@ -17,7 +17,7 @@ from pandas.core.frame import DataFrame
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
-@click.option('--frac', default=0.2, help='fraction of data to be used for testing and validation')
+@click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
 @click.option('--cosmo', default="exp", help='is loaded data from cosmo or form experiments')
 @click.option('--aug', default=False, help='augment the smile data')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')

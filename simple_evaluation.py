@@ -17,12 +17,12 @@ from simple_evaluation_utils import *
 model_path = '/home/bene/NNGamma/Models/'
 model_name = '211101-151855'
 device = 'cuda'
-#device = 'cpu'
+device = 'cpu'
 
-solvent = "(F)C(F)(F)(F)"
-solute = "CCCCCC"
+solvent = "CCO"
+solute = "O"
 
-x = np.linspace(0, 1, num=1000)
+x = np.linspace(0, 1, num=100)
 T = np.linspace(298.15, 298.15, 1)
 
 data_loader_solute = smile2input(solute, solvent, x ,T)

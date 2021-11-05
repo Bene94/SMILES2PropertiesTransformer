@@ -195,7 +195,7 @@ class GPT(nn.Module):
         logits = self.head(x)
         logits = logits.squeeze()
         correction = (0.5 - xT[:,0,0])
-        logits = logits * correction
+        #logits = logits * correction
         
         if not self.regression:
             logits = F.softmax(logits, dim=-1)
