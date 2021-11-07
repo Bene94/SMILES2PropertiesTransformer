@@ -18,7 +18,7 @@ XpV0(
                 "WANDB_API_KEY": "wandb-api-key",
             },
             volumes: 
-                {"/home/bene/NNGamma/data": "/mnt/xprun", 
+                {"/home/bene/NNGamma/data": "/mnt/xprun/data", 
                 "/home/bene/NNGamma/raw_data": "/mnt/xprun/raw_data",
                 "/home/bene/NNGamma/vocab": "/mnt/xprun/vocab",
                 "/home/bene/NNGamma/Models": "/mnt/xprun/out",
