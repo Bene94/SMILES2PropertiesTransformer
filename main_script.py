@@ -26,7 +26,7 @@ from config import *
 @click.option('--hid_fac', default=4, help='Hidden layer size')
 @click.option('--nlay', default=2, help='Number of transformer layers')
 @click.option('--nhead', default=16, help='Number of heads')
-@click.option('--wdecay', default=0.2, help='Weight decay')
+@click.option('--wdecay', default=0.0, help='Weight decay')
 @click.option('--drp', default=0.0, help='Dropout rate')
 
 @click.option('--mode', default="reg", help='Determines the mode: reg: does a regresstion; class: does a classification')

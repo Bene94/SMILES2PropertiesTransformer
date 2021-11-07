@@ -30,12 +30,12 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/" + file_path + "/"
-        file_out = "/mnt/xprun/" + save_path
+        file_out = "/mnt/xprun/" + save_path + "/"
         vocab_path = "/mnt/xprun/" + vocab_path + "/"
         alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
     else:
         file_path = "../raw_data/" + file_path + "/"
-        file_out = "../data/" + save_path
+        file_out = "../data/" + save_path + "/"
         vocab_path = "../" + vocab_path + "/"
         alias_path = '../raw_data/alias/alias_dict.npy'
     

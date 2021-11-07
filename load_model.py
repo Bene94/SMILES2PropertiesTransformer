@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '211004-141758'
+    name = '211103-142216'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         criterion = nn.MSELoss()
 
         data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
-        data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
+        #data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
         #data_path = os.path.join('/home/bene/NNGamma/data/data_no_tail/')
 
         print('-' * 89)

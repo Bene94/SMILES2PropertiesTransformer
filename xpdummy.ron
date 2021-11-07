@@ -1,5 +1,5 @@
 XpV0(
-    project: "GNN_T",
+    project: "DUMMMY",
     containers: {
         "main": (
             command: ["python", "dummy_run.py"],

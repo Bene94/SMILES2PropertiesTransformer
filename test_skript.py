@@ -1,5 +1,12 @@
- x = range(10)
 
-# list exprestion print x if i % 2 == 0
-print([i for i in x if i % 2 == 0])
 
+#save google.com as png
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import time
+
+driver = webdriver.Chrome()
+driver.get("https://www.google.com")
+time.sleep(2)
+
+driver.save_screenshot("google.png")

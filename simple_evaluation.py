@@ -17,10 +17,10 @@ from simple_evaluation_utils import *
 model_path = '/home/bene/NNGamma/Models/'
 model_name = '211101-151855'
 device = 'cuda'
-device = 'cpu'
+#device = 'cpu'
 
-solvent = "CCO"
-solute = "O"
+solvent = "CCCCCCCCCCCCC"
+solute = "CCOCCCCCCCCCCC"
 
 x = np.linspace(0, 1, num=100)
 T = np.linspace(298.15, 298.15, 1)
