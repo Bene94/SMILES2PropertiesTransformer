@@ -13,7 +13,7 @@ from pandas.core.frame import DataFrame
 @click.command()
 
 @click.option('--file_path', default="t_cosmo", help='Location of raw data')
-@click.option('--save_path', default="data_t", help='Location of output data')
+@click.option('--save_path', default="data", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
@@ -21,12 +21,13 @@ from pandas.core.frame import DataFrame
 @click.option('--cosmo', default="exp", help='is loaded data from cosmo or form experiments')
 @click.option('--aug', default=False, help='augment the smile data')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
+@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
 
-def main(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed):
-    processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
+def main(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow):
+    processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow)
 
 
-def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed):
+def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow):
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/raw_data/" + file_path + "/"
@@ -93,7 +94,7 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
                 df_train_batches[i] = argument_data(df_train_batches[i], alias_path)
             df_train_batches[i] = join_input_data_exp(df_train_batches[i], vocab_dict)
             df_train_batches[i] = apply_vocab(df_train_batches[i], vocab_dict, ul, ll)
-        save_batches(df_train_batches, file_out, "train")
+        save_batches(df_train_batches, file_out, "train", ow)
     
         for i in range(len(df_val_0_batches)):
             print("Processing batch val0: ", i, "/", len(df_val_0_batches), end="\r")
@@ -101,7 +102,7 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
                 df_val_0_batches[i] = argument_data(df_val_0_batches[i], alias_path)
             df_val_0_batches[i] = join_input_data_exp(df_val_0_batches[i], vocab_dict)
             df_val_0_batches[i] = apply_vocab(df_val_0_batches[i], vocab_dict, ul, ll)
-        save_batches(df_val_0_batches, file_out, "val_0")
+        save_batches(df_val_0_batches, file_out, "val_0", ow)
         
         for i in range(len(df_val_1_batches)):
             print("Processing batch val1: ", i, "/", len(df_val_1_batches), end="\r")
@@ -109,7 +110,7 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
                 df_val_1_batches[i] = argument_data(df_val_1_batches[i], alias_path)
             df_val_1_batches[i] = join_input_data_exp(df_val_1_batches[i], vocab_dict)
             df_val_1_batches[i] = apply_vocab(df_val_1_batches[i], vocab_dict, ul, ll)
-        save_batches(df_val_1_batches, file_out, "val_1")
+        save_batches(df_val_1_batches, file_out, "val_1", ow)
         
         for i in range(len(df_val_2_batches)):
             print("Processing batch val2: ", i, "/", len(df_val_2_batches), end="\r")
@@ -117,7 +118,7 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed)
                 df_val_2_batches[i] = argument_data(df_val_2_batches[i], alias_path)
             df_val_2_batches[i] = join_input_data_exp(df_val_2_batches[i], vocab_dict)
             df_val_2_batches[i] = apply_vocab(df_val_2_batches[i], vocab_dict, ul, ll)
-        save_batches(df_val_2_batches, file_out, "val_2")
+        save_batches(df_val_2_batches, file_out, "val_2", ow)
 
 def load_exp_data(path):
     #load the data from the experiment 
@@ -388,13 +389,22 @@ def make_batches(data, batch_size):
     return batches
 
 
-def save_batches(batches, folder_path, type):
+def save_batches(batches, folder_path, type, ow):
     # save batches to csv for either train or val batches are numpy arrays
     bar = pb.ProgressBar(maxval=len(batches), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
     bar.start()
+
+    # see if files exist in folder and delete them if overwrite is true
+    if ow:
+        for file in os.listdir(folder_path):
+            os.remove(folder_path + file)
+    
+    # see how many files start with the type
+    num_files = len([name for name in os.listdir(folder_path) if name.startswith(type)])
+
     for i, batch in enumerate(batches):
         bar.update(i)
-        file_path = os.path.join(folder_path, type + '_' +str(i) + '.csv')
+        file_path = os.path.join(folder_path, type + '_' + str(num_files+i) + '.csv')
         #formate first row float all other rows int
         fmt = '%.5f'+',%.0f'*(batch.shape[1]-1)
         #crate foler if not exist
