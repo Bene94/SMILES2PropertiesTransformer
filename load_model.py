@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '211103-142216'
+    name = '211107-220344'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -58,8 +58,8 @@ if __name__ == '__main__':
 
         criterion = nn.MSELoss()
 
-        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
-        #data_path = os.path.join('/home/bene/NNGamma/data/data_exp/')
+        #data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
+        data_path = os.path.join('/home/bene/NNGamma/data/exp/')
         #data_path = os.path.join('/home/bene/NNGamma/data/data_no_tail/')
 
         print('-' * 89)
@@ -130,21 +130,23 @@ if __name__ == '__main__':
         val_2_out = np.load(save_path + 'val_2_out.npy')
         val_2_target = np.load(save_path + 'val_2_target.npy')
 
-    make_MSE_x(train_out, train_target, name = "train", save = True)
-    make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
-    make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
+
+    if False:
+        make_MSE_x(train_out, train_target, name = "train", save = True)
+        make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
+        make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
 
 
 
-    make_heatmap(train_out, train_target, name = "train", save = True)
-    make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
-    make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)
-    make_heatmap(val_2_out, val_2_target, name = "val_2", save = True)
+        make_heatmap(train_out, train_target, name = "train", save = True)
+        make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
+        make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)
+        make_heatmap(val_2_out, val_2_target, name = "val_2", save = True)
 
-    make_historgam_delta(train_out, train_target, name = "train", save = True)
-    make_historgam_delta(val_0_out, val_0_target, name = "val_0", save = True)
-    make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True)
-    make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True)
+        make_historgam_delta(train_out, train_target, name = "train", save = True)
+        make_historgam_delta(val_0_out, val_0_target, name = "val_0", save = True)
+        make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True)
+        make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True)
 
     if len(train_out) < 10000:
         print('-' * 89)

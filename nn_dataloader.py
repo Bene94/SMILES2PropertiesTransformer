@@ -22,7 +22,8 @@ class gamma_dataset(Dataset):
         #laods the data from sefl.root  acroidng to type from batches in current direcory plus root
         files = os.listdir(self.root)
         #load all files into a numpy array from a cvs file
-
+        dirs = os.listdir(self.root)
+        files = [x for x in dirs if os.path.isfile(os.path.join(self.root, x))]
         # progress bar for loading data 
         #bar = pb.ProgressBar(maxval=len(files), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
         # load first file into data then append all other files data is a .npy file

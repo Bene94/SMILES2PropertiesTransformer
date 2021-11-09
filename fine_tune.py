@@ -21,8 +21,8 @@ from config import *
 
 @click.command()
 
-@click.option('--model_name', default='211004-141758', help='Name of the model')
-@click.option('--data_path', default='data_exp', help='Path to the data')
+@click.option('--model_name', default='211107-220344', help='Name of the model')
+@click.option('--data_path', default='t_data', help='Path to the data')
 
 @click.option('--batch_size', default=32, help='Batch size')
 @click.option('--epochs', default=5, help='Number of epochs')
@@ -32,7 +32,7 @@ from config import *
 @click.option('--cuda', default=True, help='Use cuda')
 @click.option('--local', default=True, help='Use local')
 
-@click.option('--one_out', default=True, help='Use leave one out validation')
+@click.option('--one_out', default=False, help='Use leave one out validation')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local, one_out):
@@ -87,7 +87,6 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     best_val_loss = float('inf')
 
     if one_out:
-        
         if local:
             data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
         else:
@@ -169,7 +168,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
         np.save(path_temp + 'val_loss_array_' + name + '.npy', val_loss_array)
         np.save(path_temp + 'val_prediction_array_' + name + '.npy', val_prediction_array)
         np.save(path_temp + 'val_target_array_' + name + '.npy', val_target_array)
-    #torch.save(best_model.state_dict(), path_model + config.xp_name +'.pth')
+    
+    torch.save(model.state_dict(), path_model + config.xp_name +'_fine.pth')
     # save config dict with pickle
     #with open(path_model + config.xp_name + '.pkl', 'wb') as f:
      #   pickle.dump(config, f)

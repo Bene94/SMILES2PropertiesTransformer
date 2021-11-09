@@ -21,7 +21,7 @@ class Config:
 
 ## function to compare the data from experimental and simulation data
 
-path_data = os.path.join('/home/bene/NNGamma/data/data_x/')
+path_data = os.path.join('/home/bene/NNGamma/data/data/')
 
 config = Config(data_path=path_data, shift=0)
 
