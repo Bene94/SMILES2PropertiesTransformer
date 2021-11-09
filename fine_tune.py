@@ -88,9 +88,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
 
     if one_out:
         if local:
-            data_path = os.path.join('/home/bene/NNGamma/' + config.data_path + '/')
+            data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
         else:
-            data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
+            data_path = os.path.join('/mnt/xprun/data/' + config.data_path + '/')
 
         comp_dataset = gamma_dataset(data_path, '', config)
 
