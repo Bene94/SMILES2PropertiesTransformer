@@ -398,9 +398,9 @@ def save_batches(batches, folder_path, type, ow):
     if ow:
         #file ist without folders
         for file in os.listdir(folder_path):
-            if os.path.isfile(folder_path + file):
+            if os.path.isfile(folder_path + file) and file.startswith(type):
                 os.remove(folder_path + file)
-    
+                
     # see how many files start with the type
     num_files = len([name for name in os.listdir(folder_path) if name.startswith(type)])
 

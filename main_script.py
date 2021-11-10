@@ -41,6 +41,7 @@ from config import *
 @click.option('--warmup_lr', default=100, help='Reduciton of LR in the warmup')
 @click.option('--warmup_cycle', default=1, help='Number of warmup cycels')
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
+@click.option('--stop_epo', default=0, help='Number of epochs to stop warmup')
 
 @click.option('--data', default='data', help='Location of dataset')
 
@@ -52,7 +53,7 @@ from config import *
 @click.option('--xt', default=1, help='If xT should be used')
 
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, xt):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, xt, stop_epo):
     
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -81,6 +82,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         criterion = nn.MSELoss()
     else:
         criterion = nn.CrossEntropyLoss()
+
+    if stop_epo == 0:
+        stop_epo = epo
 
     vocab_size =  59
 
@@ -141,7 +145,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     val_data_list.append(val_1_data)
     val_data_list.append(val_2_data)
     
-    for epoch in range(epoch_start, config.epoch + 1):
+    for epoch in range(epoch_start, stop_epo + 1):
 
         epoch_start_time = time.time()
 
