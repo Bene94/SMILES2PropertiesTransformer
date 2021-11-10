@@ -57,7 +57,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
 
-    test = False
+    test = True
 
     if os.environ.get('XPRUN_NAME') is not None:
         local = False
@@ -120,8 +120,13 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
 
         config.id = wandb.util.generate_id()
 
+
+    if test:
+        project = 'Test'
+    else:
+        project = 'GNN_001'
     
-    wandb.init(project='GNN_001', entity='bene94', name=name, config=config, resume="allow", id=config.id)
+    wandb.init(project=project, entity='bene94', name=name, config=config, resume="allow", id=config.id)
     wandb.watch(model)
 
     wandb.log({"xp_name": config.xp_name})
