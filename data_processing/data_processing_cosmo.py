@@ -12,7 +12,7 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="t_cosmo", help='Location of raw data')
+@click.option('--file_path', default="inf_cosmo", help='Location of raw data')
 @click.option('--save_path', default="data", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
@@ -21,7 +21,7 @@ from pandas.core.frame import DataFrame
 @click.option('--cosmo', default="exp", help='is loaded data from cosmo or form experiments')
 @click.option('--aug', default=False, help='augment the smile data')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
-@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
+@click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 
 def main(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow):
     processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow)
@@ -396,8 +396,10 @@ def save_batches(batches, folder_path, type, ow):
 
     # see if files exist in folder and delete them if overwrite is true
     if ow:
+        #file ist without folders
         for file in os.listdir(folder_path):
-            os.remove(folder_path + file)
+            if os.path.isfile(folder_path + file):
+                os.remove(folder_path + file)
     
     # see how many files start with the type
     num_files = len([name for name in os.listdir(folder_path) if name.startswith(type)])
