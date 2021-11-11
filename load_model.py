@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '211109-161604'
+    name = '211110-151610'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
