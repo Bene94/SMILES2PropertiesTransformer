@@ -90,7 +90,7 @@ class GPT(nn.Module):
         self.regression = config.mode == 'reg'
         # input embedding stem
         self.tok_emb = nn.Embedding(config.vocab_size, config.embed_size)
-        self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.embed_size))
+        self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size + config.xT, config.embed_size))
         self.drop = nn.Dropout(config.dropout)
         # xT linear
         self.xT_lin = nn.Linear(2, config.embed_size)
@@ -173,21 +173,26 @@ class GPT(nn.Module):
     def forward(self, idx, xT, targets=None):
         b, t = idx.size()
         #assert t <= self.block_size, "Cannot forward, model block size is exhausted."
-
-        # forward the GPT model
-        token_embeddings = self.tok_emb(idx) # each index maps to a (learnable) vector
-        position_embeddings = self.pos_emb[:, :t, :] # each position maps to a (learnable) vector
         
         xT = torch.unsqueeze(xT,1)
         xT_proj = self.xT_lin(xT)
+
+        # forward the GPT model
+        token_embeddings = self.tok_emb(idx) # each index maps to a (learnable) vector
         
         #concat xT to token_embeddings
-        #if self.xT > 0:
-        #    token_embeddings = torch.cat([token_embeddings, xT_proj], dim=1)
+        position_embeddings = self.pos_emb[:, :t + 1, :] # each position maps to a (learnable) vector
+        if self.xT > 0:
+            position_embeddings = self.pos_emb[:, :t + 1, :] # each position maps to a (learnable) vector
+            token_embeddings = torch.cat([token_embeddings, xT_proj], dim=1)
+            x = self.drop(token_embeddings + position_embeddings)
+        else:
+            position_embeddings = self.pos_emb[:, :t, :] # each position maps to a (learnable) vector
+            xT_embedding = torch.ones(b, token_embeddings.shape[1], token_embeddings.shape[2]).to('cuda') * xT_proj
+            x = self.drop(token_embeddings + position_embeddings + xT_embedding)
+        
 
-        xT_embedding = torch.ones(b, token_embeddings.shape[1], token_embeddings.shape[2]).to('cuda') * xT_proj
 
-        x = self.drop(token_embeddings + position_embeddings +xT_embedding)
         
         x = self.blocks(x)
         x = self.ln_f(x)
