@@ -191,9 +191,6 @@ class GPT(nn.Module):
             xT_embedding = torch.ones(b, token_embeddings.shape[1], token_embeddings.shape[2]).to('cuda') * xT_proj
             x = self.drop(token_embeddings + position_embeddings + xT_embedding)
         
-
-
-        
         x = self.blocks(x)
         x = self.ln_f(x)
         x = torch.max(x, dim=1)[0]

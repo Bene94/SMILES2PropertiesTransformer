@@ -12,8 +12,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="t_cosmo", help='Location of raw data')
-@click.option('--save_path', default="data_t", help='Location of output data')
+@click.option('--file_path', default="inf_cosmo", help='Location of raw data')
+@click.option('--save_path', default="data_full", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
@@ -21,7 +21,7 @@ from pandas.core.frame import DataFrame
 @click.option('--cosmo', default="exp", help='is loaded data from cosmo or form experiments')
 @click.option('--aug', default=False, help='augment the smile data')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
-@click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
+@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
 
 def main(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow):
     processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow)
@@ -203,6 +203,10 @@ def get_smiles(file_path):
 
 def get_smiles_test_val(list_smile0, list_smile1, frac, seed):
     # creates a dictorary where the key is a smile and the value is a bool if the smile is not in the test set
+    # sort smile list
+    list_smile0 = list_smile0.sort_values()
+    list_smile1 = list_smile1.sort_values()
+
     val_dict_0 = {}
     val_dict_1 = {}
     np.random.seed(seed)
