@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '211110-151610'
+    name = '211115-182349'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
         #data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
         data_path = os.path.join('/home/bene/NNGamma/data/exp/')
-        #data_path = os.path.join('/home/bene/NNGamma/data/data_no_tail/')
+        data_path = os.path.join('/home/bene/NNGamma/data_t/')
 
         print('-' * 89)
         print('Loading Data...')

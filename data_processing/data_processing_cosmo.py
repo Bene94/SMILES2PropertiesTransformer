@@ -305,7 +305,7 @@ def join_input_data_exp(df_val_1, vocab_dict):
     # check if field x or T exists and read that column
     if 'x' in df_val_1.columns:
         temp_df['x'] = df_val_1.iloc[:,3]
-    elif 'T' in df_val_1.columns:
+    if 'T' in df_val_1.columns:
         temp_df['T'] = df_val_1.iloc[:,4]
 
     df_joined = df_joined.append(temp_df)

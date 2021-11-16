@@ -21,7 +21,7 @@ class Config:
 
 ## function to compare the data from experimental and simulation data
 
-path_data = os.path.join('/home/bene/NNGamma/data/data/')
+path_data = os.path.join('/home/bene/NNGamma/data/data_t/')
 
 config = Config(data_path=path_data, shift=0)
 
@@ -31,6 +31,7 @@ target = data.train_target
 xT = data.xT
 smile = data.train_data
 x = xT[:,0]
+T = xT[:,1]
 target = torch.squeeze(target)
 
 # plot target over x, x is in range 0,1
@@ -46,6 +47,19 @@ plt.show()
 
 #save in the plot/ folder
 plt.savefig('plot/target_over_x.png')
+# plot target over T
+
+fig, ax = plt.subplots()
+ax.plot(T, target, '*b', label='target')
+ax.set_xlabel('T')
+ax.set_ylabel('target')
+ax.set_title('Target over T')
+ax.legend()
+plt.show()
+
+
+#save in the plot/ folder
+plt.savefig('plot/target_over_T.png')
 
 
 
