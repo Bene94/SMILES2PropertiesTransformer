@@ -44,7 +44,7 @@ def convert_config(config):
 
 if __name__ == '__main__':
     path = '/home/bene/NNGamma/Models/'
-    name = '211115-182349'
+    name = '211116-085945'
     save_path = '/home/bene/NNGamma/temp/'
     model, config = load_model(path,name)
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
         #data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
         data_path = os.path.join('/home/bene/NNGamma/data/exp/')
-        data_path = os.path.join('/home/bene/NNGamma/data_t/')
+        data_path = os.path.join('/home/bene/NNGamma/data/exp_t/')
 
         print('-' * 89)
         print('Loading Data...')
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True)
         make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True)
 
-    if len(train_out) < 10000:
+    if len(train_out) < 30000:
         print('-' * 89)
         print('Make Scatter...')
         print('-' * 89)

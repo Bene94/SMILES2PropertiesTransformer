@@ -8,21 +8,24 @@ sys.path.append(
 from nn_dataloader import *
 
 @dataclass()
-class config:
+class Config:
     data_path: str
     data_path: str
     shift: int
     mode: str = 'reg'
     batch_size: int = 1024
+    test = False
 
 
 ## function to compare the data from experimental and simulation data
 
-path_sim = os.path.join('/home/bene/NNGamma/' +'data/')
-path_exp = os.path.join('/home/bene/NNGamma/' +'data_exp/')
+path_sim = os.path.join('/home/bene/NNGamma/data/' +'data/')
+path_exp = os.path.join('/home/bene/NNGamma/data/' +'exp_t/')
 
-config_sim = config(data_path=path_sim, shift=0)
-config_exp = config(data_path=path_exp, shift=0)
+
+
+config_sim = Config(data_path=path_sim, shift=0)
+config_exp = Config(data_path=path_exp, shift=0)
 
 exp_data = gamma_dataset(path_exp, '', config_exp)
 exp_dict = dict(zip(exp_data.train_data, exp_data.train_target))
