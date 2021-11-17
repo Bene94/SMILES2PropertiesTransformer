@@ -90,7 +90,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         ##Loss logging and display
 
         total_loss += log_loss
-        log_interval = 10
+        log_interval = 1000
         total_tokens += train_dataloader.batch_size * 128 * 1e-6
         total_compute += 6 * wandb.config.params * train_dataloader.batch_size * 1e-6
       
@@ -101,7 +101,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         wandb.log({"n_tokens": total_tokens})
         wandb.log({"compute": total_compute})
       
-        if i % log_interval == 0 and i > 0:
+        if i % log_interval == 0 and i > 0 and False:
             cur_loss = total_loss / log_interval
             elapsed = time.time() - start_time
             wandb.log({"batch_time":  elapsed / log_interval})

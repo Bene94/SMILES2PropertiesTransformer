@@ -104,6 +104,24 @@ def load_data(config,local = False,test = False):
 
     return training_data, val_0_data, val_1_data, val_2_data
 
+def load_data_full(config,local = False,test = False):
+
+    if local:
+        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
+    else:
+        data_path = os.path.join('/mnt/xprun/data/' + config.data_path + '/')
+
+    train_dataset = gamma_dataset(data_path, '', config)
+
+    if test:
+        train_dataset.train_data = train_dataset.train_data[0:500]
+        train_dataset.train_target = train_dataset.train_target[0:500]
+
+
+    training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+
+    return training_data
+
 
 
 

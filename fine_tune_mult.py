@@ -78,8 +78,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     wandb.init(project='GNN_001_FT', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
-
-
+    print("=" * 50)
+    print("Start of training")
+    print("=" * 50)
     
     outer_loop = mult
     
@@ -95,10 +96,11 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     for i in range(0,outer_loop):
 
         wandb.log({'outer_loop': i})
+        print("outer_loop: ", i)
 
         model, __ = load_model(path_model,model_name)
         model = model.to(config.device)
-        wandb.watch(model)
+        #wandb.watch(model)
 
 
         ## set up scheduler

@@ -51,9 +51,10 @@ from config import *
 
 @click.option('--shift', default=0, help='Shift the data')
 @click.option('--xt', default=1, help='If xT should be used')
+@click.option('--noval', default=False, help='All data is used for training')
 
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, xt, stop_epo):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, xt, stop_epo, noval):
     
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
@@ -144,6 +145,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     val_data_list.append(val_0_data) 
     val_data_list.append(val_1_data)
     val_data_list.append(val_2_data)
+
+    if noval:
+        training_data = load_data_full(config,local,test=test)
     
     for epoch in range(epoch_start, stop_epo + 1):
 

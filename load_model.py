@@ -131,7 +131,7 @@ if __name__ == '__main__':
         val_2_target = np.load(save_path + 'val_2_target.npy')
 
 
-    if False:
+    if True:
         make_MSE_x(train_out, train_target, name = "train", save = True)
         make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
         make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
