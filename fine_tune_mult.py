@@ -112,11 +112,16 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         config.data_path = data_path + '/'  + str(i)
         training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=False)
 
+        val_data_list = []
+        val_data_list.append(val_0_data) 
+        val_data_list.append(val_1_data)
+        val_data_list.append(val_2_data)
+
         for epoch in range(epoch_start, config.epoch):
 
             epoch_start_time = time.time()
 
-            train(model, criterion, optimizer, training_data, scheduler, epoch, wandb)
+            train(model, criterion, optimizer, train_dataloader, val_data_list, scheduler, epoch, wandb)
             
             torch.cuda.empty_cache()
 
