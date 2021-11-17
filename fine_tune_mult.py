@@ -44,6 +44,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         path_model = "/mnt/xprun/out/"
         path_wandb = "/mnt/xprun/wandb/"
         xp_name = os.environ['XPRUN_NAME']
+        data_path = "/mnt/xprun/data/" + data_path
     else:
         local = True
         path_temp = '../out_fine_tuen/'
