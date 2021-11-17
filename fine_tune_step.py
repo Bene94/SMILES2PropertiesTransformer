@@ -75,10 +75,24 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda):
     wandb.init(project='GNN_001_FT_step', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
-    if local:
-        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
+    if os.environ.get('XPRUN_NAME') is not None:
+        
+        print("Run on XPRUN")
+
+        local = False
+
+        path_temp = "/mnt/xprun/temp/"
+        path_model = "/mnt/xprun/out/"
+        path_wandb = "/mnt/xprun/wandb/"
+        xp_name = os.environ['XPRUN_NAME']
+        data_path = "/mnt/xprun/data/" + data_path
     else:
-        data_path = os.path.join('/mnt/xprun/' + config.data_path + '/')
+        print("Run on local machine")
+        local = True
+        path_temp = '../out_fine_tuen/'
+        path_model = '../Models/'
+        path_wandb = '../wandb/'
+        xp_name = "local_test"
 
     comp_dataset = gamma_dataset(data_path, '', config)
 
