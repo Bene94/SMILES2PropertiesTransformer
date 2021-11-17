@@ -46,7 +46,7 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
 def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
-    plt.hist2d(target, prediciton, bins=200, norm=LogNorm())
+    plt.hist2d(target, prediciton, bins=41, norm=LogNorm())
     heatmap, xedges, yedges = np.histogram2d(target.squeeze(), prediciton.squeeze(), bins=2000)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     plt.imshow(heatmap.T, extent=extent, origin='lower')

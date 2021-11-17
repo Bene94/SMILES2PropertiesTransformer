@@ -94,9 +94,12 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
 
     for i in range(0,outer_loop):
 
+        wandb.log({'outer_loop': i})
+
         model, __ = load_model(path_model,model_name)
         model = model.to(config.device)
         wandb.watch(model)
+
 
         ## set up scheduler
         criterion = nn.MSELoss()
@@ -121,7 +124,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
 
             epoch_start_time = time.time()
 
-            train(model, criterion, optimizer, train_dataloader, val_data_list, scheduler, epoch, wandb)
+            train(model, criterion, optimizer, training_data, val_data_list, scheduler, epoch, wandb)
             
             torch.cuda.empty_cache()
 
