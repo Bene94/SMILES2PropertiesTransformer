@@ -21,18 +21,18 @@ from config import *
 
 @click.command()
 
-@click.option('--model_name', default='211107-220344', help='Name of the model')
-@click.option('--data_path', default='data_t', help='Path to the data')
+@click.option('--model_name', default='211116-164532', help='Name of the model')
+@click.option('--data_path', default='exp_D', help='Path to the data')
 
 @click.option('--batch_size', default=32, help='Batch size')
-@click.option('--epochs', default=5, help='Number of epochs')
-@click.option('--lr', default=1e-5, help='Learning rate')
+@click.option('--epochs', default=20, help='Number of epochs')
+@click.option('--lr', default=1e-4, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
 @click.option('--cuda', default=True, help='Use cuda')
 @click.option('--local', default=True, help='Use local')
 
-@click.option('--one_out', default=False, help='Use leave one out validation')
+@click.option('--one_out', default=True, help='Use leave one out validation')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local, one_out):
@@ -112,15 +112,32 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
             val_dataset = deepcopy(comp_dataset)
             train_dataset = deepcopy(comp_dataset)
 
-            train_dataset.train_data = torch.cat((comp_dataset.train_data[:i,:], comp_dataset.train_data[i+1:,:]))
-            train_dataset.train_target = torch.cat((comp_dataset.train_target[:i,:],comp_dataset.train_target[i+1:,:]))
+            diff = True
 
-            val_dataset.train_data = comp_dataset.train_data[i,:].unsqueeze(0)
-            val_dataset.train_target = comp_dataset.train_target[i,:].unsqueeze(0)
+            if diff:
+                comp = comp_dataset.train_data[i,:].unsqueeze(0)
+                # find all other lines with the same comp in comp_dataset.train_data
+                comp_index = [i for i in range(len(comp_dataset.train_data)) if torch.all(comp_dataset.train_data[i,:] == comp[0])]
+                
+                # remove the comp from the train_data
+                train_dataset.train_data = np.delete(train_dataset.train_data,comp_index,axis=0)
+                train_dataset.train_target = np.delete(train_dataset.train_target,comp_index,axis=0)
+
+                # select the comp from the val_data
+                val_dataset.val_data = val_dataset.train_data[comp_index,:].unsqueeze(0)
+                val_dataset.val_target = val_dataset.train_target[comp_index,:].unsqueeze(0)
+                
+            else:
+                val_dataset.train_data = comp_dataset.train_data[i,:].unsqueeze(0)
+                val_dataset.train_target = comp_dataset.train_target[i,:].unsqueeze(0)
+                train_dataset.train_data = torch.cat((comp_dataset.train_data[:i,:], comp_dataset.train_data[i+1:,:]))
+                train_dataset.train_target = torch.cat((comp_dataset.train_target[:i,:],comp_dataset.train_target[i+1:,:]))
 
             training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
             val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
             
+            val_dataloader_list = [val_data]
+
             model, __ = load_model(path_model,model_name)
             model = model.to(config.device)
 
@@ -138,7 +155,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
 
             epoch_start_time = time.time()
 
-            train(model, criterion, optimizer, training_data, scheduler, epoch, wandb)
+            train(model, criterion, optimizer, training_data, val_dataloader_list, scheduler, epoch, wandb)
             
             torch.cuda.empty_cache()
 
@@ -154,9 +171,14 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
                                                 val_loss))
                 print('-' * 89)
             else:
-                val_loss_array[i,epoch], val_prediction_array[i,epoch], val_target_array[i,epoch] = evaluate(model, val_data, criterion, config)
+                
+                val_loss, val_prediction, val_target = evaluate(model, val_data, criterion, config)
+                val_loss_array[i,epoch] = np.mean(val_loss)
+                val_prediction_array[i,epoch] = np.mean(val_prediction)
+                val_target_array[i,epoch] = np.mean(val_target)
+
                 wandb.log({"I": i})
-    
+                wandb.log({"val_loss": val_loss_array[i,epoch]})
         
     if one_out:
         wandb.log({"val_loss_log":np.mean(val_loss_array,axis=0)}) 
