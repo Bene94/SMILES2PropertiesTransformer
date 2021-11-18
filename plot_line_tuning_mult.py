@@ -17,6 +17,19 @@ val_predction_2 = np.load(path_temp + 'val_prediction_array_2_' + name + '.npy')
 val_target_2 = np.load(path_temp + 'val_target_array_2_' + name + '.npy')
 
 
+print('data loaded')
+print('length val0: ' + str(len(val_predction_0)))
+print('length val1: ' + str(len(val_predction_1)))
+print('length val2: ' + str(len(val_predction_2)))
+
+
+pr.make_heatmap(val_predction_0, val_target_0, 'val_0_fine' , path = '', save=True)
+pr.make_heatmap(val_predction_1, val_target_1, 'val_1_fine' , path = '', save=True)
+pr.make_heatmap(val_predction_2, val_target_2, 'val_2_fine' , path = '', save=True)
+
+print('heatmaps made')
+
 pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', path = '', save=True)
 pr.make_scatter(val_predction_1, val_target_1, name = 'val_1', path = '', save=True)
 pr.make_scatter(val_predction_2, val_target_2, name = 'val_2', path = '', save=True)
+print('scatter plots made')
