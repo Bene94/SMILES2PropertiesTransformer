@@ -111,7 +111,6 @@ if __name__ == '__main__':
             np.save(save_path + 'train_out.npy', train_out)
             np.save(save_path + 'train_target.npy', train_target)
 
-
             np.save(save_path + 'val_0_out.npy', val_0_out)
             np.save(save_path + 'val_0_target.npy', val_0_target)
             np.save(save_path + 'val_1_out.npy', val_1_out)

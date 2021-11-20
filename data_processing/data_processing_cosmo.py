@@ -15,19 +15,20 @@ from pandas.core.frame import DataFrame
 @click.option('--file_path', default="brouwer_exp_c", help='Location of raw data')
 @click.option('--save_path', default="exp_t_c", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
+@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
+
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
 @click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
-@click.option('--cosmo', default="exp", help='is loaded data from cosmo or form experiments')
+
 @click.option('--aug', default=False, help='augment the smile data')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
-@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
 
-def main(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow):
-    processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow)
+def main(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow):
+    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow)
 
 
-def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed, ow):
+def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow):
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/raw_data/" + file_path + "/"
@@ -39,88 +40,68 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, cosmo, aug, seed,
         file_out = "../data/" + save_path + "/"
         vocab_path = "../" + vocab_path + "/"
         alias_path = '../raw_data/alias/alias_dict.npy'
-    
-
 
     # make os path
 
     print("Data Loading")
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     
-    if cosmo == "cosmo":
-
-        list_smile0, list_smile1  = get_smiles(file_path)
-        val_dict_0, val_dict_1 = get_smiles_test_val(list_smile0, list_smile1, frac, seed)
-
-        df_train, df_val_0, df_val_1, df_val_2  = load_data_test_val(file_path, val_dict_0, val_dict_1)
+    solvent_list, solute_list, df_join = load_exp_data(file_path) 
         
-        df_train_joined = join_input_data(df_train, vocab_dict)
-        df_val_0_joined = join_input_data(df_val_0, vocab_dict)
-        df_val_1_joined = join_input_data(df_val_1, vocab_dict)
-        df_val_2_joined = join_input_data(df_val_2, vocab_dict)
+    ok = True
+    count = 0
 
-
-        print("Length train: " + str(df_train_joined.shape[0]))
-        print("Length val 0: " + str(df_val_0_joined.shape[0]))
-        print("Length val 1: " + str(df_val_1_joined.shape[0]))
-        print("Length val 2: " + str(df_val_2_joined.shape[0]))
-        print("Data Loaded")
-
-    else :
-
-        solvent_list, solute_list, df_join = load_exp_data(file_path) 
-         
-        ok = True
-        count = 0
-        while ok and count < 10:
-        
-            val_solvent, val_solute = get_smiles_test_val_exp(solvent_list, solute_list, frac, seed)
-            df_train, df_val_0, df_val_1, df_val_2  = split_data_test_val_exp(df_join, val_solvent, val_solute, seed)
-            if len(df_train) > 0 and len(df_val_0) > 0 and len(df_val_1) > 0 and len(df_val_2) > 0:
-                ok = False
-            else:
-                seed = seed + 200
-                count += 1
-
-        if len(df_train) > 0:
-            df_train_batches = make_batches(df_train, 30000)
-            for i in range(len(df_train_batches)):
-                print("Processing batch train: ", i, "/", len(df_train_batches), end="\r")
-                if aug:
-                    df_train_batches[i] = argument_data(df_train_batches[i], alias_path)
-                df_train_batches[i] = join_input_data_exp(df_train_batches[i], vocab_dict)
-                df_train_batches[i] = apply_vocab(df_train_batches[i], vocab_dict, ul, ll)
-            save_batches(df_train_batches, file_out, "train", ow)
+    while ok and count < 10:
     
-        if len(df_val_0) > 0:
-            df_val_0_batches = make_batches(df_val_0, 30000)
-            for i in range(len(df_val_0_batches)):
-                print("Processing batch val0: ", i, "/", len(df_val_0_batches), end="\r")
-                if aug:
-                    df_val_0_batches[i] = argument_data(df_val_0_batches[i], alias_path)
-                df_val_0_batches[i] = join_input_data_exp(df_val_0_batches[i], vocab_dict)
-                df_val_0_batches[i] = apply_vocab(df_val_0_batches[i], vocab_dict, ul, ll)
-            save_batches(df_val_0_batches, file_out, "val_0", ow)
+        val_solvent, val_solute = get_smiles_test_val_exp(solvent_list, solute_list, frac, seed)
+        df_train, df_val_0, df_val_1, df_val_2  = split_data_test_val_exp(df_join, val_solvent, val_solute, seed)
         
-        if len(df_val_1) > 0:
-            df_val_1_batches = make_batches(df_val_1, 30000)
-            for i in range(len(df_val_1_batches)):
-                print("Processing batch val1: ", i, "/", len(df_val_1_batches), end="\r")
-                if aug:
-                    df_val_1_batches[i] = argument_data(df_val_1_batches[i], alias_path)
-                df_val_1_batches[i] = join_input_data_exp(df_val_1_batches[i], vocab_dict)
-                df_val_1_batches[i] = apply_vocab(df_val_1_batches[i], vocab_dict, ul, ll)
-            save_batches(df_val_1_batches, file_out, "val_1", ow)
-        
-        if len(df_val_2) > 0:
-            df_val_2_batches = make_batches(df_val_2, 30000)
-            for i in range(len(df_val_2_batches)):
-                print("Processing batch val2: ", i, "/", len(df_val_2_batches), end="\r")
-                if aug:
-                    df_val_2_batches[i] = argument_data(df_val_2_batches[i], alias_path)
-                df_val_2_batches[i] = join_input_data_exp(df_val_2_batches[i], vocab_dict)
-                df_val_2_batches[i] = apply_vocab(df_val_2_batches[i], vocab_dict, ul, ll)
-            save_batches(df_val_2_batches, file_out, "val_2", ow)
+        if len(df_train) > 0 and len(df_val_0) > 0 and len(df_val_1) > 0 and len(df_val_2) > 0:
+            ok = False
+        else:
+            seed = seed + 200
+            count += 1
+
+    if len(df_train) > 0:
+        df_train_batches = make_batches(df_train, 30000)
+        for i in range(len(df_train_batches)):
+            print("Processing batch train: ", i, "/", len(df_train_batches), end="\r")
+            if aug:
+                df_train_batches[i] = argument_data(df_train_batches[i], alias_path)
+            df_train_batches[i] = join_input_data_exp(df_train_batches[i], vocab_dict)
+            df_train_batches[i] = apply_vocab(df_train_batches[i], vocab_dict, ul, ll)
+        save_batches(df_train_batches, file_out, "train", ow)
+
+    if len(df_val_0) > 0:
+        df_val_0_batches = make_batches(df_val_0, 30000)
+        for i in range(len(df_val_0_batches)):
+            print("Processing batch val0: ", i, "/", len(df_val_0_batches), end="\r")
+            if aug:
+                df_val_0_batches[i] = argument_data(df_val_0_batches[i], alias_path)
+            df_val_0_batches[i] = join_input_data_exp(df_val_0_batches[i], vocab_dict)
+            df_val_0_batches[i] = apply_vocab(df_val_0_batches[i], vocab_dict, ul, ll)
+        save_batches(df_val_0_batches, file_out, "val_0", ow)
+    
+    if len(df_val_1) > 0:
+        df_val_1_batches = make_batches(df_val_1, 30000)
+        for i in range(len(df_val_1_batches)):
+            print("Processing batch val1: ", i, "/", len(df_val_1_batches), end="\r")
+            if aug:
+                df_val_1_batches[i] = argument_data(df_val_1_batches[i], alias_path)
+            df_val_1_batches[i] = join_input_data_exp(df_val_1_batches[i], vocab_dict)
+            df_val_1_batches[i] = apply_vocab(df_val_1_batches[i], vocab_dict, ul, ll)
+        save_batches(df_val_1_batches, file_out, "val_1", ow)
+    
+    if len(df_val_2) > 0:
+        df_val_2_batches = make_batches(df_val_2, 30000)
+        for i in range(len(df_val_2_batches)):
+            print("Processing batch val2: ", i, "/", len(df_val_2_batches), end="\r")
+            if aug:
+                df_val_2_batches[i] = argument_data(df_val_2_batches[i], alias_path)
+            df_val_2_batches[i] = join_input_data_exp(df_val_2_batches[i], vocab_dict)
+            df_val_2_batches[i] = apply_vocab(df_val_2_batches[i], vocab_dict, ul, ll)
+        save_batches(df_val_2_batches, file_out, "val_2", ow)
+
 
 def load_exp_data(path):
     #load the data from the experiment 
@@ -148,40 +129,6 @@ def load_exp_data(path):
 
     return solvent_list, solute_list, df
 
-def load_data(folder_path):
-    # list all files in InputData
-    files = os.listdir(folder_path)
-    #load all files into a panda
-    df = pd.DataFrame()
-    num_smile0 = len(files)
-    num_smile1 = 0
-    for i, file in enumerate(files): 
-        print("Processing file: ", i, "/", len(files), end="\r")
-        file_path = os.path.join(folder_path, file)
-        temp_df = pd.read_csv(file_path, sep=',', index_col=None)
-        df = df.append(temp_df)
-        num_smile1 = temp_df.shape[0]
-    return df, num_smile0, num_smile1
-
-def find_vocab(df):
-    # find the vocab for the text
-    vocab = set()
-    for i in range(df.shape[0]):
-        # add progress bar
-        print("Processing row: ", i, "/", df.shape[0], end="\r")
-        text = df.iloc[i][0]
-        text = text+df.iloc[i][1]
-        for char in text:
-            vocab.add(char)
-    return vocab
-
-def create_vocab_dict(vocab):
-    # create a dictionary for the vocab with the char being the key and the value being the index       
-    vocab_dict = {}
-    for i, char in enumerate(vocab):       
-        vocab_dict[char] = i       
-    return vocab_dict
-
 def load_vocab(file_path,vocab_name):
     #load the vocab from a .cvs file and adds it to a dictoinary
     with open(file_path + vocab_name + '.csv') as csv_file:
@@ -191,36 +138,6 @@ def load_vocab(file_path,vocab_name):
             vocab_dict[row[0]] = int(row[1])
         
     return vocab_dict
-
-def get_smiles(file_path):
-    # smile0 is the name of all files in file path
-    list_smile0 = pd.DataFrame(os.listdir(file_path))
-    # remove .txt from the end of entries in list_smile0
-    list_smile0 = list_smile0[0].str.split('.',expand=True)[0]
-    #read first csv in file path
-    smile1 = pd.read_csv(file_path+'/'+list_smile0.iloc[0] + '.txt')
-    #smile1 is the second column
-    list_smile1 = pd.DataFrame(smile1.iloc[:,1])
-    return list_smile0, list_smile1 
-
-def get_smiles_test_val(list_smile0, list_smile1, frac, seed):
-    # creates a dictorary where the key is a smile and the value is a bool if the smile is not in the test set
-    # sort smile list
-    list_smile0 = list_smile0.sort_values()
-    list_smile1 = list_smile1.sort_values()
-
-    val_dict_0 = {}
-    val_dict_1 = {}
-    np.random.seed(seed)
-    list_smile0_test= np.random.choice(list_smile0, int(frac*len(list_smile0)), replace=False, )
-    np.random.seed(os.setegid())
-    list_smile1_test= np.random.choice(list_smile1, int(frac*len(list_smile1)), replace=False, )
-    
-    for i in range(list_smile0_test.shape[0]):
-        val_dict_0[list_smile0_test.iloc[i]] = False
-    for i in range(list_smile1_test.shape[0]):
-        val_dict_1[list_smile1_test.iloc[i][0]] = False
-    return val_dict_0, val_dict_1 
 
 def get_smiles_test_val_exp(solvent_list, solute_list, frac, seed):
     
@@ -284,22 +201,6 @@ def split_data_test_val_exp(df_join, val_solvent, val_solute, seed):
 
     return df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2
 
-def join_input_data(df, vocab_dict):
-    #takes the smiles and adds them together wiht a space between them for the combination 0 ,1 collume 2 is the value otherwise collume 3
-    df_joined = pd.DataFrame()
-
-    temp_df = pd.DataFrame()
-    temp_df['SMILES'] = list(vocab_dict.keys())[1] + df.iloc[:,0] + list(vocab_dict.keys())[2] + df.iloc[:,1] + list(vocab_dict.keys())[3]
-    temp_df['gamma'] = df.iloc[:,2]
-
-    df_joined = df_joined.append(temp_df)
-
-    temp_df = pd.DataFrame()
-    temp_df['SMILES'] = list(vocab_dict.keys())[1] + df.iloc[:,1] + list(vocab_dict.keys())[2] + df.iloc[:,0] + list(vocab_dict.keys())[3]
-    temp_df['gamma'] = df.iloc[:,3]
-    df_joined = df_joined.append(temp_df)
-    return df_joined
-
 def join_input_data_exp(df_val_1, vocab_dict):
     #takes the smiles and adds them together wiht a space between them for the combination 0 ,1 collume 2 is the value otherwise collume 3
     df_joined = pd.DataFrame()
@@ -358,7 +259,6 @@ def apply_vocab(df, vocab_dict, ul, ll):
             text = df.iloc[i,0].ljust(128, padd_char)
             temp[i,:] = [vocab_dict [char] for char in text]
     
-    
     target = np.array(df.iloc[:,1])
 
     # check if field x or T exists
@@ -381,6 +281,37 @@ def apply_vocab(df, vocab_dict, ul, ll):
     # remove all data where gamma < -10 or > 10
     data = data[np.logical_and(data[:,0] > ll, data[:,0] < ul)]
     return data
+
+def revert_vocab(df, vocab_dict):
+    # revert the vocab back to the original smiles
+    
+    reverse_vocab = {vocab_dict[key]: key for key in vocab_dict}
+    df_new = pd.DataFrame( columns=['solute', 'solvent', 'lnGamma', 'x', 'T'])
+    for i in range(df.shape[0]):
+        temp_df = pd.DataFrame(columns=['solute', 'solvent', 'lnGamma', 'x', 'T'])
+        
+        solvent_solute = df.iloc[i,1:129:129]
+        
+        sos = solvent_solute.find(list(vocab_dict.keys())[0])
+        mos = solvent_solute.find(list(vocab_dict.keys())[1])
+        eos = solvent_solute.find(list(vocab_dict.keys())[2])
+
+        solute = solvent_solute[sos+1:mos]
+        solvent = solvent_solute[mos+1:eos]
+
+        solute = [reverse_vocab[num] for num in solute]
+        solvent = [reverse_vocab[num] for num in solvent]
+
+        temp_df['solute'] = solute
+        temp_df['solvent'] = solvent
+        temp_df['lnGamma'] = df.iloc[i,0]
+        temp_df['x'] = df.iloc[i,2]
+        temp_df['T'] = df.iloc[i,3]
+
+        df_new = pd.concat([df_new, temp_df])
+               
+    return df_new
+
 
 
 def make_batches(data, batch_size):
