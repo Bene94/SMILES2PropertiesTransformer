@@ -12,8 +12,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="D", help='Location of raw data')
-@click.option('--save_path', default="exp_D", help='Location of output data')
+@click.option('--file_path', default="brouwer_exp_c", help='Location of raw data')
+@click.option('--save_path', default="exp_t_c", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')

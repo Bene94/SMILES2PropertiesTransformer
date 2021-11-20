@@ -24,7 +24,7 @@ from config import *
 @click.option('--model_name', default='211116-164532', help='Name of the model')
 @click.option('--data_path', default='exp_D', help='Path to the data')
 
-@click.option('--batch_size', default=32, help='Batch size')
+@click.option('--batch_size', default=16, help='Batch size')
 @click.option('--epochs', default=20, help='Number of epochs')
 @click.option('--lr', default=1e-4, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
@@ -32,7 +32,7 @@ from config import *
 @click.option('--cuda', default=True, help='Use cuda')
 @click.option('--local', default=True, help='Use local')
 
-@click.option('--one_out', default=True, help='Use leave one out validation')
+@click.option('--one_out', default=False, help='Use leave one out validation')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local, one_out):
@@ -100,8 +100,11 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
         val_target_array = np.zeros((outer_loop,config.epoch))
     
     else:
-        training_data, val_0_data, val_1_data, __ = load_data(config,local,test=False)
-        outer_loop = 0
+        training_data = load_data_full(config,local,test=False)
+        val_data = training_data
+        val_dataloader_list = [val_data]
+        outer_loop = 1
+        
     
 
     for i in range(0,outer_loop):
@@ -160,9 +163,10 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
             torch.cuda.empty_cache()
 
             if not one_out:
-                val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
+
+                val_loss, val_out, val_target = evaluate(model, training_data, criterion, config)
                 wandb.log({"val_0_loss": val_loss})
-                val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
+                val_loss, val_out, val_target = evaluate(model, training_data, criterion, config)
                 wandb.log({"val_1_loss": val_loss})
 
                 print('-' * 89)
@@ -193,8 +197,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     
     torch.save(model.state_dict(), path_model + config.xp_name +'_fine.pth')
     # save config dict with pickle
-    #with open(path_model + config.xp_name + '.pkl', 'wb') as f:
-     #   pickle.dump(config, f)
+    with open(path_model + config.xp_name + '_fine.pkl', 'wb') as f:
+        pickle.dump(config, f)
 
 
 

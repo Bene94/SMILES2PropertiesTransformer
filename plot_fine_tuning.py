@@ -5,11 +5,11 @@ from plot_results import *
 
 # load data
 
-name = '211004-141758'
+name = '211116-164532'
 
-val_loss_array = np.load('../temp/'+ 'val_loss_array_' + name + '.npy', allow_pickle=True)
-val_prediction_array = np.load('../temp/'+ 'val_prediction_array_' + name + '.npy', allow_pickle=True)
-val_target_array = np.load('../temp/'+ 'val_target_array_' + name + '.npy', allow_pickle=True)
+val_loss_array = np.load('../out_fine_tuen/'+ 'val_loss_array_' + name + '.npy', allow_pickle=True)
+val_prediction_array = np.load('../out_fine_tuen/'+ 'val_prediction_array_' + name + '.npy', allow_pickle=True)
+val_target_array = np.load('../out_fine_tuen/'+ 'val_target_array_' + name + '.npy', allow_pickle=True)
 
 mean_loss = np.mean(val_loss_array, axis=0)
 

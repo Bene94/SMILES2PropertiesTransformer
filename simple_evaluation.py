@@ -15,18 +15,22 @@ from simple_evaluation_utils import *
 
 # %% Parameters
 model_path = '/home/bene/NNGamma/Models/'
-model_name = '211101-151855'
+model_name = 'local_test_fine'
+#model_name =  '211116-164532'
 device = 'cuda'
 device = 'cpu'
 
-solvent = "CCCCCC"
-solute = "CCCO"
+solvent = "C1CCCCC1"
+solvent = "CC(=O)C"
+solute = "Cc1ccccc1"
 
-x = np.linspace(0, 1, num=100)
-T = np.linspace(298.15, 298.15, 1)
+T = 298.15
+
+x = np.linspace(0, 1, num=20)
+T = np.linspace(T, T, 1)
 
 data_loader_solute = smile2input(solute, solvent, x ,T)
-data_loader_solvent = smile2input(solvent, solute, x ,T)
+data_loader_solvent = smile2input(solvent, solute, 1-x ,T)
 # %% Load model
 
 model, config = load_model(model_path,model_name)
@@ -44,10 +48,11 @@ print("Evaluation time: ", end - start)
 
 # plot train out over x 
 fig, ax = plt.subplots()
-ax.plot(x, gamma_solute)
-ax.plot(1-x, gamma_solvent)
+ax.plot(x, gamma_solute,marker='*')
+ax.plot(1-x, gamma_solvent,marker='*')
+ax.set_title(str(T[0]) + " K")
 ax.set_xlabel('x')
-ax.set_ylabel('ln gamma')
+ax.set_ylabel('D')
 ax.set_xlim([0,1])
 ax.legend([solute, solvent])
 plt.show()
