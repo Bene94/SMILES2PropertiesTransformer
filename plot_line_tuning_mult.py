@@ -1,7 +1,7 @@
 import numpy as np
 import plot_results as pr
 
-name = '211116-085945'
+name = '211118-063721'
 path_temp = '../out_fine_tuen/'
 #path_temp = '../temp/'
 
