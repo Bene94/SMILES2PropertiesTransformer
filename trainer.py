@@ -161,8 +161,8 @@ def evaluate(eval_model, val_dataloader, criterion, config):
     chunk_size = config.max_btch
     total_output = np.array([])
     total_target = np.array([])
-    total_xT = np.array([])
-    total_smile = np.array([])
+    total_xT = np.empty((0,2))
+    total_smile = np.empty((0,128))
 
     with torch.no_grad():
 
@@ -203,8 +203,8 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                     
                     total_output = np.append(total_output, output.cpu().numpy())
                     total_target = np.append(total_target, target.cpu().numpy())
-                    total_xT = np.append(total_xT, xt.cpu().numpy())
-                    total_smile = np.append(total_smile, smile.cpu().numpy())
+                    total_xT = np.append(total_xT, xt_chunks[j].cpu().numpy(),axis=0)
+                    total_smile = np.append(total_smile, smile.cpu().numpy(),axis=0)
 
     
     return total_loss / (len(val_dataloader)), total_output, total_target, [total_smile, total_xT]

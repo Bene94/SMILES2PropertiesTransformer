@@ -12,10 +12,10 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="brouwer_exp_c", help='Location of raw data')
-@click.option('--save_path', default="exp_t_c", help='Location of output data')
+@click.option('--file_path', default="brouwer_exp", help='Location of raw data')
+@click.option('--save_path', default="exp_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
-@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
+@click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
@@ -284,31 +284,35 @@ def apply_vocab(df, vocab_dict, ul, ll):
 
 def revert_vocab(df, vocab_dict):
     # revert the vocab back to the original smiles
-    
+
     reverse_vocab = {vocab_dict[key]: key for key in vocab_dict}
-    df_new = pd.DataFrame( columns=['solute', 'solvent', 'lnGamma', 'x', 'T'])
+    df_new = pd.DataFrame(columns=['solute', 'solvent', 'x', 'T', 'target', 'out'])
+
     for i in range(df.shape[0]):
-        temp_df = pd.DataFrame(columns=['solute', 'solvent', 'lnGamma', 'x', 'T'])
+        print(i)
         
-        solvent_solute = df.iloc[i,1:129:129]
         
-        sos = solvent_solute.find(list(vocab_dict.keys())[0])
-        mos = solvent_solute.find(list(vocab_dict.keys())[1])
-        eos = solvent_solute.find(list(vocab_dict.keys())[2])
+        
+        solvent_solute = df.loc[i,['smile']]
+        solvent_solute = np.array(solvent_solute.to_numpy()[0])
+        
+        # find sos mos and eos in solvent_solute and split them
+        sos = np.where(solvent_solute == 1)[0][0]
+        mos = np.where(solvent_solute == 2)[0][0]
+        eos = np.where(solvent_solute == 3)[0][0]
 
         solute = solvent_solute[sos+1:mos]
         solvent = solvent_solute[mos+1:eos]
 
-        solute = [reverse_vocab[num] for num in solute]
-        solvent = [reverse_vocab[num] for num in solvent]
+        solute = ''.join([reverse_vocab[num] for num in solute])
+        solvent = ''.join([reverse_vocab[num] for num in solvent])
+        x = df['x'][i]
+        T = df['T'][i]
+        target = df['target'][i]
+        out = df['out'][i]
+        
+        df_new = df_new.append({'solute': solute, 'solvent': solvent, 'x': x, 'T': T, 'target': target, 'out': out}, ignore_index=True)
 
-        temp_df['solute'] = solute
-        temp_df['solvent'] = solvent
-        temp_df['lnGamma'] = df.iloc[i,0]
-        temp_df['x'] = df.iloc[i,2]
-        temp_df['T'] = df.iloc[i,3]
-
-        df_new = pd.concat([df_new, temp_df])
                
     return df_new
 

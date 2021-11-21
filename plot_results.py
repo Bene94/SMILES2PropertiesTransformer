@@ -78,6 +78,13 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
     plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
+    # set axix to max and min of target or prediciton
+    min_target = min(target)
+    max_target = max(target)
+    min_pred = min(prediciton)
+    max_pred = max(prediciton)
+    plt.xlim(min(min_target, min_pred), max(max_target, max_pred))
+    plt.ylim(min(min_target, min_pred), max(max_target, max_pred))
 
     if save:
         plt.savefig(path + 'plot/scatter_' + name)

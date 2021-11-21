@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
         #data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
         #data_path = os.path.join('/home/bene/NNGamma/data/exp/')
-        data_path = os.path.join('/home/bene/NNGamma/data/exp_t_c/')
+        data_path = os.path.join('/home/bene/NNGamma/data/exp_t/')
 
         print('-' * 89)
         print('Loading Data...')
@@ -80,15 +80,15 @@ if __name__ == '__main__':
         print('Calculating Traning...')
         print('-' * 89)
 
-        train_loss, train_out, train_target = evaluate(model, training_data, criterion, config)
+        train_loss, train_out, train_target, train_in = evaluate(model, training_data, criterion, config)
 
         print('-' * 89)
         print('Calculating Validation...')
         print('-' * 89)
 
-        val_0_loss, val_0_out, val_0_target = evaluate(model, val_0_data, criterion, config)
-        val_1_loss, val_1_out, val_1_target = evaluate(model, val_1_data, criterion, config)
-        val_2_loss, val_2_out, val_2_target = evaluate(model, val_2_data, criterion, config)
+        val_0_loss, val_0_out, val_0_target, val_0_in = evaluate(model, val_0_data, criterion, config)
+        val_1_loss, val_1_out, val_1_target, val_1_in = evaluate(model, val_1_data, criterion, config)
+        val_2_loss, val_2_out, val_2_target, val_2_in = evaluate(model, val_2_data, criterion, config)
 
         train_target = train_target.squeeze()
         train_out = train_out.squeeze()
@@ -110,13 +110,23 @@ if __name__ == '__main__':
             # save the results to a file
             np.save(save_path + 'train_out.npy', train_out)
             np.save(save_path + 'train_target.npy', train_target)
+            np.save(save_path + 'train_smile.npy', train_in[0])
+            np.save(save_path + 'train_xT.npy', train_in[1])
 
             np.save(save_path + 'val_0_out.npy', val_0_out)
             np.save(save_path + 'val_0_target.npy', val_0_target)
+            np.save(save_path + 'val_0_smile.npy', val_0_in[0])
+            np.save(save_path + 'val_0_xT.npy', val_0_in[1])
+
             np.save(save_path + 'val_1_out.npy', val_1_out)
             np.save(save_path + 'val_1_target.npy', val_1_target)
+            np.save(save_path + 'val_1_smile.npy', val_1_in[0])
+            np.save(save_path + 'val_1_xT.npy', val_1_in[1])
+
             np.save(save_path + 'val_2_out.npy', val_2_out)
             np.save(save_path + 'val_2_target.npy', val_2_target)
+            np.save(save_path + 'val_2_smile.npy', val_2_in[0])
+            np.save(save_path + 'val_2_xT.npy', val_2_in[1])
 
     else:
 
@@ -130,10 +140,11 @@ if __name__ == '__main__':
         val_2_target = np.load(save_path + 'val_2_target.npy')
 
 
-    if True:
+    if False:
         make_MSE_x(train_out, train_target, name = "train", save = True)
         make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
         make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
+        make_MSE_x(val_2_out, val_2_target, name = "val_2", save = True)
 
 
 
@@ -152,6 +163,9 @@ if __name__ == '__main__':
         print('Make Scatter...')
         print('-' * 89)
         # concatenate the resutls
-        train_out = np.concatenate((train_out, val_0_out, val_1_out), axis=0)
-        train_target = np.concatenate((train_target, val_0_target, val_1_target), axis=0)
+        #train_out = np.concatenate((train_out, val_0_out, val_1_out, val_2_out), axis=0)
+        #train_target = np.concatenate((train_target, val_0_target, val_1_target, val_2_target), axis=0)
+        train_out = np.concatenate((train_out, val_1_out, val_2_out), axis=0)
+        train_target = np.concatenate((train_target, val_1_target, val_2_target), axis=0)
+        
         make_scatter(train_out, train_target, name = "train", save = True)
