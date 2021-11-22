@@ -21,6 +21,8 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
     config = wandb.config
 
     chunk_size = config.max_btch
+    if config.batch_size < chunk_size:
+        chunk_size = config.batch_size
 
     total_tokens = epoch * len(train_dataloader) * train_dataloader.batch_size * 128 * 1e-6
     total_compute = 6 * wandb.config.params * epoch * len(train_dataloader) * train_dataloader.batch_size * 1e-6
