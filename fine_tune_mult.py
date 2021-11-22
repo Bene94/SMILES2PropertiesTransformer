@@ -148,14 +148,14 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         wandb.log({"I": i})
     
 
-    np.save(path_temp + 'val_prediction_array_0_' + name + '.npy', val_predction_0)
-    np.save(path_temp + 'val_target_array_0_' + name + '.npy', val_target_0)
+    np.save(path_temp + 'val_prediction_array_0_' + xp_name + '.npy', val_predction_0)
+    np.save(path_temp + 'val_target_array_0_' + xp_name + '.npy', val_target_0)
 
-    np.save(path_temp + 'val_prediction_array_1_' + name + '.npy', val_predction_1)
-    np.save(path_temp + 'val_target_array_1_' + name + '.npy', val_target_1)
+    np.save(path_temp + 'val_prediction_array_1_' + xp_name + '.npy', val_predction_1)
+    np.save(path_temp + 'val_target_array_1_' + xp_name + '.npy', val_target_1)
 
-    np.save(path_temp + 'val_prediction_array_2_' + name + '.npy', val_predction_2)
-    np.save(path_temp + 'val_target_array_2_' + name + '.npy', val_target_2)
+    np.save(path_temp + 'val_prediction_array_2_' + xp_name + '.npy', val_predction_2)
+    np.save(path_temp + 'val_target_array_2_' + xp_name + '.npy', val_target_2)
         
 
 if __name__ == '__main__':
