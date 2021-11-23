@@ -12,14 +12,14 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="t_cosmo", help='Location of raw data')
-@click.option('--save_path', default="data_t", help='Location of output data')
+@click.option('--file_path', default="D", help='Location of raw data')
+@click.option('--save_path', default="exp_D", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
-@click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
+@click.option('--frac', default=0.0, help='fraction of data to be used for testing and validation')
 
 @click.option('--aug', default=False, help='augment the smile data')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')

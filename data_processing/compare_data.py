@@ -19,8 +19,8 @@ class Config:
 
 ## function to compare the data from experimental and simulation data
 
-path_sim = os.path.join('/home/bene/NNGamma/data/' +'data/')
-path_exp = os.path.join('/home/bene/NNGamma/data/' +'exp_t/')
+path_sim = os.path.join('/home/bene/NNGamma/data/' +'exp_D_temp/')
+path_exp = os.path.join('/home/bene/NNGamma/data/' +'exp_D/')
 
 
 
@@ -36,12 +36,16 @@ sim_dict = dict(zip(sim_data.train_data, sim_data.train_target))
 # get thte data that is in both datasets and plot the targets
 targets_exp = []
 targets_sim = []
-for key in exp_dict:
-    if key in sim_dict:
-        targets_exp.append(exp_dict[key])
-        targets_sim.append(sim_dict[key])
+for i, data in enumerate(exp_data.train_data):
+    for j, data_sim in enumerate(sim_data.train_data):
+        if torch.eq(data, data_sim).all() and torch.eq(exp_data.xT[i], sim_data.xT[j]).all():
+            if not exp_data.train_target[i] == sim_data.train_target[j]:
+                print("WTF is going on here, like for real")
+            targets_exp.append(exp_data.train_target[i])
+            targets_sim.append(sim_data.train_target[j])
 
-# plot the data
+print()
+
 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 ax.scatter(targets_exp, targets_sim, s=1)
 ax.set_xlabel('Experimental data')

@@ -42,7 +42,7 @@ class gamma_dataset(Dataset):
                     
         target = data[:, 0]
         smiles = data[:, 1:129]
-        xT = data[:,-2:]
+        xT = data[:,129:131]
 
         smiles = torch.tensor(smiles)
         target = torch.from_numpy(target)

@@ -13,8 +13,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="D", help='Location of raw data')
-@click.option('--save_path', default="exp_D", help='Location of output data')
+@click.option('--file_path', default="t_cosmo", help='Location of raw data')
+@click.option('--save_path', default="data_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 
@@ -22,14 +22,15 @@ from pandas.core.frame import DataFrame
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
 @click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
 
-@click.option('--aug', default=True, help='augment the smile data')
+@click.option('--aug', default=False, help='augment the smile data')
+@click.option('--max_aug', default=0, help='maximum number of augmentations')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
 
-def main(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow):
-    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow)
+def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow):
+    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow)
 
 
-def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow):
+def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow):
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/raw_data/" + file_path + "/"
@@ -42,10 +43,6 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow):
         vocab_path = "../" + vocab_path + "/"
         alias_path = '../raw_data/alias/alias_dict.npy'
 
-    # make os path
-
-    print("Data Loading")
-    
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path) 
         
@@ -57,17 +54,22 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow):
     
     val_solvent_indx, val_solute_indx = get_idx_test_val(solvent_indx, solute_indx, frac, seed)
 
+    water_index = comp_list.index[comp_list["SMILE0"]=="O"][0]    
+    if (val_solute_indx == water_index).any():
+        val_solute_indx = val_solute_indx[val_solute_indx != water_index]
+    if (val_solvent_indx == water_index).any():
+        val_solvent_indx = val_solvent_indx[val_solvent_indx != water_index]
+
     df_list = split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
 
     # make input data
     for i, df in enumerate(df_list):
         if not df.empty:
-            data = make_input_data(df, comp_list)
-            data_batches = make_batches(data, batch_size=100000)
             if i == 0:
                 prefix = 'train'
             else:
                 prefix = 'val_' + str(i-1)
+            data_batches = aug_df(df, comp_list, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow)
 
 def load_exp_data(path):
@@ -76,22 +78,25 @@ def load_exp_data(path):
     # list all files in the folder
     files = os.listdir(path)
     # load all files into a panda
+    bar = pb.ProgressBar(maxval=len(files), widgets=["Processing files:",pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
     for i, file in enumerate(files):
-        print("Processing file: ", i, "/", len(files), end="\r")
+        bar.update(i)
         file_path = os.path.join(path, file)
         temp_df = pd.read_csv(file_path, sep=',', index_col=None)
         df = pd.concat([df, temp_df], ignore_index=True)
-
+    bar.finish()
     # remove all nan rows
     df = df.dropna()
+    df = df.reset_index(drop=True)
 
     solvent_list = df['solvent'].drop_duplicates()
     solute_list = df['solute'].drop_duplicates()
 
-    complete_list = pd.concat([solute_list, solute_list])
+    complete_list = pd.concat([solute_list, solvent_list])
     complete_list = complete_list.drop_duplicates()
     complete_list.reset_index(drop=True, inplace=True)
-    complete_list = pd.DataFrame({'SMILE0':complete_list })
+    complete_list = pd.DataFrame({'n_alias':np.ones(complete_list.shape[0]),'SMILE0':complete_list })
 
     # get the index of the solven_list and solute_list
     solvent_indx = complete_list.index[complete_list['SMILE0'].isin(solvent_list)]
@@ -113,26 +118,102 @@ def load_vocab(file_path,vocab_name):
 def aug_data(comp_list,alias_path):
 
     alias_dict = np.load(alias_path, allow_pickle=True).item()
-
+    bar = pb.ProgressBar(maxval=len(comp_list), widgets=[pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
     #add the alias to the new collumn alias to comp_list
     for i in range(len(comp_list)):
+        bar.update(i)
         for j, alias in enumerate(alias_dict[comp_list.loc[i,'SMILE0']]):
             comp_list.loc[i,'SMILE' +str(j+1)] = alias
+        comp_list.loc[i,'n_alias'] = len(alias_dict[comp_list.loc[i,'SMILE0']]) +1 
     return comp_list
+
+def aug_df(df, comp_list, batch_size):
+    # add the alias to the new collumn alias to comp_list
+
+
+    df_temp = df.copy()
+    df_temp['emb'] = np.nan
+    df_temp['emb'] = df_temp['emb'].astype(object)
+    bar = pb.ProgressBar(maxval=len(df_temp), widgets=[pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
+
+    sos = np.array((1,))
+    mos = np.array((2,))
+    eos = np.array((3,))
+
+    temp_data = np.zeros((batch_size,133)) 
+    data_list = []
+    # find the index of the smiles in df in comp_list
+    index_solute = np.zeros((len(df_temp),))
+    index_solvent = np.zeros((len(df_temp),))
+    solute_n_alias = np.zeros((len(df_temp),))
+    solvent_n_alias = np.zeros((len(df_temp),))
+
+    comp_list_dic= {}
+
+    for i, smile in enumerate(comp_list['SMILE0']):
+        comp_list_dic[smile] = [i, comp_list.loc[i,'n_alias']]
+
+
+    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Indexing data: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
+    for i in range(len(df_temp)):
+        bar.update(i)
+        [index_solute[i], solute_n_alias[i]] = comp_list_dic[df_temp['solute'].values[i]]
+        [index_solvent[i], solvent_n_alias[i]] = comp_list_dic[df_temp['solvent'].values[i]]
+
+    index_solute = index_solute.astype(int)
+    index_solvent = index_solvent.astype(int)
+    solute_n_alias = solute_n_alias.astype(int)
+    solvent_n_alias = solvent_n_alias.astype(int)
+    bar.finish()
+
+    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Processing data: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
+    count = 0
+    for i in range(len(df)):
+        bar.update(i)
+
+        gamma = df.loc[i,'lnGamma']
+        x = df.loc[i,'x']
+        T = df.loc[i,'T']
+
+        for j in range(solute_n_alias[i]):
+            for k in range(solvent_n_alias[i]):      
+                emb = np.concatenate((sos,comp_list.loc[index_solute[i], 'emb' + str(j)], mos, comp_list.loc[index_solvent[i], 'emb' + str(k)], eos))
+                if len(emb) <= 128:
+                    emb = np.pad(emb, (0, 128 - len(emb)), 'constant', constant_values=(0, 0))
+                    temp_data[count,0] = gamma
+                    temp_data[count,1:129] = emb
+                    temp_data[count,129] = x
+                    temp_data[count,130] = T
+                    temp_data[count,131] = index_solute[i]
+                    temp_data[count,132] = index_solvent[i]
+                    count += 1
+                    if count == batch_size:
+                        data_list.append(temp_data)
+                        temp_data = np.zeros((batch_size,133))
+                        count = 0
+    if count != 0:
+        data_list.append(temp_data[:count,:])
+    bar.finish()
+    return data_list
 
 def apply_vocab(comp_list, vocab_dict):
     
     # add a collumn for each SMILE and alias with the embedding
     for j, columns in enumerate(comp_list.columns):
-        for i in range(len(comp_list)):
-            if i == 0:
-                comp_list.insert(comp_list.shape[1],'emb'+str(j),np.nan)
-                comp_list['emb' + str(j)] = comp_list['emb'+str(j)].astype(object, copy=True)
-            if not pd.isnull(comp_list.loc[i,columns]):
-                if comp_list.loc[i,columns] == 'O' and False:
-                    comp_list.at[i,'emb'+str(j)] = [vocab_dict['H2O']]
-                else:
-                    comp_list.at[i,'emb'+str(j)] = [vocab_dict [char] for char in comp_list.loc[i,columns]]            
+        if not columns == 'n_alias':
+            for i in range(len(comp_list)):
+                if i == 0:
+                    comp_list.insert(comp_list.shape[1],'emb'+str(j-1),np.nan)
+                    comp_list['emb' + str(j-1)] = comp_list['emb'+str(j-1)].astype(object, copy=True)
+                if not pd.isnull(comp_list.loc[i,columns]):
+                    if comp_list.loc[i,columns] == 'O':
+                        comp_list.at[i,'emb'+str(j-1)] = np.array([vocab_dict['H2O']])
+                    else:
+                        comp_list.at[i,'emb'+str(j-1)] = np.array([vocab_dict [char] for char in comp_list.loc[i,columns]])            
     return comp_list
 
 def get_idx_test_val(solvent_indx, solute_indx, frac, seed): 
@@ -168,45 +249,24 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
 
     return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
 
-def make_input_data(df, comp_list):
+def make_input_data(df, comp_list,batch_size):
 
-    bar = pb.ProgressBar(maxval=len(df), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
-    bar.start()
-    data = []
-    for i in range(len(df)):
-        bar.update(i)
-        # find number of aliases
-        solvent = df.iloc[i,1]
-        solute = df.iloc[i,0]
-        
-        solute_index = comp_list['SMILE0'].isin([solute])
-        solvent_index = comp_list['SMILE0'].isin([solvent])
+    target = np.array(df.ioc[:,"lnGamma"])
 
-        num_alias_solute = int((~comp_list.loc[solute_index].isna()).sum().sum() / 2)
-        num_alias_solvent = int((~comp_list.loc[solvent_index].isna()).sum().sum() / 2)
+    emb  = np.array(df.emb[:])
+    T = np.array(df['T'])
+    x = np.array(df['x'])
+    solute_index = np.array(df['solute_index'])
+    solvent_index = np.array(df['solvent_index'])
 
-        for j in range(num_alias_solute):
-            for k in range(num_alias_solvent):
-                    
-                    solute_emb = np.asarray(comp_list.loc[solute_index]['emb'+str(j)].values[0])
-                    solvent_emb = np.asarray(comp_list.loc[solvent_index]['emb'+str(k)].values[0])
-                    
-                    value = np.zeros(133)
-                    value[0] = np.array(df.loc[i,'lnGamma'])
-                    value[1] = 1
-                    value[2:2+len(solute_emb)] = solute_emb
-                    value[2+len(solute_emb)] = 3
-                    value[2+len(solute_emb):2+len(solute_emb)+len(solvent_emb)] = solvent_emb
-                    value[129] = df.loc[i,'x']
-                    value[130] = df.loc[i,'T']
-                    value[131] = solute_index.index[solute_index].tolist()[0]
-                    value[132] = solute_index.index[solute_index].tolist()[0]
-                
-                    if i == 0:
-                        data = np.array(value)
-                    else:
-                        data = np.vstack((data,value))
-    pass
+    target = target.reshape(target.shape[0],1)
+    T = T.reshape(T.shape[0],1)
+    x = x.reshape(x.shape[0],1)
+    solute_index = solute_index.reshape(solute_index.shape[0],1)
+    solvent_index = solvent_index.reshape(solvent_index.shape[0],1)
+    # add temp, target, x and T to a nested np array
+    data = np.concatenate((target, emb, x, T, solute_index, solvent_index), axis=1) 
+
     return data
                 
 def make_batches(data, batch_size):

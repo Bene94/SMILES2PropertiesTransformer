@@ -16,13 +16,13 @@ from simple_evaluation_utils import *
 # %% Parameters
 model_path = '/home/bene/NNGamma/Models/'
 model_name = 'local_test_fine'
-#model_name =  '211116-164532'
+model_name =  '211123-110140'
 device = 'cuda'
 device = 'cpu'
 
 solvent = "C1CCCCC1"
 solvent = "CC(C)=O"
-#solvent = "CC(=O)C"
+solvent = "CC(=O)C"
 solute = "c1ccccc1C"
 solute = "Cc1ccccc1"
 
@@ -58,9 +58,8 @@ MD_x = np.array([0.05,	0.1,	0.2,	0.3,	0.4,	0.5,	0.6,	0.7,	0.8,	0.9,	0.95])
 # plot train out over x 
 fig, ax = plt.subplots()
 # use dashed lines
-ax.plot(x, gamma_solute, '--',marker='*')
-ax.plot(1-x, gamma_solvent, '--',marker='*')
-ax.plot(x, mean,marker='*')
+ax.fill_between(x, gamma_solute, np.flip(gamma_solvent), alpha=0.5, color='b')
+ax.plot(x, mean, 'b', label='Solute')
 
 ax.errorbar(x_mesure, messure, yerr=messure_err, fmt='o')
 ax.errorbar(MD_x, MD, yerr=0.0, fmt='x')

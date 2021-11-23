@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import torch
 import numpy as np
 
-data_path = 'data_t/'
+data_path = 'exp_D/'
 
 train_dataset = gamma_dataset(data_path, 'train')
 val_dataset_1 = gamma_dataset(data_path, 'val')
