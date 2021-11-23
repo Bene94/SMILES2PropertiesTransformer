@@ -87,7 +87,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     if stop_epo == 0:
         stop_epo = epo
 
-    vocab_size =  59
+    vocab_size =  60
 
     config = NN_config(xp_name=xp_name, device=device, criterion=criterion, padding_idx=0, 
         vocab_size=vocab_size, block_size=128, embed_size=emb, hidden_factor=hid_fac, num_layers=nlay, 
