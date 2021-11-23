@@ -24,8 +24,8 @@ from config import *
 @click.option('--model_name', default='211116-164532', help='Name of the model')
 @click.option('--data_path', default='exp_D', help='Path to the data')
 
-@click.option('--batch_size', default=16, help='Batch size')
-@click.option('--epochs', default=20, help='Number of epochs')
+@click.option('--batch_size', default=64, help='Batch size')
+@click.option('--epochs', default=10, help='Number of epochs')
 @click.option('--lr', default=1e-4, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
@@ -164,9 +164,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
 
             if not one_out:
 
-                val_loss, val_out, val_target = evaluate(model, training_data, criterion, config)
+                val_loss, val_out, val_target, __ = evaluate(model, training_data, criterion, config)
                 wandb.log({"val_0_loss": val_loss})
-                val_loss, val_out, val_target = evaluate(model, training_data, criterion, config)
+                val_loss, val_out, val_target, __  = evaluate(model, training_data, criterion, config)
                 wandb.log({"val_1_loss": val_loss})
 
                 print('-' * 89)

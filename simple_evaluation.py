@@ -22,7 +22,7 @@ device = 'cpu'
 
 solvent = "C1CCCCC1"
 solvent = "CC(C)=O"
-solvent = "CC(=O)C"
+#solvent = "CC(=O)C"
 solute = "c1ccccc1C"
 solute = "Cc1ccccc1"
 

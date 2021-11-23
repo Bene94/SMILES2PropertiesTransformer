@@ -129,8 +129,8 @@ def apply_vocab(comp_list, vocab_dict):
                 comp_list.insert(comp_list.shape[1],'emb'+str(j),np.nan)
                 comp_list['emb' + str(j)] = comp_list['emb'+str(j)].astype(object, copy=True)
             if not pd.isnull(comp_list.loc[i,columns]):
-                if comp_list.loc[i,columns] == 'O':
-                    comp_list.at[i,'emb'+str(j)] = vocab_dict['H2O']
+                if comp_list.loc[i,columns] == 'O' and False:
+                    comp_list.at[i,'emb'+str(j)] = [vocab_dict['H2O']]
                 else:
                     comp_list.at[i,'emb'+str(j)] = [vocab_dict [char] for char in comp_list.loc[i,columns]]            
     return comp_list
@@ -188,23 +188,19 @@ def make_input_data(df, comp_list):
         for j in range(num_alias_solute):
             for k in range(num_alias_solvent):
                     
-                    solute_emb = np.asarray(comp_list.loc[solute_index]['emb'+str(k)].values[0])
+                    solute_emb = np.asarray(comp_list.loc[solute_index]['emb'+str(j)].values[0])
                     solvent_emb = np.asarray(comp_list.loc[solvent_index]['emb'+str(k)].values[0])
                     
-                    value = np.zeros(131)
+                    value = np.zeros(133)
                     value[0] = np.array(df.loc[i,'lnGamma'])
-                    value = np.array(df.loc[i,'lnGamma'])
-                    value = np.append(value, 1)
-                    value = np.append(value, solute_emb)
-                    value = np.append(value, 2)
-                    value = np.append(value, solvent_emb)
-                    value = np.append(value, 3)
-                    value = np.append(value, np.zeros(129 - len(value)))
-                    value = np.append(value, df.loc[i,'x'])
-                    value = np.append(value, df.loc[i,'T'])
-                    value = np.append(value, solute_index)
-                    value = np.append(value, solvent_index)
-
+                    value[1] = 1
+                    value[2:2+len(solute_emb)] = solute_emb
+                    value[2+len(solute_emb)] = 3
+                    value[2+len(solute_emb):2+len(solute_emb)+len(solvent_emb)] = solvent_emb
+                    value[129] = df.loc[i,'x']
+                    value[130] = df.loc[i,'T']
+                    value[131] = solute_index.index[solute_index].tolist()[0]
+                    value[132] = solute_index.index[solute_index].tolist()[0]
                 
                     if i == 0:
                         data = np.array(value)
