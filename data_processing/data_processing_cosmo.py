@@ -12,8 +12,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="brouwer_exp", help='Location of raw data')
-@click.option('--save_path', default="exp_t", help='Location of output data')
+@click.option('--file_path', default="t_cosmo", help='Location of raw data')
+@click.option('--save_path', default="data_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 
@@ -54,6 +54,10 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, seed, ow):
     while ok and count < 10:
     
         val_solvent, val_solute = get_smiles_test_val_exp(solvent_list, solute_list, frac, seed)
+        # remove water from val_solvent and val_solute
+        val_solvent.pop('O', None)
+        val_solute.pop('O', None)
+
         df_train, df_val_0, df_val_1, df_val_2  = split_data_test_val_exp(df_join, val_solvent, val_solute, seed)
         
         if len(df_train) > 0 and len(df_val_0) > 0 and len(df_val_1) > 0 and len(df_val_2) > 0:
@@ -255,6 +259,9 @@ def apply_vocab(df, vocab_dict, ul, ll):
         if len(df.iloc[i][0]) > 128:
             remove_index.append(i)
         else:
+            # check if the smile is water
+            if df.iloc[i][0] == 'O':
+                temp[i,:] = vocab_dict["H2O"]
             # padd to 128 with 0
             text = df.iloc[i,0].ljust(128, padd_char)
             temp[i,:] = [vocab_dict [char] for char in text]

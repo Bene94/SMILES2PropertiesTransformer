@@ -21,7 +21,9 @@ device = 'cuda'
 device = 'cpu'
 
 solvent = "C1CCCCC1"
+solvent = "CC(C)=O"
 solvent = "CC(=O)C"
+solute = "c1ccccc1C"
 solute = "Cc1ccccc1"
 
 T = 298.15
@@ -39,22 +41,35 @@ model = model.to(config.device)
 criterion = nn.MSELoss()
 # time evaluation
 start = time.time()
-__,gamma_solute, __ = evaluate(model, data_loader_solute, criterion, config)
-__,gamma_solvent, __ = evaluate(model, data_loader_solvent, criterion, config)
+__,gamma_solute, __, __ = evaluate(model, data_loader_solute, criterion, config)
+__,gamma_solvent, __, __ = evaluate(model, data_loader_solvent, criterion, config)
+mean = (gamma_solute + np.flip(gamma_solvent)) / 2
 end = time.time()
 print("Evaluation time: ", end - start)
 
 # %%
 
+messure = np.array([2.78,2.71,2.60,2.54,2.62,2.75,2.86,3.11,3.46])
+messure_err = np.array([1.58,1.05,0.79,0.09,0.68,0.80,0.75,0.90,0.93]) * 0.1
+x_mesure =  np.linspace(0.1, 0.9, num=9)
+
+MD = np.array([2.74,	2.9,	2.76,	2.59,	2.6,	2.69,	2.88,	3,	3.11,	3.18,	3.45])
+MD_x = np.array([0.05,	0.1,	0.2,	0.3,	0.4,	0.5,	0.6,	0.7,	0.8,	0.9,	0.95])
 # plot train out over x 
 fig, ax = plt.subplots()
-ax.plot(x, gamma_solute,marker='*')
-ax.plot(1-x, gamma_solvent,marker='*')
+# use dashed lines
+ax.plot(x, gamma_solute, '--',marker='*')
+ax.plot(1-x, gamma_solvent, '--',marker='*')
+ax.plot(x, mean,marker='*')
+
+ax.errorbar(x_mesure, messure, yerr=messure_err, fmt='o')
+ax.errorbar(MD_x, MD, yerr=0.0, fmt='x')
+
 ax.set_title(str(T[0]) + " K")
-ax.set_xlabel('x')
+ax.set_xlabel('x ' + solvent )
 ax.set_ylabel('D')
 ax.set_xlim([0,1])
-ax.legend([solute, solvent])
+ax.legend([solute, solvent, 'mean', 'carsten', 'MD'])
 plt.show()
 
 plt.savefig('plot/simple_.png')

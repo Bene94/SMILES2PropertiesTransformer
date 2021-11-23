@@ -21,7 +21,7 @@ from config import *
 
 @click.command()
 
-@click.option('--model_name', default='211004-141758', help='Name of the model')
+@click.option('--model_name', default='211118-063721', help='Name of the model')
 @click.option('--data_path', default='data_exp', help='Path to the data')
 
 @click.option('--batch_size', default=32, help='Batch size')
@@ -31,7 +31,7 @@ from config import *
 
 @click.option('--cuda', default=True, help='Use cuda')
 
-@click.option('--mult', default=200, help='Uses multibel val/train splits')
+@click.option('--mult', default=2, help='Uses multibel val/train splits')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult):
@@ -86,11 +86,15 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     
     val_predction_0 = np.array([])
     val_predction_1 = np.array([])
-    val_predction_2 = np.array([])
+    val_predction_2 = []
+    
+    val_input_0 = np.array([])
+    val_input_1 = np.array([])
+    val_input_2 = []
 
     val_target_0 = np.array([])
     val_target_1 = np.array([])
-    val_target_2 = np.array([])
+    val_target_2 = []
 
 
     for i in range(0,outer_loop):
@@ -133,30 +137,38 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
             # evaluate the 3 validation sets
 
         
-        temp_val_loss, temp_val_prediction, temp_val_target, __ = evaluate(model, val_0_data, criterion, config)
+        temp_val_loss, temp_val_prediction, temp_val_target, val_in = evaluate(model, val_0_data, criterion, config)
         val_predction_0 = np.concatenate((val_predction_0, temp_val_prediction), axis=0)
         val_target_0 = np.concatenate((val_target_0, temp_val_target), axis=0)
+        val_input_0 = np.concatenate((val_input_0, val_in), axis=0)
+        
         wandb.log({"val_0_ft": temp_val_loss})
 
-        temp_val_loss, temp_val_prediction, temp_val_target, __  = evaluate(model, val_1_data, criterion, config)
+        temp_val_loss, temp_val_prediction, temp_val_target, val_in  = evaluate(model, val_1_data, criterion, config)
         val_predction_1 = np.concatenate((val_predction_1, temp_val_prediction), axis=0)
         val_target_1 = np.concatenate((val_target_1, temp_val_target), axis=0)
+        val_input_1 = np.concatenate((val_input_1, val_in), axis=0)
         wandb.log({"val_1_ft": temp_val_loss})
 
-        temp_val_loss, temp_val_prediction, temp_val_target, __  = evaluate(model, val_2_data, criterion, config)
+        temp_val_loss, temp_val_prediction, temp_val_target, val_in  = evaluate(model, val_2_data, criterion, config)
         val_predction_2 = np.concatenate((val_predction_2, temp_val_prediction), axis=0)
         val_target_2 = np.concatenate((val_target_2, temp_val_target), axis=0)
+        val_input_2 = np.concatenate((val_input_2, val_in), axis=0)
         wandb.log({"val_2_ft": temp_val_loss})
     
+
+
     np.save(path_temp + 'val_prediction_array_0_' + xp_name + '.npy', val_predction_0)
     np.save(path_temp + 'val_target_array_0_' + xp_name + '.npy', val_target_0)
+    np.save(path_temp + 'val_input_array_0_' + xp_name + '.npy', val_input_0)
 
     np.save(path_temp + 'val_prediction_array_1_' + xp_name + '.npy', val_predction_1)
     np.save(path_temp + 'val_target_array_1_' + xp_name + '.npy', val_target_1)
+    np.save(path_temp + 'val_input_array_1_' + xp_name + '.npy', val_input_1)
 
     np.save(path_temp + 'val_prediction_array_2_' + xp_name + '.npy', val_predction_2)
     np.save(path_temp + 'val_target_array_2_' + xp_name + '.npy', val_target_2)
+    np.save(path_temp + 'val_input_array_2_' + xp_name + '.npy', val_input_2)
         
-
 if __name__ == '__main__':
     main()
