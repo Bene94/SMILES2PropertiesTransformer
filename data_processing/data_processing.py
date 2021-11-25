@@ -13,8 +13,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="brouwer_exp", help='Location of raw data')
-@click.option('--save_path', default="exp_t", help='Location of output data')
+@click.option('--file_path', default="t_cosmo", help='Location of raw data')
+@click.option('--save_path', default="data_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
 
