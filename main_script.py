@@ -59,6 +59,10 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     
 
+    print('-' * 89)
+    print('Beginn Script...')
+    print('-' * 89)
+
     test = False
 
     if os.environ.get('XPRUN_NAME') is not None:
@@ -96,12 +100,20 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         mode=mode, bins=bins, bound=20, shift=shift, test=test, xT=xt)
 
     ## load training and validation data
-
     print('-' * 89)
     print('Loading Data...')
     print('-' * 89)
-
-    training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=test)
+  
+    
+    if noval:
+        training_data = load_data_full(config,local,test=test)
+        val_data_list = []
+    else:
+        training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=test)
+        val_data_list = []
+        val_data_list.append(val_0_data) 
+        val_data_list.append(val_1_data)
+        val_data_list.append(val_2_data)
 
     # see if file with name xp_name exists
     if os.path.isfile(path_temp + config.xp_name + '_epoch.pkl'):
@@ -140,14 +152,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     best_model = None
 
     overall_start_time = time.time()
-
-    val_data_list = []
-    val_data_list.append(val_0_data) 
-    val_data_list.append(val_1_data)
-    val_data_list.append(val_2_data)
-
-    if noval:
-        training_data = load_data_full(config,local,test=test)
     
     for epoch in range(epoch_start, stop_epo + 1):
 
@@ -161,12 +165,14 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         save_checkpoint(model, config, epoch, optimizer, scheduler)
 
 
-    val_loss, val_out, val_target = evaluate(model, val_0_data, criterion, config)
-    wandb.log({"val_0_loss": val_loss})
-    val_loss, val_out, val_target = evaluate(model, val_1_data, criterion, config)
-    wandb.log({"val_1_loss": val_loss})
-    val_loss, val_out, val_target = evaluate(model, val_2_data, criterion, config)
-    wandb.log({"val_2_loss": val_loss})
+
+    if not noval:
+        val_loss, val_out, val_target, __ = evaluate(model, val_0_data, criterion, config)
+        wandb.log({"val_0_loss": val_loss})
+        val_loss, val_out, val_target, __ = evaluate(model, val_1_data, criterion, config)
+        wandb.log({"val_1_loss": val_loss})
+        val_loss, val_out, val_target, __ = evaluate(model, val_2_data, criterion, config)
+        wandb.log({"val_2_loss": val_loss})
 
     print('-' * 89)
     print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '

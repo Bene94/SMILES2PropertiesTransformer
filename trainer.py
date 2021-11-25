@@ -35,6 +35,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 
     iter_val_dataloader_list  = []
     val_step = []  
+    
     for i in range(len(val_dataloader_list)):
         iter_val_dataloader_list.append(iter(val_dataloader_list[i]))
         val_step.append(int(np.ceil(len(train_dataloader) /len(val_dataloader_list[i]))))

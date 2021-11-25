@@ -11,7 +11,7 @@ class gamma_dataset(Dataset):
     def __init__(self, root, data_type, config):
         self.root = root
         self.data_type = data_type
-        self.train_data, self.train_target, self.xT = self.load_data(config.test)
+        self.train_data, self.train_target, self.xT, self.smile_index = self.load_data(config.test)
         if config.shift != 0:
            self.train_target = self.train_target + config.shift
 
@@ -43,6 +43,7 @@ class gamma_dataset(Dataset):
         target = data[:, 0]
         smiles = data[:, 1:129]
         xT = data[:,129:131]
+        smile_index = data[:,131:133]
 
         smiles = torch.tensor(smiles)
         target = torch.from_numpy(target)
@@ -53,7 +54,7 @@ class gamma_dataset(Dataset):
         target = target.view((target.shape[0],1,1))
         xT = xT.type(torch.FloatTensor)
         #return the data and target
-        return smiles, target, xT 
+        return smiles, target, xT, smile_index 
 
     def bin_data(self, config):
         bound = config.bound

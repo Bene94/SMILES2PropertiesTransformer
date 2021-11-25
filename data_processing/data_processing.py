@@ -13,10 +13,10 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="t_cosmo", help='Location of raw data')
-@click.option('--save_path', default="data_t", help='Location of output data')
+@click.option('--file_path', default="brouwer_exp", help='Location of raw data')
+@click.option('--save_path', default="exp_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
-@click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
+@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
 
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
@@ -24,13 +24,14 @@ from pandas.core.frame import DataFrame
 
 @click.option('--aug', default=False, help='augment the smile data')
 @click.option('--max_aug', default=0, help='maximum number of augmentations')
+@click.option('--h2o', default=False, help='allows H2O in the validation set')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
 
-def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow):
-    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow)
+def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow, h2o):
+    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o)
 
 
-def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow):
+def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o):
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/raw_data/" + file_path + "/"
@@ -54,10 +55,11 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, see
     
     val_solvent_indx, val_solute_indx = get_idx_test_val(solvent_indx, solute_indx, frac, seed)
 
+    # removes water from the validation set
     water_index = comp_list.index[comp_list["SMILE0"]=="O"][0]    
-    if (val_solute_indx == water_index).any():
+    if (val_solute_indx == water_index).any() and not h2o:
         val_solute_indx = val_solute_indx[val_solute_indx != water_index]
-    if (val_solvent_indx == water_index).any():
+    if (val_solvent_indx == water_index).any() and not h2o:
         val_solvent_indx = val_solvent_indx[val_solvent_indx != water_index]
 
     df_list = split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
@@ -78,7 +80,7 @@ def load_exp_data(path):
     # list all files in the folder
     files = os.listdir(path)
     # load all files into a panda
-    bar = pb.ProgressBar(maxval=len(files), widgets=["Processing files:",pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(files), widgets=["Processing files: ",pb.Timer(), pb.Bar(), pb.ETA()])
     bar.start()
     for i, file in enumerate(files):
         bar.update(i)
@@ -172,6 +174,13 @@ def aug_df(df, comp_list, batch_size):
     bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Processing data: ',pb.Timer(), pb.Bar(), pb.ETA()])
     bar.start()
     count = 0
+
+    if not 'x' in df.columns:
+        df['x'] = np.zeros((len(df),))
+    if not 'T' in df.columns:
+        df['T'] = np.ones((len(df),)) *298.15
+
+
     for i in range(len(df)):
         bar.update(i)
 
