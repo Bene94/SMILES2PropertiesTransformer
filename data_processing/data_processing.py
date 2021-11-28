@@ -13,10 +13,10 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', default="t_cosmo", help='Location of raw data')
-@click.option('--save_path', default="data_t", help='Location of output data')
+@click.option('--file_path', "-p",default=["brouwer_exp"], help='Location of raw data', multiple=True)
+@click.option('--save_path', default="exp_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
-@click.option('--ow', default=False, help='overwirte exising files in the save folder or add to them ')
+@click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
@@ -30,22 +30,23 @@ from pandas.core.frame import DataFrame
 def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow, h2o):
     processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o)
 
-
-def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o):
+def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o):
     
     if os.environ.get('XPRUN_NAME') is not None:
-        file_path = "/mnt/xprun/raw_data/" + file_path + "/"
+        file_path = "/mnt/xprun/raw_data/" 
         file_out = "/mnt/xprun/data/" + save_path + "/"
         vocab_path = "/mnt/xprun/" + vocab_path + "/"
         alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
     else:
-        file_path = "../raw_data/" + file_path + "/"
+        file_path = "../raw_data/" 
         file_out = "../data/" + save_path + "/"
         vocab_path = "../" + vocab_path + "/"
         alias_path = '../raw_data/alias/alias_dict.npy'
 
+
+
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path) 
+    df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
         
     if aug:
         comp_list = aug_data(comp_list, alias_path=alias_path)
@@ -74,20 +75,22 @@ def processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, see
             data_batches = aug_df(df, comp_list, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow)
 
-def load_exp_data(path):
+def load_exp_data(file_path, foler_names):
     #load the data from the experiment 
     df = pd.DataFrame()
-    # list all files in the folder
-    files = os.listdir(path)
-    # load all files into a panda
-    bar = pb.ProgressBar(maxval=len(files), widgets=["Processing files: ",pb.Timer(), pb.Bar(), pb.ETA()])
-    bar.start()
-    for i, file in enumerate(files):
-        bar.update(i)
-        file_path = os.path.join(path, file)
-        temp_df = pd.read_csv(file_path, sep=',', index_col=None)
-        df = pd.concat([df, temp_df], ignore_index=True)
-    bar.finish()
+
+    for folder_name in foler_names:
+        # list all files in the folder
+        files = os.listdir(file_path + folder_name)
+        # load all files into a panda
+        bar = pb.ProgressBar(maxval=len(files), widgets=["Processing files from " + folder_name + ": ",pb.Timer(), pb.Bar(), pb.ETA()])
+        bar.start()
+        for i, file in enumerate(files):
+            bar.update(i)
+            temp_path = os.path.join(file_path, folder_name, file)
+            temp_df = pd.read_csv(temp_path, sep=',', index_col=None)
+            df = pd.concat([df, temp_df], ignore_index=True)
+        bar.finish()
     # remove all nan rows
     df = df.dropna()
     df = df.reset_index(drop=True)
@@ -310,7 +313,6 @@ def save_batches(batches, folder_path, type, ow):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         np.save(file_path, batch)
-
 
 if __name__ == "__main__":
     main()

@@ -104,7 +104,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     print('Loading Data...')
     print('-' * 89)
   
-    
     if noval:
         training_data = load_data_full(config,local,test=test)
         val_data_list = []
@@ -137,7 +136,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
 
         config.id = wandb.util.generate_id()
 
-
     if test:
         project = 'Test'
     else:
@@ -145,8 +143,12 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     
     wandb.init(project=project, entity='bene94', name=name, config=config, resume="allow", id=config.id)
     wandb.watch(model)
-
     wandb.log({"xp_name": config.xp_name})
+    
+    print('-' * 89)
+    print('Training...')
+    print('-' * 89)
+
     ## train model
     best_val_loss = float("inf")
     best_model = None
@@ -174,11 +176,11 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         val_loss, val_out, val_target, __ = evaluate(model, val_2_data, criterion, config)
         wandb.log({"val_2_loss": val_loss})
 
-    print('-' * 89)
-    print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
-        .format(epoch, (time.time() - epoch_start_time),
-                                    val_loss))
-    print('-' * 89)
+        print('-' * 89)
+        print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
+            .format(epoch, (time.time() - epoch_start_time),
+                                        val_loss))
+        print('-' * 89)
         
     best_model = model  
 
@@ -187,7 +189,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     print('-' * 89)
     print('| End of training | time: {:5.2f}s |'.format((time.time() - overall_start_time)))
     print('-' * 89)
-    print("Best validation loss {:.4f}".format(best_val_loss))
 
     torch.save(best_model.state_dict(), path_model + config.xp_name +'.pth')
     # save config dict with pickle

@@ -21,17 +21,17 @@ from config import *
 
 @click.command()
 
-@click.option('--model_name', default='211118-063721', help='Name of the model')
-@click.option('--data_path', default='data_exp', help='Path to the data')
+@click.option('--model_name', '-m', default='211118-063721', help='Name of the model')
+@click.option('--data_path', '-p',default='data_exp', help='Path to the data')
 
-@click.option('--batch_size', default=32, help='Batch size')
-@click.option('--epochs', default=5, help='Number of epochs')
-@click.option('--lr', default=1e-5, help='Learning rate')
+@click.option('--batch_size', '-b', default=32, help='Batch size')
+@click.option('--epochs', '-e',default=5, help='Number of epochs')
+@click.option('--lr', '-l',default=1e-5, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
 @click.option('--cuda', default=True, help='Use cuda')
 
-@click.option('--mult', default=2, help='Uses multibel val/train splits')
+@click.option('--mult', '-x',default=2, help='Uses multibel val/train splits')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult):

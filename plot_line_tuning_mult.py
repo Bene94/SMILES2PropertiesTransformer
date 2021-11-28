@@ -1,7 +1,7 @@
 import numpy as np
 import plot_results as pr
 
-name = '211124-183111'
+name = '211127-092906'
 path_temp = '../out_fine_tuen/'
 #path_temp = '../temp/'
 
@@ -32,6 +32,9 @@ print('heatmaps made')
 max = int(2e5)
 
 pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', path = '', save=True)
+print('val_0_fine done')
 pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1', path = '', save=True)
+print('val_1_fine done')
 pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', path = '', save=True)
+print('val_2_fine done')
 print('scatter plots made')

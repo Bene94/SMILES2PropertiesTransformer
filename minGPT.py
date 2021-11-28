@@ -182,6 +182,7 @@ class GPT(nn.Module):
         
         #concat xT to token_embeddings
         position_embeddings = self.pos_emb[:, :t + 1, :] # each position maps to a (learnable) vector
+        
         if self.xT > 0:
             position_embeddings = self.pos_emb[:, :t + 1, :] # each position maps to a (learnable) vector
             token_embeddings = torch.cat([token_embeddings, xT_proj], dim=1)
