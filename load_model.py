@@ -2,12 +2,13 @@
 ## load the pytorch transformer model and the cofiguration file
 
 import pickle
+from numpy.random.mtrand import random
 import torch
 import torch.nn as nn
 import os
 
-
 import wandb
+import click
 
 import minGPT 
 from nn_dataloader import *
@@ -15,52 +16,46 @@ from plot_results import *
 from trainer import *
 from plot_results import *
 
-def load_model(path, name):
-    # load config file
-    #list all files in path
-    files = os.listdir(path)
-    # check if the beginning of one file is the same as the name else make error
-    for file in files:
-        if file.startswith(name):
-            config_file = file
-    # remove last 4 characters from config file name
-    config_file = config_file[:-4]
-    config = pickle.load(open(path + config_file + '.pkl', 'rb'))
-
-    #config = convert_config(config)
-
-    # load model
-    model = minGPT.GPT(config)
-    model.load_state_dict(torch.load(path + config_file + '.pth'))
-    model.eval()
-    return model, config
-
-def convert_config(config):
-    wandb.init(config=config)
-    config = wandb.config
-    wandb.finish()
-    return config
 
 
-if __name__ == '__main__':
-    path = '/home/bene/NNGamma/Models/'
-    name = '211126-160520'
-    save_path = '/home/bene/NNGamma/temp/'
-    model, config = load_model(path,name)
 
-    calc = True
-    save = True
+@click.command()
+
+@click.option('--name','-n', default='local_test', help='Name of the modle')
+@click.option('--data','-d', default='', help='Path to the data if empty use datapath from modle config')
+
+@click.option('--calc','-c', default=True, help='Calculate results and eval')
+@click.option('--plot','-p', default=True, help='Plot results')
+@click.option('--save','-s', default=True, help='Save results')
+
+
+def main(name,data,calc,plot,save):
+    
+    if os.environ.get('XPRUN_NAME') is not None:
+        local = False
+        path_temp = "/mnt/xprun/temp/"
+        path_model = "/mnt/xprun/out/"
+        path_wandb = "/mnt/xprun/wandb/"
+        data_path = "/mnt/xprun/data/" + data + "/"
+        save_path = "/mnt/xprun/out/" + name + "/"
+        xp_name = os.environ['XPRUN_NAME']
+    else:
+        local = True
+        path_temp = '../temp/'
+        path_model = '../Models/'
+        path_wandb = '../wandb/'
+        data_path = '../data/' + data + '/'
+        save_path = '../out/' + name +  '/'
+        xp_name = 'local_test' + str(random())
+
+    model, config = load_model(path_model,name)
 
     if calc:
+
         #model to devide
         print(config.data_path)
         model = model.to('cuda')
-
         criterion = nn.MSELoss()
-
-        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
-        #data_path = os.path.join('/home/bene/NNGamma/data/exp/')
-        #data_path = os.path.join('/home/bene/NNGamma/data/exp_t/')
 
         print('-' * 89)
         print('Loading Data...')
@@ -107,6 +102,9 @@ if __name__ == '__main__':
 
 
         if save:
+            # check if save path exists
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
             # save the results to a file
             np.save(save_path + 'train_out.npy', train_out)
             np.save(save_path + 'train_target.npy', train_target)
@@ -140,7 +138,7 @@ if __name__ == '__main__':
         val_2_target = np.load(save_path + 'val_2_target.npy')
 
 
-    if False:
+    if plot:
         make_MSE_x(train_out, train_target, name = "train", save = True)
         make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
         make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
@@ -158,14 +156,42 @@ if __name__ == '__main__':
         make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True)
         make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True)
 
-    if len(train_out) < 30000:
-        print('-' * 89)
-        print('Make Scatter...')
-        print('-' * 89)
-        # concatenate the resutls
-        #train_out = np.concatenate((train_out, val_0_out, val_1_out, val_2_out), axis=0)
-        #train_target = np.concatenate((train_target, val_0_target, val_1_target, val_2_target), axis=0)
-        train_out = np.concatenate((train_out, val_1_out, val_2_out), axis=0)
-        train_target = np.concatenate((train_target, val_1_target, val_2_target), axis=0)
-        
-        make_scatter(train_out, train_target, name = "train", save = True)
+        if len(train_out) < 30000:
+            print('-' * 89)
+            print('Make Scatter...')
+            print('-' * 89)
+            train_out = np.concatenate((train_out, val_1_out, val_2_out), axis=0)
+            train_target = np.concatenate((train_target, val_1_target, val_2_target), axis=0)
+            
+            make_scatter(train_out, train_target, name = "train", save = True)
+
+
+def load_model(path, name):
+    # load config file
+    #list all files in path
+    files = os.listdir(path)
+    # check if the beginning of one file is the same as the name else make error
+    for file in files:
+        if file.startswith(name):
+            config_file = file
+    # remove last 4 characters from config file name
+    config_file = config_file[:-4]
+    config = pickle.load(open(path + config_file + '.pkl', 'rb'))
+
+    #config = convert_config(config)
+
+    # load model
+    model = minGPT.GPT(config)
+    model.load_state_dict(torch.load(path + config_file + '.pth'))
+    model.eval()
+    return model, config
+
+def convert_config(config):
+    wandb.init(config=config)
+    config = wandb.config
+    wandb.finish()
+    return config
+
+
+if __name__ == '__main__':
+    main()

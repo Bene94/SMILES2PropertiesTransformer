@@ -165,7 +165,7 @@ def evaluate(eval_model, val_dataloader, criterion, config):
     total_output = np.array([])
     total_target = np.array([])
     total_xT = np.empty((0,2))
-    total_smile = np.empty((0,128))
+    total_idx = np.empty((0,2))
 
     with torch.no_grad():
 
@@ -176,16 +176,20 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                 target_batch, data_batch = batch[0], batch[1]
                 smile = data_batch[0]
                 xt = data_batch[1]
+                idx = data_batch[2]
+
                 
                 target_chunks = torch.split(target_batch,chunk_size)
                 smile_chunks = torch.split(smile,chunk_size)
                 xt_chunks = torch.split(xt,chunk_size)
+                idx_chunks = torch.split(idx,chunk_size)
                     
                 for j in range(len(target_chunks)):
             
                     target = target_chunks[j]
                     smile = smile_chunks[j]
                     xt = xt_chunks[j]
+                    idx = idx_chunks[j]
 
                     xt[:,0] = xt[:,0] - 0.5
                     xt[:,1] = xt[:,1] / 298.5 -1.
@@ -202,13 +206,16 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                         target = target.type(torch.LongTensor).to(config.device)
 
                     output = eval_model(smile, xt)
+
+
+
                     total_loss += criterion(output.squeeze(), target.squeeze()).item()/len(target_chunks)
                     
                     total_output = np.append(total_output, output.cpu().numpy())
                     total_target = np.append(total_target, target.cpu().numpy())
-                    total_xT = np.append(total_xT, xt_chunks[j].cpu().numpy(),axis=0)
-                    total_smile = np.append(total_smile, smile.cpu().numpy(),axis=0)
+                    total_xT = np.append(total_xT, xt.cpu().numpy(),axis=0)
+                    total_idx = np.append(total_idx, idx.cpu().numpy() ,axis=0)
 
     
-    return total_loss / (len(val_dataloader)), total_output, total_target, [total_smile, total_xT]
+    return total_loss / (len(val_dataloader)), total_output, total_target, [total_idx, total_xT]
 

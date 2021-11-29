@@ -65,7 +65,7 @@ class gamma_dataset(Dataset):
         self.train_target = np.digitize(self.train_target, bins)
     
     def __getitem__(self, index): 
-        return self.train_target[index],  [self.train_data[index], self.xT[index]]
+        return self.train_target[index],  [self.train_data[index], self.xT[index], self.smile_index[index]]
 
     def __len__(self):
         if len(self.train_data.shape) == 1:
