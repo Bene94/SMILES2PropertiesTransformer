@@ -158,8 +158,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     
 
     # check if folder exists in path temp with name of model
-    if not os.path.exists(path_temp + name):
-        os.makedirs(path_temp + name)
+    if not os.path.exists(path_temp + xp_name):
+        os.makedirs(path_temp + xp_name)
     
     np.save(path_temp + xp_name + '/val_predction_0.npy', val_predction_0)
     np.save(path_temp + xp_name + '/val_predction_1.npy', val_predction_1)
