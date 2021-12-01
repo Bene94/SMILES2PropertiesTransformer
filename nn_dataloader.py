@@ -11,7 +11,9 @@ class gamma_dataset(Dataset):
     def __init__(self, root, data_type, config):
         self.root = root
         self.data_type = data_type
-        self.train_data, self.train_target, self.xT, self.smile_index = self.load_data(config.test)
+        
+        self.train_data, self.train_target, self.xT, self.smile_index, self.index = self.load_data(config.test)
+        
         if config.shift != 0:
            self.train_target = self.train_target + config.shift
 
@@ -30,7 +32,7 @@ class gamma_dataset(Dataset):
         data = np.array([])
         for i in range(0, len(files)):
             #bar.update(i)
-            if files[i].startswith(self.data_type):
+            if files[i].startswith(self.data_type) and not files[i].startswith("comp_list"):
                 # when the data array is empty create lese append
                 if data.size == 0:
                     data = np.load(self.root + files[i])
@@ -44,6 +46,10 @@ class gamma_dataset(Dataset):
         smiles = data[:, 1:129]
         xT = data[:,129:131]
         smile_index = data[:,131:133]
+        if data.shape[1] == 134:
+            index = data[:,133]
+        else:
+            index = np.zeros(len(data))
 
         smiles = torch.tensor(smiles)
         target = torch.from_numpy(target)
@@ -54,7 +60,7 @@ class gamma_dataset(Dataset):
         target = target.view((target.shape[0],1,1))
         xT = xT.type(torch.FloatTensor)
         #return the data and target
-        return smiles, target, xT, smile_index 
+        return smiles, target, xT, smile_index, index 
 
     def bin_data(self, config):
         bound = config.bound
@@ -65,7 +71,7 @@ class gamma_dataset(Dataset):
         self.train_target = np.digitize(self.train_target, bins)
     
     def __getitem__(self, index): 
-        return self.train_target[index],  [self.train_data[index], self.xT[index], self.smile_index[index]]
+        return self.train_target[index],  [self.train_data[index], self.xT[index], self.smile_index[index], self.index[index]]
 
     def __len__(self):
         if len(self.train_data.shape) == 1:

@@ -21,8 +21,8 @@ from plot_results import *
 
 @click.command()
 
-@click.option('--name','-n', default='local_test', help='Name of the modle')
-@click.option('--data','-d', default='', help='Path to the data if empty use datapath from modle config')
+@click.option('--name','-n', default='211126-160520', help='Name of the modle')
+@click.option('--data','-d', default='exp_t', help='Path to the data if empty use datapath from modle config')
 
 @click.option('--calc','-c', default=True, help='Calculate results and eval')
 @click.option('--plot','-p', default=True, help='Plot results')
@@ -110,21 +110,25 @@ def main(name,data,calc,plot,save):
             np.save(save_path + 'train_target.npy', train_target)
             np.save(save_path + 'train_smile.npy', train_in[0])
             np.save(save_path + 'train_xT.npy', train_in[1])
+            np.save(save_path + 'train_x.npy', train_in[2])
 
             np.save(save_path + 'val_0_out.npy', val_0_out)
             np.save(save_path + 'val_0_target.npy', val_0_target)
             np.save(save_path + 'val_0_smile.npy', val_0_in[0])
             np.save(save_path + 'val_0_xT.npy', val_0_in[1])
+            np.save(save_path + 'val_0_x.npy', val_0_in[2])
 
             np.save(save_path + 'val_1_out.npy', val_1_out)
             np.save(save_path + 'val_1_target.npy', val_1_target)
             np.save(save_path + 'val_1_smile.npy', val_1_in[0])
             np.save(save_path + 'val_1_xT.npy', val_1_in[1])
+            np.save(save_path + 'val_1_x.npy', val_1_in[2])
 
             np.save(save_path + 'val_2_out.npy', val_2_out)
             np.save(save_path + 'val_2_target.npy', val_2_target)
             np.save(save_path + 'val_2_smile.npy', val_2_in[0])
             np.save(save_path + 'val_2_xT.npy', val_2_in[1])
+            np.save(save_path + 'val_2_x.npy', val_2_in[2])
 
     else:
 

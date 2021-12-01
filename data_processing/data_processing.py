@@ -74,6 +74,9 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
                 prefix = 'val_' + str(i-1)
             data_batches = aug_df(df, comp_list, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow)
+    
+    # save comp
+    comp_list.to_csv(file_out + 'comp_list.csv', index=False)
 
 def load_exp_data(file_path, foler_names):
     #load the data from the experiment 
@@ -94,6 +97,8 @@ def load_exp_data(file_path, foler_names):
     # remove all nan rows
     df = df.dropna()
     df = df.reset_index(drop=True)
+    if not 'i' in df.columns:
+        df['i'] = 1 
 
     solvent_list = df['solvent'].drop_duplicates()
     solute_list = df['solute'].drop_duplicates()
@@ -147,7 +152,7 @@ def aug_df(df, comp_list, batch_size):
     mos = np.array((2,))
     eos = np.array((3,))
 
-    temp_data = np.zeros((batch_size,133)) 
+    temp_data = np.zeros((batch_size,134)) 
     data_list = []
     # find the index of the smiles in df in comp_list
     index_solute = np.zeros((len(df_temp),))
@@ -190,6 +195,7 @@ def aug_df(df, comp_list, batch_size):
         gamma = df.loc[i,'lnGamma']
         x = df.loc[i,'x']
         T = df.loc[i,'T']
+        idx = df.loc[i,'i']
 
         for j in range(solute_n_alias[i]):
             for k in range(solvent_n_alias[i]):      
@@ -202,10 +208,11 @@ def aug_df(df, comp_list, batch_size):
                     temp_data[count,130] = T
                     temp_data[count,131] = index_solute[i]
                     temp_data[count,132] = index_solvent[i]
+                    temp_data[count,133] = idx
                     count += 1
                     if count == batch_size:
                         data_list.append(temp_data)
-                        temp_data = np.zeros((batch_size,133))
+                        temp_data = np.zeros((batch_size,134))
                         count = 0
     if count != 0:
         data_list.append(temp_data[:count,:])
@@ -313,6 +320,13 @@ def save_batches(batches, folder_path, type, ow):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         np.save(file_path, batch)
+
+def revert_vocab(df, comp_list):
+    # look up the index in comp_list and return the smiles string first index is the solute second the solvent
+    df['Solute'] = comp_list.loc[df['solute_index'].to_numpy().astype(int), 'SMILE0'].tolist()
+    df['Solvent'] = comp_list.loc[df['solvent_index'].to_numpy().astype(int), 'SMILE0'].tolist()
+    return df
+
 
 if __name__ == "__main__":
     main()
