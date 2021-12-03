@@ -97,7 +97,26 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     val_target_2 = []
 
 
-    for i in range(0,outer_loop):
+    # check if checkpoints exist
+    if os.path.exists(path_temp + xp_name + '/i.npy'):
+        print("Loading checkpoint")
+        i_start = np.load(path_temp + xp_name + '/i.npy')
+
+        val_predction_0 = np.load(path_temp + xp_name + '/val_predction_0.npy')
+        val_predction_1 = np.load(path_temp + xp_name + '/val_predction_1.npy')
+        val_predction_2 = np.load(path_temp + xp_name + '/val_predction_2.npy')
+
+        val_input_0 = np.load(path_temp + xp_name + '/val_input_0.npy')
+        val_input_1 = np.load(path_temp + xp_name + '/val_input_1.npy')
+        val_input_2 = np.load(path_temp + xp_name + '/val_input_2.npy')
+
+        val_target_0 = np.load(path_temp + xp_name + '/val_target_0.npy')
+        val_target_1 = np.load(path_temp + xp_name + '/val_target_1.npy')
+        val_target_2 = np.load(path_temp + xp_name + '/val_target_2.npy')
+    else:
+        i_start = 0
+
+    for i in range(i_start,outer_loop):
 
         wandb.log({'outer_loop': i})
         print("outer_loop: ", i)
@@ -157,21 +176,23 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         wandb.log({"val_2_ft": temp_val_loss})
     
 
-    # check if folder exists in path temp with name of model
-    if not os.path.exists(path_temp + xp_name):
-        os.makedirs(path_temp + xp_name)
-    
-    np.save(path_temp + xp_name + '/val_predction_0.npy', val_predction_0)
-    np.save(path_temp + xp_name + '/val_predction_1.npy', val_predction_1)
-    np.save(path_temp + xp_name + '/val_predction_2.npy', val_predction_2)
+        # check if folder exists in path temp with name of model
+        if not os.path.exists(path_temp + xp_name):
+            os.makedirs(path_temp + xp_name)
 
-    np.save(path_temp + xp_name + '/val_target_0.npy', val_target_0)
-    np.save(path_temp + xp_name + '/val_target_1.npy', val_target_1)
-    np.save(path_temp + xp_name + '/val_target_2.npy', val_target_2)
+        np.save(path_temp + xp_name + '/i.npy', i)
+        
+        np.save(path_temp + xp_name + '/val_predction_0.npy', val_predction_0)
+        np.save(path_temp + xp_name + '/val_predction_1.npy', val_predction_1)
+        np.save(path_temp + xp_name + '/val_predction_2.npy', val_predction_2)
 
-    np.save(path_temp + xp_name + '/val_input_0.npy', val_input_0)
-    np.save(path_temp + xp_name + '/val_input_1.npy', val_input_1)
-    np.save(path_temp + xp_name + '/val_input_2.npy', val_input_2)
+        np.save(path_temp + xp_name + '/val_target_0.npy', val_target_0)
+        np.save(path_temp + xp_name + '/val_target_1.npy', val_target_1)
+        np.save(path_temp + xp_name + '/val_target_2.npy', val_target_2)
+
+        np.save(path_temp + xp_name + '/val_input_0.npy', val_input_0)
+        np.save(path_temp + xp_name + '/val_input_1.npy', val_input_1)
+        np.save(path_temp + xp_name + '/val_input_2.npy', val_input_2)
         
 if __name__ == '__main__':
     main()

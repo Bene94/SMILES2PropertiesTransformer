@@ -233,6 +233,7 @@ def apply_vocab(comp_list, vocab_dict):
                         comp_list.at[i,'emb'+str(j-1)] = np.array([vocab_dict['H2O']])
                     else:
                         comp_list.at[i,'emb'+str(j-1)] = np.array([vocab_dict [char] for char in comp_list.loc[i,columns]])            
+
     return comp_list
 
 def get_idx_test_val(solvent_indx, solute_indx, frac, seed): 

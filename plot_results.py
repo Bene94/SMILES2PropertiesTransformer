@@ -46,13 +46,13 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
 def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
-    plt.hist2d(target, prediciton, bins=41, norm=LogNorm())
+    plt.hist2d(target, prediciton, bins=101, norm=LogNorm())
     heatmap, xedges, yedges = np.histogram2d(target.squeeze(), prediciton.squeeze(), bins=2000)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     plt.imshow(heatmap.T, extent=extent, origin='lower')
     plt.show()
-    plt.xlim(-20,20)
-    plt.ylim(-20,20)
+    plt.xlim(xedges[0],xedges[-1])
+    plt.ylim(yedges[0],yedges[-1])
     plt.colorbar()
 
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)

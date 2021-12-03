@@ -4,7 +4,7 @@ import numpy as np
 ## function to create multiple splits of the data
 
 
-file_path = ["brouwer_exp_c"]
+file_path = ["brouwer_exp"]
 save_path = "data_exp"
 vocab_path = "vocab"
 ul = np.inf
