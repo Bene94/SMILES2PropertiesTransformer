@@ -2,7 +2,7 @@ XpV0(
     project: "data_processing",
     containers: {
         "main": (
-            command: ["python", "data_processing/data_processing_cosmo.py"],
+            command: ["python", "data_processing/data_processing.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),

@@ -29,7 +29,7 @@ from config import *
 @click.option('--lr', default=1e-4, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
-@click.option('--cuda', default=True, help='Use cuda')
+@click.option('--cuda', default=False, help='Use cuda')
 @click.option('--local', default=True, help='Use local')
 
 @click.option('--one_out', default=False, help='Use leave one out validation')

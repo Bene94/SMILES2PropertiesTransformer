@@ -64,6 +64,7 @@ def make_heatmap(prediciton, target, name = '', path = '', save=False):
     plt.savefig(path + 'plot/heat_' + name)
 
 def make_scatter(prediciton, target, name = '', path = '', save=False):
+    
     plt.clf()
     vals = []
     vals.append(target)
@@ -78,6 +79,11 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
     plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
+
+    # add two lines to the plot to show +- 0.1 delta
+    plt.plot([-20,20], [-19.7, 20.3], 'k--', lw=1)
+    plt.plot([-20,20], [-20.3, 19.7], 'k--', lw=1)
+    
     # set axix to max and min of target or prediciton
     min_target = min(target)
     max_target = max(target)
