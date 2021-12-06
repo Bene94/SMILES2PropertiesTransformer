@@ -22,7 +22,7 @@ from pandas.core.frame import DataFrame
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
 @click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
 
-@click.option('--aug', default=False, help='augment the smile data')
+@click.option('--aug', default=True, help='augment the smile data')
 @click.option('--max_aug', default=0, help='maximum number of augmentations')
 @click.option('--h2o', default=False, help='allows H2O in the validation set')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
@@ -41,7 +41,7 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
         file_path = "../raw_data/" 
         file_out = "../data/" + save_path + "/"
         vocab_path = "../" + vocab_path + "/"
-        alias_path = '../raw_data/alias/alias_dict.npy'
+        alias_path = '../raw_data/alias/alias_dict_brower.npy'
 
 
 
@@ -141,7 +141,6 @@ def aug_data(comp_list,alias_path):
 def aug_df(df, comp_list, batch_size):
     # add the alias to the new collumn alias to comp_list
 
-
     df_temp = df.copy()
     df_temp['emb'] = np.nan
     df_temp['emb'] = df_temp['emb'].astype(object)
@@ -198,7 +197,7 @@ def aug_df(df, comp_list, batch_size):
         idx = df.loc[i,'i']
 
         for j in range(solute_n_alias[i]):
-            for k in range(solvent_n_alias[i]):      
+            for k in range(solvent_n_alias[i]):
                 emb = np.concatenate((sos,comp_list.loc[index_solute[i], 'emb' + str(j)], mos, comp_list.loc[index_solvent[i], 'emb' + str(k)], eos))
                 if len(emb) <= 128:
                     emb = np.pad(emb, (0, 128 - len(emb)), 'constant', constant_values=(0, 0))
@@ -257,17 +256,32 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
     df_temp_train = df_temp.loc[ ~df_temp.index.isin(df_temp_val_0.index) & ~df_temp.index.isin(df_temp_val_1.index)]
     
     #sample 10 % of the dataframe that is not in the validation set
-    df_temp_val_2 = df_temp_train.sample(frac=0.1, replace=False, random_state=seed)
-    df_temp_train = df_temp_train.drop(df_temp_val_2.index)
+
+    df_temp_val_2 = df_temp_train.sample(frac=0.01, replace=False, random_state=seed)
+
+    bar = pb.ProgressBar(maxval=len(df_temp_val_2), widgets=['Sampling data: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
+    count = 0
+    df_val_2 = pd.DataFrame(columns=df_temp_val_2.columns)
+    for i in df_temp_val_2.index:
+        bar.update(count)
+        count += 1	
+
+        temp = df_temp_val_2.loc[i,['solvent','solute']] == df_temp_train.loc[:,['solvent','solute']]
+        temp = temp[temp['solute']]
+        temp = temp[temp['solvent']]
+        df_val_2 = pd.concat([df_val_2, df_temp_train.loc[temp.index,:]])
+
+    df_temp_train = df_temp_train.drop(df_val_2.index)
 
     # remove all nan form df_temp_train
     df_temp_train = df_temp_train.dropna()
     df_temp_train = df_temp_train.reset_index(drop=True)
     df_temp_val_0 = df_temp_val_0.reset_index(drop=True)
     df_temp_val_1 = df_temp_val_1.reset_index(drop=True)
-    df_temp_val_2 = df_temp_val_2.reset_index(drop=True)
+    df_val_2 = df_val_2.reset_index(drop=True)
 
-    return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
+    return [df_temp_train, df_temp_val_0, df_temp_val_1, df_val_2]
 
 def make_input_data(df, comp_list,batch_size):
 

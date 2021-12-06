@@ -1,6 +1,8 @@
+from progressbar.widgets import ETA
 import rdkit as rd  
 import numpy as np
 
+import progressbar as pb
 
 from SmilesEnumerator import SmilesEnumerator
 import data_processing_cosmo as dp
@@ -10,22 +12,23 @@ import data_processing_cosmo as dp
 
 
 def main():
-    file_path = '../raw_data/cosmo_002/'
+    file_path = '../raw_data/brouwer_exp/'
     solvent_list, solute_list, df_join = dp.load_exp_data(file_path) 
     smile_list = np.append(solvent_list, solute_list)
     smile_list = np.unique(smile_list)
     alias_dict = augment_smile(smile_list)
-    np.save('../raw_data/alias/alias_dict.npy', alias_dict)
+    np.save('../raw_data/alias/alias_dict_brower.npy', alias_dict)
 
 
 
 def augment_smile(solvent_list):
     # creates alternitive representations of smiles
-    aug_fac = 5
+    aug_fac = 8
     sme = SmilesEnumerator()
     
     alias_dict = {}
 
+    bar = pb.ProgressBar(max_value=len(solvent_list), widgets=['Making alias: ', pb.Bar('=', '[', ']'), ' ', pb.Percentage(), pb.ETA()])
     #argument the data by a factor of aug_fac
     for i in range(len(solvent_list)):
         alias_list = [solvent_list[i]]
