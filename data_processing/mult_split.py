@@ -10,11 +10,12 @@ save_path = "data_exp"
 vocab_path = "vocab"
 ul = np.inf
 ll = -np.inf
-frac = 0.1
+frac = 0.05
 aug = False
 max_aug = 10
+h2o = True # if True, H2O can be in the validation set
 
-num_splits = 500
+num_splits = 200
 
 for i in range(0,num_splits):
     print("\n")
@@ -24,5 +25,4 @@ for i in range(0,num_splits):
     # check if the directory exists
     if not os.path.exists('../data/'+save_path_temp):
         os.makedirs('../data/'+save_path_temp)
-    
-    dc.processing(file_path, save_path_temp, vocab_path, ul, ll, frac, aug,  max_aug, i, ow=True, h2o=True)
+    dc.processing(file_path, save_path_temp, vocab_path, ul, ll, frac, aug,  max_aug, i, ow=True, h2o=h2o)

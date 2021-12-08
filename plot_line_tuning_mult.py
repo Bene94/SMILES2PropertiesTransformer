@@ -3,12 +3,15 @@ import plot_results as pr
 import pandas as pd
 
 name = '211201-125751'
-name = '211204-210416'
+name = '211206-103629'
 name = '211204-211038'
-path_temp = '../out_fine_tuen/'
+name = '211206-103617' # current one
+name = '211206-135802'
+path_temp = '/home/bene/NNGamma/out_fine_tuen/'
+plot_path = '/home/bene/NNGamma/src/'
 #path_temp = '../temp/'
 
-group = True
+group = False
 
 #load data
 val_predction_0 = np.load(path_temp + name + '/val_predction_0.npy')
@@ -69,22 +72,22 @@ print('length val0: ' + str(len(val_predction_0)))
 print('length val1: ' + str(len(val_predction_1)))
 print('length val2: ' + str(len(val_predction_2)))
 
-pr.make_heatmap(val_predction_0, val_target_0, 'val_0_fine' , path = '', save=True)
-pr.make_heatmap(val_predction_1, val_target_1, 'val_1_fine' , path = '', save=True)
-pr.make_heatmap(val_predction_2, val_target_2, 'val_2_fine' , path = '', save=True)
+pr.make_heatmap(val_predction_0, val_target_0, 'val_0_fine' , path = plot_path, save=True)
+pr.make_heatmap(val_predction_1, val_target_1, 'val_1_fine' , path = plot_path, save=True)
+pr.make_heatmap(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
 print('heatmaps plotted')
 
-pr.make_historgam_delta(val_predction_0, val_target_0, 'val_0_fine' , path = '', save=True)
-pr.make_historgam_delta(val_predction_1, val_target_1, 'val_1_fine' , path = '', save=True)
-pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = '', save=True)
+pr.make_historgam_delta(val_predction_0, val_target_0, 'val_0_fine' , path = plot_path, save=True)
+pr.make_historgam_delta(val_predction_1, val_target_1, 'val_1_fine' , path = plot_path, save=True)
+pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
 max = int(2e5)
 
-pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', path = '', save=True)
+pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', path = plot_path, save=True)
 print('val_0_fine done')
-pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1', path = '', save=True)
+pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1', path = plot_path, save=True)
 print('val_1_fine done')
-pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', path = '', save=True)
+pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', path = plot_path, save=True)
 print('val_2_fine done')
 print('scatter plots made')

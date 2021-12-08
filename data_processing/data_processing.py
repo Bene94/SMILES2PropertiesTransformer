@@ -259,10 +259,13 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
 
     df_temp_val_2 = df_temp_train.sample(frac=0.01, replace=False, random_state=seed)
 
-    bar = pb.ProgressBar(maxval=len(df_temp_val_2), widgets=['Sampling data: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(df_temp_val_2), widgets=['Checking integrety of val sets: ',pb.Timer(), pb.Bar(), pb.ETA()])
     bar.start()
     count = 0
+
+    
     df_val_2 = pd.DataFrame(columns=df_temp_val_2.columns)
+    
     for i in df_temp_val_2.index:
         bar.update(count)
         count += 1	
@@ -270,9 +273,33 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
         temp = df_temp_val_2.loc[i,['solvent','solute']] == df_temp_train.loc[:,['solvent','solute']]
         temp = temp[temp['solute']]
         temp = temp[temp['solvent']]
-        df_val_2 = pd.concat([df_val_2, df_temp_train.loc[temp.index,:]])
+
+        temp_2 = df_temp_train.drop(temp.index)
+
+        if len(temp_2[temp_2['solvent'] == df_temp_val_2.loc[i,'solvent']]) == 0 and len(temp_2[temp_2['solute'] == df_temp_val_2.loc[i,'solute']]) == 0:
+            df_temp_val_0 = df_temp_val_0.append(df_temp_train.loc[temp.index,:])
+            df_temp_train = df_temp_train.drop(temp.index)
+
+        elif len(temp_2[temp_2['solvent'] == df_temp_val_2.loc[i,'solvent']]) == 0 or len(temp_2[temp_2['solute'] == df_temp_val_2.loc[i,'solute']]) == 0:
+            df_temp_val_1 = df_temp_val_1.append(df_temp_train.loc[temp.index,:])
+            df_temp_train = df_temp_train.drop(temp.index)
+        else:
+            df_val_2 = pd.concat([df_val_2, df_temp_train.loc[temp.index,:]])
+
+    bar.finish()
+
+    df_val_2.drop_duplicates(inplace=True)
+    df_temp_val_1.drop_duplicates(inplace=True)
+    df_temp_val_0.drop_duplicates(inplace=True)
 
     df_temp_train = df_temp_train.drop(df_val_2.index)
+
+    print("len of data: " + str(len(df_join)))
+    print("len of val_0: " + str(len(df_temp_val_0)))
+    print("len of val_1: " + str(len(df_temp_val_1)))
+    print("len of val_2: " + str(len(df_val_2)))
+    print("len of train: " + str(len(df_temp_train)))
+    print("len of val_0 + val_1 + val_2 + train: " + str(len(df_temp_val_0) + len(df_temp_val_1) + len(df_val_2) + len(df_temp_train)) )
 
     # remove all nan form df_temp_train
     df_temp_train = df_temp_train.dropna()
