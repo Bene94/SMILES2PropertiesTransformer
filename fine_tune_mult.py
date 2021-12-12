@@ -162,53 +162,41 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
 
             epoch_start_time = time.time()
 
-            train(model, criterion, optimizer, training_data, val_data_list, scheduler, epoch, wandb)
+            train(model, criterion, optimizer, training_data, [], scheduler, epoch, wandb)
             
             torch.cuda.empty_cache()
 
             # evaluate the 3 validation sets
 
         
-        temp_val_loss, temp_val_prediction, temp_val_target, val_in = evaluate(model, val_0_data, criterion, config)
-        
-        val_predction_0 = np.concatenate((val_predction_0, temp_val_prediction), axis=0)
-        val_target_0 = np.concatenate((val_target_0, temp_val_target), axis=0)
-        val_input_0 = np.concatenate((val_input_0, val_in[2]), axis=0)
+        temp_val_loss, val_predction_0, val_target_0, val_input_0 = evaluate(model, val_0_data, criterion, config)
         
         wandb.log({"val_0_ft": temp_val_loss})
 
-        temp_val_loss, temp_val_prediction, temp_val_target, val_in  = evaluate(model, val_1_data, criterion, config)
-        
-        val_predction_1 = np.concatenate((val_predction_1, temp_val_prediction), axis=0)
-        val_target_1 = np.concatenate((val_target_1, temp_val_target), axis=0)
-        val_input_1 = np.concatenate((val_input_1, val_in[2]), axis=0)
+        temp_val_loss, val_predction_1, val_target_1, val_input_1  = evaluate(model, val_1_data, criterion, config)
+
         wandb.log({"val_1_ft": temp_val_loss})
 
-        temp_val_loss, temp_val_prediction, temp_val_target, val_in  = evaluate(model, val_2_data, criterion, config)
-        
-        val_predction_2 = np.concatenate((val_predction_2, temp_val_prediction), axis=0)
-        val_target_2 = np.concatenate((val_target_2, temp_val_target), axis=0)
-        val_input_2 = np.concatenate((val_input_2, val_in[2]), axis=0)
+        temp_val_loss, val_predction_2, val_target_2, val_input_2  = evaluate(model, val_2_data, criterion, config)
+    
         wandb.log({"val_2_ft": temp_val_loss})
     
-
-        # check if folder exists in path temp with name of model
         if not os.path.exists(path_temp + xp_name):
             os.makedirs(path_temp + xp_name)
 
         np.save(path_temp + xp_name + '/i.npy', i)
         
-        np.save(path_temp + xp_name + '/val_predction_0.npy', val_predction_0)
-        np.save(path_temp + xp_name + '/val_predction_1.npy', val_predction_1)
-        np.save(path_temp + xp_name + '/val_predction_2.npy', val_predction_2)
+        np.save(path_temp + xp_name + '/val_predction_0_'+ str(i) +'.npy', val_predction_0)
+        np.save(path_temp + xp_name + '/val_predction_1_'+ str(i) +'.npy', val_predction_1)
+        np.save(path_temp + xp_name + '/val_predction_2_'+ str(i) +'.npy', val_predction_2)
 
-        np.save(path_temp + xp_name + '/val_target_0.npy', val_target_0)
-        np.save(path_temp + xp_name + '/val_target_1.npy', val_target_1)
-        np.save(path_temp + xp_name + '/val_target_2.npy', val_target_2)
+        np.save(path_temp + xp_name + '/val_input_0_'+ str(i) +'.npy', val_input_0)
+        np.save(path_temp + xp_name + '/val_input_1_'+ str(i) +'.npy', val_input_1)
+        np.save(path_temp + xp_name + '/val_input_2_'+ str(i) +'.npy', val_input_2)
 
-        np.save(path_temp + xp_name + '/val_input_0.npy', val_input_0)
-        np.save(path_temp + xp_name + '/val_input_1.npy', val_input_1)
-        np.save(path_temp + xp_name + '/val_input_2.npy', val_input_2)
+        np.save(path_temp + xp_name + '/val_target_0_'+ str(i) +'.npy', val_target_0)
+        np.save(path_temp + xp_name + '/val_target_1_'+ str(i) +'.npy', val_target_1)
+        np.save(path_temp + xp_name + '/val_target_2_'+ str(i) +'.npy', val_target_2)
         
 if __name__ == '__main__':
     main()
