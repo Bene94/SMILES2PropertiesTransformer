@@ -99,8 +99,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda):
     ## determin the datasets:
 
     sample_sizes = np.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 1000, 2000])
-    sampels = np.ones(len(sample_sizes),dtype=int) *200
-    epochs = np.ones(len(sample_sizes), dtype=int) *10
+    sampels = np.ones(len(sample_sizes),dtype=int) *20
+    epochs = np.ones(len(sample_sizes), dtype=int) *20
     
         # create the datasets
 
@@ -120,7 +120,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda):
     optimizer = model.configure_optimizers(config)
 
     criterion = nn.MSELoss()
-    loss, __, __ =  evaluate(model, comp_dataloader, criterion, config)
+    loss, __, __, __ =  evaluate(model, comp_dataloader, criterion, config)
     print("Reference Loss: " + str(loss))
 
     for i in range(len(sample_sizes)):

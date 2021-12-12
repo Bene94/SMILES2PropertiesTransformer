@@ -6,6 +6,7 @@ from copy import deepcopy
 import torch
 from torch._C import _log_api_usage_once
 import torch.nn as nn
+from torch.optim import lr_scheduler
 import wandb
 import click
 
@@ -75,6 +76,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     config.local = local
     config.xp_name = xp_name
 
+    lr_schedule = 'cosine'
+
     wandb.init(project='GNN_001_FT_mult', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
@@ -130,11 +133,6 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         criterion = nn.MSELoss()
 
         optimizer = model.configure_optimizers(config)
-
-        total_steps = 100000 * config.epoch
-            
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=total_steps, gamma=1)
-
         epoch_start = 0
         
         config.data_path = data_path + '/'  + str(i)
@@ -144,6 +142,21 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         val_data_list.append(val_0_data) 
         val_data_list.append(val_1_data)
         val_data_list.append(val_2_data)
+
+        if lr_schedule == 'cosine':
+                    ## set up scheduler
+            total_steps = len(training_data) * (config.epoch +1)
+            min_lr = config.lr / 100
+            warumup_steps = int(total_steps * (5 / config.epoch))
+            first_cycle_steps = int(total_steps / 1)
+            scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps=first_cycle_steps, cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=1)
+
+        else:
+            total_steps = 100000 * config.epoch
+              
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=total_steps, gamma=1)
+
+
 
         for epoch in range(epoch_start, config.epoch):
 

@@ -147,4 +147,26 @@ def makeColours( vals ):
     colours = [cm.ScalarMappable( norm=norm, cmap='jet').to_rgba( val ) for val in vals]
 
     return colours
+    
+def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '', save=False):
+    # make one figure containting three subplots with boxplots for each n
+    fig, ax = plt.subplots(3, 1, sharex=True)
+    fig.subplots_adjust(hspace=0.5)
+    
+    # axis limit for all subplots to 2
 
+    ax[0].set_ylim(0,0.5)
+    ax[1].set_ylim(0,0.5)
+    ax[2].set_ylim(0,0.5)
+
+    ax[0].set_title('Val 0')
+    ax[0].boxplot(mse_list_0)
+    ax[1].set_title('Val 1')
+    ax[1].boxplot(mse_list_1)
+    ax[2].set_title('Val 2')
+    ax[2].boxplot(mse_list_2)
+    ax[2].set_xlabel(n_list)
+    # set the title of the figure to name
+    fig.suptitle(name)
+    if save:
+        plt.savefig(path + 'plot/boxplot_' + name)

@@ -78,6 +78,47 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
     # save comp
     comp_list.to_csv(file_out + 'comp_list.csv', index=False)
 
+def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n):
+    
+    if os.environ.get('XPRUN_NAME') is not None:
+        file_path = "/mnt/xprun/raw_data/" 
+        file_out = "/mnt/xprun/data/" + save_path + "/"
+        vocab_path = "/mnt/xprun/" + vocab_path + "/"
+        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
+    else:
+        file_path = "../raw_data/" 
+        file_out = "../data/" + save_path + "/"
+        vocab_path = "../" + vocab_path + "/"
+        alias_path = '../raw_data/alias/alias_dict_brower.npy'
+
+
+
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
+        
+    if aug:
+        comp_list = aug_data(comp_list, alias_path=alias_path)
+    
+    ## apply the vocab to the smiles
+    comp_list = apply_vocab(comp_list, vocab_dict)
+    
+
+    df_list = split_data_test_val_exp_n(df_join, comp_list,seed, n)
+
+    # make input data
+    for i, df in enumerate(df_list):
+        if not df.empty:
+            if i == 0:
+                prefix = 'train'
+            else:
+                prefix = 'val_' + str(i-1)
+            data_batches = aug_df(df, comp_list, batch_size=100000)
+            save_batches(data_batches, file_out, prefix, ow)
+    
+    # save comp
+    comp_list.to_csv(file_out + 'comp_list.csv', index=False)
+
+
 def load_exp_data(file_path, foler_names):
     #load the data from the experiment 
     df = pd.DataFrame()
@@ -257,58 +298,108 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
     
     #sample 10 % of the dataframe that is not in the validation set
 
-    df_temp_val_2 = df_temp_train.sample(frac=0.01, replace=False, random_state=seed)
-
-    bar = pb.ProgressBar(maxval=len(df_temp_val_2), widgets=['Checking integrety of val sets: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    systems =  df_temp_train.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+    systems_val_2 = systems.sample(frac=0.05, random_state=seed)
+   
+   
+    bar = pb.ProgressBar(maxval=len(systems_val_2), widgets=['Checking integrety of val sets: ',pb.Timer(), pb.Bar(), pb.ETA()])
     bar.start()
     count = 0
 
     
-    df_val_2 = pd.DataFrame(columns=df_temp_val_2.columns)
+    df_temp_val_2 = pd.DataFrame(columns=df_temp_train.columns)
     
-    for i in df_temp_val_2.index:
+    for i in systems_val_2.index:
         bar.update(count)
         count += 1	
 
-        temp = df_temp_val_2.loc[i,['solvent','solute']] == df_temp_train.loc[:,['solvent','solute']]
+        temp = systems_val_2.loc[i,['solvent','solute']] == df_temp_train.loc[:,['solvent','solute']]
         temp = temp[temp['solute']]
         temp = temp[temp['solvent']]
 
         temp_2 = df_temp_train.drop(temp.index)
 
-        if len(temp_2[temp_2['solvent'] == df_temp_val_2.loc[i,'solvent']]) == 0 and len(temp_2[temp_2['solute'] == df_temp_val_2.loc[i,'solute']]) == 0:
+        if len(temp_2[temp_2['solvent'] == systems_val_2.loc[i,'solvent']]) == 0 and len(temp_2[temp_2['solute'] == systems_val_2.loc[i,'solute']]) == 0:
             df_temp_val_0 = df_temp_val_0.append(df_temp_train.loc[temp.index,:])
             df_temp_train = df_temp_train.drop(temp.index)
 
-        elif len(temp_2[temp_2['solvent'] == df_temp_val_2.loc[i,'solvent']]) == 0 or len(temp_2[temp_2['solute'] == df_temp_val_2.loc[i,'solute']]) == 0:
+        elif len(temp_2[temp_2['solvent'] == systems_val_2.loc[i,'solvent']]) == 0 or len(temp_2[temp_2['solute'] == systems_val_2.loc[i,'solute']]) == 0:
             df_temp_val_1 = df_temp_val_1.append(df_temp_train.loc[temp.index,:])
             df_temp_train = df_temp_train.drop(temp.index)
         else:
-            df_val_2 = pd.concat([df_val_2, df_temp_train.loc[temp.index,:]])
+            df_temp_val_2 = pd.concat([df_temp_val_2, df_temp_train.loc[temp.index,:]])
 
     bar.finish()
 
-    df_val_2.drop_duplicates(inplace=True)
+    df_temp_val_2.drop_duplicates(inplace=True)
     df_temp_val_1.drop_duplicates(inplace=True)
     df_temp_val_0.drop_duplicates(inplace=True)
 
-    df_temp_train = df_temp_train.drop(df_val_2.index)
+    df_temp_train = df_temp_train.drop(df_temp_val_2.index)
 
     print("len of data: " + str(len(df_join)))
     print("len of val_0: " + str(len(df_temp_val_0)))
     print("len of val_1: " + str(len(df_temp_val_1)))
-    print("len of val_2: " + str(len(df_val_2)))
+    print("len of val_2: " + str(len(df_temp_val_2)))
     print("len of train: " + str(len(df_temp_train)))
-    print("len of val_0 + val_1 + val_2 + train: " + str(len(df_temp_val_0) + len(df_temp_val_1) + len(df_val_2) + len(df_temp_train)) )
+    print("len of val_0 + val_1 + val_2 + train: " + str(len(df_temp_val_0) + len(df_temp_val_1) + len(df_temp_val_2) + len(df_temp_train)) )
 
     # remove all nan form df_temp_train
     df_temp_train = df_temp_train.dropna()
     df_temp_train = df_temp_train.reset_index(drop=True)
     df_temp_val_0 = df_temp_val_0.reset_index(drop=True)
     df_temp_val_1 = df_temp_val_1.reset_index(drop=True)
-    df_val_2 = df_val_2.reset_index(drop=True)
+    df_temp_val_2 = df_temp_val_2.reset_index(drop=True)
 
-    return [df_temp_train, df_temp_val_0, df_temp_val_1, df_val_2]
+    return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
+
+def split_data_test_val_exp_n(df_join, comp_list,seed, n):
+    
+    systems =  df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+    systems_train = systems.sample(n=n, random_state=seed)
+
+    df_temp_train = pd.DataFrame(columns=df_join.columns)
+    df_temp_val_0 = df_join.copy()
+
+    idx_solute = []
+    idx_solvent = []
+
+    for i in systems_train.index:
+        temp = df_join[(df_join['solvent'] == systems_train.loc[i,'solvent']) & (df_join['solute'] == systems_train.loc[i,'solute'])]
+        to_train = temp.sample(n=1)
+        to_drop = temp.drop(to_train.index)
+        df_temp_train = pd.concat([df_temp_train, to_train])
+        
+        df_join = df_join.drop(temp.index)
+        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['solvent'] == systems_train.loc[i,'solvent']].index)
+        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['solute'] == systems_train.loc[i,'solute']].index)
+
+    for i in systems_train.index:
+        idx_solvent += df_join[df_join['solvent'] == systems_train.loc[i,'solvent']].index.tolist()
+        idx_solute += df_join[df_join['solute'] == systems_train.loc[i,'solute']].index.tolist()
+
+    # find the elements that are both in idx_solvent and idx_solute
+    idx_solvent = list(set(idx_solvent) & set(idx_solute))
+    df_temp_val_2 = df_join.loc[idx_solvent,:]
+
+    df_temp_val_1 = df_join.drop(df_temp_val_2.index)
+    df_temp_val_1 = df_temp_val_1.drop(df_temp_val_0.index)
+      
+    print("len of data: " + str(len(df_join)))
+    print("len of val_0: " + str(len(df_temp_val_0)))
+    print("len of val_1: " + str(len(df_temp_val_1)))
+    print("len of val_2: " + str(len(df_temp_val_2)))
+    print("len of train: " + str(len(df_temp_train)))
+    print("len of val_0 + val_1 + val_2 + train: " + str(len(df_temp_val_0) + len(df_temp_val_1) + len(df_temp_val_2) + len(df_temp_train)) )
+
+    # remove all nan form df_temp_train
+    df_temp_train = df_temp_train.dropna()
+    df_temp_train = df_temp_train.reset_index(drop=True)
+    df_temp_val_0 = df_temp_val_0.reset_index(drop=True)
+    df_temp_val_1 = df_temp_val_1.reset_index(drop=True)
+    df_temp_val_2 = df_temp_val_2.reset_index(drop=True)
+
+    return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
 
 def make_input_data(df, comp_list,batch_size):
 
@@ -367,6 +458,12 @@ def revert_vocab(df, comp_list):
     # look up the index in comp_list and return the smiles string first index is the solute second the solvent
     df['Solute'] = comp_list.loc[df['solute_index'].to_numpy().astype(int), 'SMILE0'].tolist()
     df['Solvent'] = comp_list.loc[df['solvent_index'].to_numpy().astype(int), 'SMILE0'].tolist()
+    return df
+
+def revert_vocab_index(df, comp_list):
+    # look up the index in comp_list and return the smiles string first index is the solute second the solvent
+    df['Solute'] = comp_list.loc[df['x_index'].to_numpy().astype(int), 'SMILE0'].tolist()
+    df['Solvent'] = comp_list.loc[df['x_index'].to_numpy().astype(int), 'SMILE0'].tolist()
     return df
 
 
