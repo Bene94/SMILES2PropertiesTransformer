@@ -90,15 +90,16 @@ class NRTL_head(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-
+        self.device = config.device
 
     def forward(self, x, X):
 
-        x_out = torch.zeros(x.shape[0] , 1)
+        x_out = torch.zeros(x.shape[0] , 1, device=self.device, requires_grad=True)
+
         G_12 = torch.exp(-x[:,0] * x[:,1])
         G_21 = torch.exp(-x[:,0] * x[:,2])
 
-        x_out[:,0] = (1-X)**2 * (x[:,2] * (G_21 / (X + (1-X) * G_21))**2 + (x[:,1] * G_12)/((1-X) + X * G_21)**2)
+        x_out = (1-X)**2 * (x[:,2] * (G_21 / (X + (1-X) * G_21))**2 + (x[:,1] * G_12)/((1-X) + X * G_21)**2)
         #x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_12)**2)
 
         return x_out

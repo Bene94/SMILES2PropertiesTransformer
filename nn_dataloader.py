@@ -17,9 +17,6 @@ class gamma_dataset(Dataset):
         if config.shift != 0:
            self.train_target = self.train_target + config.shift
 
-        if not config.mode == 'reg':
-            self.bin_data(config)
-
     def load_data(self,test):
         #laods the data from sefl.root  acroidng to type from batches in current direcory plus root
         files = os.listdir(self.root)
