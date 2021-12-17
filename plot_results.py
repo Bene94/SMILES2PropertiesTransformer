@@ -153,6 +153,10 @@ def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '
     fig, ax = plt.subplots(3, 1, sharex=True)
     fig.subplots_adjust(hspace=0.5)
     
+    # set axis to log scale
+    ax[0].set_yscale('log')
+    ax[1].set_yscale('log')
+    ax[2].set_yscale('log')
     # axis limit for all subplots to 2
 
     ax[0].set_ylim(0,0.5)
@@ -165,7 +169,10 @@ def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '
     ax[1].boxplot(mse_list_1)
     ax[2].set_title('Val 2')
     ax[2].boxplot(mse_list_2)
-    ax[2].set_xlabel(n_list)
+    # lable the boxplots with the n values
+    ax[0].set_xticklabels(n_list)
+    ax[1].set_xticklabels(n_list)
+    ax[2].set_xticklabels(n_list)
     # set the title of the figure to name
     fig.suptitle(name)
     if save:

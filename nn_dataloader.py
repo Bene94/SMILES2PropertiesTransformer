@@ -41,7 +41,11 @@ class gamma_dataset(Dataset):
 
             if test and len(data) > 5000:
                 break
-                    
+
+        if data is None:
+            print("No data " + self.data_type + " found")
+            return [], [], [], [], []
+
         target = data[:, 0]
         smiles = data[:, 1:129]
         xT = data[:,129:131]

@@ -19,7 +19,7 @@ num_splits = 200
 
 #n_list = [10, 50 , 100, 500, 1000, 5000, 10000]
 
-n_list = [3, 5, 20 , 30, 40]
+n_list = [2000, 3000, 4000, 5000]
 
 for n in n_list:
     for i in range(0,num_splits):

@@ -76,7 +76,10 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         path_temp = '../temp/'
         path_model = '../Models/'
         path_wandb = '../wandb/'
-        xp_name = 'local_test' + str(random())
+        if log_name != '':
+            xp_name = log_name
+        else:
+            xp_name = 'local_test' + str(random())
 
     if cuda:
         device = torch.device('cuda')

@@ -22,11 +22,12 @@ from config import *
 
 @click.command()
 
-@click.option('--model_name', '-m', default='211118-063721', help='Name of the model')
+@click.option('--model_name', '-m', default='211126-160520', help='Name of the model')
 @click.option('--data_path', '-p',default='data_exp', help='Path to the data')
+@click.option('--exp_name', '-n',default='', help='Name of the experiment')
 
 @click.option('--batch_size', '-b', default=32, help='Batch size')
-@click.option('--epochs', '-e',default=5, help='Number of epochs')
+@click.option('--epochs', '-e',default=20, help='Number of epochs')
 @click.option('--lr', '-l',default=1e-5, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
@@ -35,7 +36,8 @@ from config import *
 @click.option('--mult', '-x',default=2, help='Uses multibel val/train splits')
 
 
-def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult):
+
+def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult):
 
     name = model_name
 
@@ -62,6 +64,8 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     else:
         device = torch.device('cpu')
 
+    if exp_name != '':
+        xp_name = exp_name
     
     model, config = load_model(path_model,model_name)
     model = model.to(config.device)
@@ -87,35 +91,10 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
     
     outer_loop = mult
     
-    val_predction_0 = np.array([])
-    val_predction_1 = np.array([])
-    val_predction_2 = []
-    
-    val_input_0 = np.array([])
-    val_input_1 = np.array([])
-    val_input_2 = []
-
-    val_target_0 = np.array([])
-    val_target_1 = np.array([])
-    val_target_2 = []
-
-
     # check if checkpoints exist
     if os.path.exists(path_temp + xp_name + '/i.npy'):
         print("Loading checkpoint")
         i_start = np.load(path_temp + xp_name + '/i.npy')
-
-        val_predction_0 = np.load(path_temp + xp_name + '/val_predction_0.npy')
-        val_predction_1 = np.load(path_temp + xp_name + '/val_predction_1.npy')
-        val_predction_2 = np.load(path_temp + xp_name + '/val_predction_2.npy')
-
-        val_input_0 = np.load(path_temp + xp_name + '/val_input_0.npy')
-        val_input_1 = np.load(path_temp + xp_name + '/val_input_1.npy')
-        val_input_2 = np.load(path_temp + xp_name + '/val_input_2.npy')
-
-        val_target_0 = np.load(path_temp + xp_name + '/val_target_0.npy')
-        val_target_1 = np.load(path_temp + xp_name + '/val_target_1.npy')
-        val_target_2 = np.load(path_temp + xp_name + '/val_target_2.npy')
     else:
         i_start = 0
 
@@ -190,9 +169,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, mult
         np.save(path_temp + xp_name + '/val_predction_1_'+ str(i) +'.npy', val_predction_1)
         np.save(path_temp + xp_name + '/val_predction_2_'+ str(i) +'.npy', val_predction_2)
 
-        np.save(path_temp + xp_name + '/val_input_0_'+ str(i) +'.npy', val_input_0)
-        np.save(path_temp + xp_name + '/val_input_1_'+ str(i) +'.npy', val_input_1)
-        np.save(path_temp + xp_name + '/val_input_2_'+ str(i) +'.npy', val_input_2)
+        np.save(path_temp + xp_name + '/val_input_0_'+ str(i) +'.npy', val_input_0[2])
+        np.save(path_temp + xp_name + '/val_input_1_'+ str(i) +'.npy', val_input_1[2])
+        np.save(path_temp + xp_name + '/val_input_2_'+ str(i) +'.npy', val_input_2[2])
 
         np.save(path_temp + xp_name + '/val_target_0_'+ str(i) +'.npy', val_target_0)
         np.save(path_temp + xp_name + '/val_target_1_'+ str(i) +'.npy', val_target_1)

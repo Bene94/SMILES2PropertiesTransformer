@@ -10,12 +10,12 @@ save_path = "data_exp"
 vocab_path = "vocab"
 ul = np.inf
 ll = -np.inf
-frac = 0.05
+frac = 0.03
 aug = False
 max_aug = 10
 h2o = True # if True, H2O can be in the validation set
 
-num_splits = 200
+num_splits = 500
 
 for i in range(0,num_splits):
     print("\n")

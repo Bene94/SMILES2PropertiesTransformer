@@ -299,7 +299,7 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
     #sample 10 % of the dataframe that is not in the validation set
 
     systems =  df_temp_train.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
-    systems_val_2 = systems.sample(frac=0.05, random_state=seed)
+    systems_val_2 = systems.sample(frac=0.01, random_state=seed)
    
    
     bar = pb.ProgressBar(maxval=len(systems_val_2), widgets=['Checking integrety of val sets: ',pb.Timer(), pb.Bar(), pb.ETA()])
