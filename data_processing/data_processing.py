@@ -17,6 +17,7 @@ from pandas.core.frame import DataFrame
 @click.option('--save_path', default="exp_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
+@click.option('--source', default='COSMO', help='see if to select COSMO or EXP')
 
 @click.option('--ul', default=np.inf, help='upper limit of gamma')
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
@@ -27,10 +28,10 @@ from pandas.core.frame import DataFrame
 @click.option('--h2o', default=False, help='allows H2O in the validation set')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
 
-def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow, h2o):
-    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o)
+def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow, h2o, source):
+    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source)
 
-def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o):
+def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source):
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/raw_data/" 
@@ -42,8 +43,6 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
         file_out = "../data/" + save_path + "/"
         vocab_path = "../" + vocab_path + "/"
         alias_path = '../raw_data/alias/alias_dict_brower.npy'
-
-
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
@@ -63,7 +62,11 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
     if (val_solvent_indx == water_index).any() and not h2o:
         val_solvent_indx = val_solvent_indx[val_solvent_indx != water_index]
 
-    df_list = split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
+    if source == 'COSMO':    
+        df_list = split_data_test_val(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
+    elif source == 'EXP':
+        df_list = split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
+    
 
     # make input data
     for i, df in enumerate(df_list):
@@ -277,12 +280,38 @@ def apply_vocab(comp_list, vocab_dict):
     return comp_list
 
 def get_idx_test_val(solvent_indx, solute_indx, frac, seed): 
+
     np.random.seed(seed)
     val_solvent_indx= np.random.choice(solvent_indx, int(frac*len(solvent_indx)), replace=False, )
     np.random.seed(seed)
     val_solute_indx= np.random.choice(solute_indx, int(frac*len(solute_indx)), replace=False, )
 
     return val_solvent_indx, val_solute_indx
+
+def split_data_test_val(df_join, val_solvent_indx, val_solute_indx, comp_list,seed):
+     
+    df_temp = df_join.copy()
+    
+    #reste index
+    df_temp.reset_index(drop=True, inplace=True) 
+    df_temp_val_0 = df_temp.loc[(df_temp.iloc[:,0].isin(comp_list.loc[val_solute_indx,'SMILE0'])) & (df_temp.iloc[:,1].isin(comp_list.loc[val_solvent_indx,'SMILE0']))]
+    df_temp_val_1 = df_temp.loc[(df_temp.iloc[:,0].isin(comp_list.loc[val_solute_indx,'SMILE0'])) ^ (df_temp.iloc[:,1].isin(comp_list.loc[val_solvent_indx,'SMILE0']))]
+    
+    # df_temp is the dataframe that is not in the validation set
+    df_temp_train = df_temp.loc[ ~df_temp.index.isin(df_temp_val_0.index) & ~df_temp.index.isin(df_temp_val_1.index)]
+    
+    #sample 10 % of the dataframe that is not in the validation set
+    df_temp_val_2 = df_temp_train.sample(frac=0.1, replace=False, random_state=seed)
+    df_temp_train = df_temp_train.drop(df_temp_val_2.index)
+
+    # remove all nan form df_temp_train
+    df_temp_train = df_temp_train.dropna()
+    df_temp_train = df_temp_train.reset_index(drop=True)
+    df_temp_val_0 = df_temp_val_0.reset_index(drop=True)
+    df_temp_val_1 = df_temp_val_1.reset_index(drop=True)
+    df_temp_val_2 = df_temp_val_2.reset_index(drop=True)
+
+    return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
 
 def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_list,seed):
     

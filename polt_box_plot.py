@@ -30,13 +30,19 @@ def load_data(n_list, file_path, type):
 
 
 data_path = "/home/bene/NNGamma/out_fine_tuen/n_"
-n_list = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000] # , 100, 500, 1000]
+n_list = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 600, 700, 800, 1000] # , 100, 500, 1000]
 
 type_list = ['0', '1','2']
 
 target_list_0, prediction_list_0, mse_list_0 = load_data(n_list, data_path, type_list[0])
 target_list_1, prediction_list_1, mse_list_1 = load_data(n_list, data_path, type_list[1])
 target_list_2, prediction_list_2, mse_list_2 = load_data(n_list, data_path, type_list[2])
+
+
+data_path = "/home/bene/NNGamma/out_fine_tuen/n_ut_"
+target_list_ut_0, prediction_list_ut_0, mse_list_ut_0 = load_data(n_list, data_path, type_list[0])
+target_list_ut_1, prediction_list_ut_1, mse_list_ut_1 = load_data(n_list, data_path, type_list[1])
+target_list_ut_2, prediction_list_ut_2, mse_list_ut_2 = load_data(n_list, data_path, type_list[2])
 
 # make a figure with three subplots sharing both x axes with the mse list as boxplot
 
@@ -136,12 +142,13 @@ ax.set_yscale('log')
 ax.set_xlabel('n')
 ax.set_ylabel('loss')
 ax.set_title('Median loss as funciton of training data')
-ax.plot(n_list, [np.median(mse) for mse in mse_list_0], label='val 0', linestyle='--', marker='o')
-# make y axis limit between 0.1 and 1 and make labeling not scientific
-ax.set_ylim(0.1, 1)
-ax.set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-ax.set_yticklabels(['0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1'])
+ax.plot(n_list, [np.median(mse) for mse in mse_list_0], label='pretrained', linestyle='--', marker='o')
+ax.plot(n_list, [np.median(mse) for mse in mse_list_ut_0], label='untrained', linestyle='--', marker='o')
 
+# make y axis limit between 0.1 and 1 and make labeling not scientific
+ax.set_ylim(0.1, 5)
+# add a legend
+ax.legend(loc='upper right')
 plt.show
 plt.savefig('plot/mean_mse_val0.png')
 

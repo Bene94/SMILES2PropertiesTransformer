@@ -80,12 +80,36 @@ class Block(nn.Module):
         x = x + self.mlp(self.ln2(x))
         return x
 
+class NRTL_head(nn.Module):
+    """
+    An Head using the NRTL modle takes 3 parameters:
+        x[0] = alpha
+        x[1] = tau_12
+        x[2] = tau_21
+    """
+
+    def __init__(self, config):
+        super().__init__()
+
+
+    def forward(self, x, X):
+
+        x_out = torch.zeros(x.shape[0] , 1)
+        G_12 = torch.exp(-x[:,0] * x[:,1])
+        G_21 = torch.exp(-x[:,0] * x[:,2])
+
+        x_out[:,0] = (1-X)**2 * (x[:,2] * (G_21 / (X + (1-X) * G_21))**2 + (x[:,1] * G_12)/((1-X) + X * G_21)**2)
+        #x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_12)**2)
+
+        return x_out
+
 class GPT(nn.Module):
     """  the full GPT language model, with a context size of block_size """
 
     def __init__(self, config):
         super().__init__()
 
+        self.config = config
         self.xT = config.xT
         self.regression = config.mode == 'reg'
         # input embedding stem
@@ -102,8 +126,12 @@ class GPT(nn.Module):
         
         if self.regression:
             self.head = nn.Linear(config.embed_size, 1)
+        elif config.mode == 'NRTL':
+            self.head = nn.Linear(config.embed_size, 3)
+            self.NRTL = NRTL_head(config)
         else:
             self.head = nn.Linear(config.embed_size, config.bins + 2)
+        
         
         self.block_size = config.block_size
         self.apply(self._init_weights)
@@ -122,7 +150,7 @@ class GPT(nn.Module):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
         
-        self.head.bias.data.fill_(0) # this is only for current data
+        #self.head.bias.data.fill_(0) # this is only for current data
 
     def configure_optimizers(self, config):
         """
@@ -197,10 +225,13 @@ class GPT(nn.Module):
         x = torch.max(x, dim=1)[0]
         x = self.decoder(x)
         x = F.relu(x)
-        logits = self.head(x)
+
+        if self.config.mode == 'NRTL':
+            logits = self.head(x)
+            logits = self.NRTL(logits, xT[:,0,0] + 0.5) #add 0.5 to revert the normalization
+        else:
+            logits = self.head(x)
+
         logits = logits.squeeze()
-        
-        if not self.regression:
-            logits = F.softmax(logits, dim=-1)
 
         return logits

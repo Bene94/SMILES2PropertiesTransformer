@@ -29,7 +29,7 @@ from config import *
 @click.option('--wdecay', default=0.0, help='Weight decay')
 @click.option('--drp', default=0.0, help='Dropout rate')
 
-@click.option('--mode', default="reg", help='Determines the mode: reg: does a regresstion; class: does a classification')
+@click.option('--mode', default="NRTL", help='Determines the mode: reg: does a regresstion; NRTL: use NRTL model as head')
 @click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
 
 @click.option('--lr', default= 0.0005, help='Learning rate')
@@ -43,11 +43,11 @@ from config import *
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 @click.option('--stop_epo', default=0, help='Number of epochs to stop warmup')
 
-@click.option('--data', default='data', help='Location of dataset')
+@click.option('--data', default='data_xt', help='Location of dataset')
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--test', default=False, help='If true smale dataset is used')
+@click.option('--test', default=True, help='If true smale dataset is used')
 
 @click.option('--shift', default=0, help='Shift the data')
 @click.option('--xt', default=1, help='If xT should be used')
@@ -62,8 +62,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     print('-' * 89)
     print('Beginn Script...')
     print('-' * 89)
-
-    test = False
 
     if os.environ.get('XPRUN_NAME') is not None:
         local = False
@@ -86,10 +84,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     else:
         device = torch.device('cpu')
 
-    if mode == "reg":
-        criterion = nn.MSELoss()
-    else:
-        criterion = nn.CrossEntropyLoss()
+    criterion = nn.MSELoss()
 
     if stop_epo == 0:
         stop_epo = epo
