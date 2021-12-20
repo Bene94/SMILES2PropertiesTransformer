@@ -103,9 +103,7 @@ def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, 
         comp_list = aug_data(comp_list, alias_path=alias_path)
     
     ## apply the vocab to the smiles
-    comp_list = apply_vocab(comp_list, vocab_dict)
-    
-
+    comp_list = apply_vocab(comp_list, vocab_dict)  
     df_list = split_data_test_val_exp_n(df_join, comp_list,seed, n)
 
     # make input data
@@ -120,7 +118,6 @@ def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, 
     
     # save comp
     comp_list.to_csv(file_out + 'comp_list.csv', index=False)
-
 
 def load_exp_data(file_path, foler_names):
     #load the data from the experiment 

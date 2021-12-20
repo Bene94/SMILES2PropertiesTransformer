@@ -25,9 +25,11 @@ class gamma_dataset(Dataset):
         self.xT = xT
         self.train_data = smiles
         self.train_target = target
+        self.smile_index = np.zeros((data.shape[0],2))
+        self.index = np.zeros(data.shape[0])
     
     def __getitem__(self, index): 
-        return self.train_target[index],  [self.train_data[index], self.xT[index]]
+        return self.train_target[index],  [self.train_data[index], self.xT[index], self.smile_index[index], self.index[index]]
 
     def __len__(self):
         if len(self.train_data.shape) == 1:

@@ -9,8 +9,6 @@ import torch.nn as nn
 import wandb
 import click
 
-
-from nn_model import * 
 from nn_dataloader import *
 from plot_results import *
 from trainer import *
@@ -18,7 +16,6 @@ import minGPT
 from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 from load_model import *
 from config import *
-
 
 @click.command()
 
@@ -162,8 +159,6 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
 
         # save checkpoint to resume training
         save_checkpoint(model, config, epoch, optimizer, scheduler)
-
-
 
     if not noval:
         val_loss, val_out, val_target, __ = evaluate(model, val_0_data, criterion, config)

@@ -99,9 +99,42 @@ class NRTL_head(nn.Module):
         G_12 = torch.exp(-x[:,0] * x[:,1])
         G_21 = torch.exp(-x[:,0] * x[:,2])
 
-        x_out = (1-X)**2 * (x[:,2] * (G_21 / (X + (1-X) * G_21))**2 + (x[:,1] * G_12)/((1-X) + X * G_21)**2)
-        #x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_12)**2)
+        x_out = (1-X) ** 2 * (x[:,2] * (G_21 / (X + (1-X) * G_21)) **2 + (x[:,1] * G_12)/ ((1-X) + X * G_12)**2)
+        #x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_21)**2)
 
+        return x_out
+
+class UNIQUAC_head(nn.Module):
+    """
+    An Head using the NRTL modle takes 3 parameters:
+        x[0] = r1
+        x[1] = r2
+        x[2] = q1
+        x[3] = q2
+        x[4] = tau_12
+        x[5] = tau_21
+
+    """
+
+    def __init__(self, config):
+        super().__init__()
+        self.device = config.device
+
+    def forward(self, x, X):
+
+        z = 10
+        r1 = x[:,0]
+        r2 = x[:,1]
+        q1 = x[:,2]
+        q2 = x[:,3]
+        tau_12 = x[:,4]
+        tau_21 = x[:,5]
+
+        lng_c_1 = 1 - r1/r2 + torch.log(r1/r2) - z/2 * q1 * (1- (r1*q2)/(r2*q1) + torch.log((r1*q2)/(r2*q1)))
+        lng_c_2 = 1 - r2/r1 + torch.log(r2/r1) - z/2 * q2 * (1- (r2*q1)/(r1*q2) + torch.log((r2*q1)/(r1*q2)))
+
+        lng_r_1 = q1 * ( 1- torch.log((q1* X[:,1] * tau_12 + q2* (1-X[:,1]) * tau_21)/(q1 * X[:,1] + q2 (1-X[:,1])))) # This is not yet correct
+ 
         return x_out
 
 class GPT(nn.Module):
@@ -151,7 +184,7 @@ class GPT(nn.Module):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
         
-        #self.head.bias.data.fill_(0) # this is only for current data
+        self.head.bias.data.fill_(0) # this is only for current data
 
     def configure_optimizers(self, config):
         """
@@ -202,7 +235,9 @@ class GPT(nn.Module):
     def forward(self, idx, xT, targets=None):
         b, t = idx.size()
         #assert t <= self.block_size, "Cannot forward, model block size is exhausted."
-        
+        if self.config.mode == 'NRTL':
+            X = xT[:,0] + 0.5
+            xT[:,0] = 0
         xT = torch.unsqueeze(xT,1)
         xT_proj = self.xT_lin(xT)
 
@@ -229,7 +264,7 @@ class GPT(nn.Module):
 
         if self.config.mode == 'NRTL':
             logits = self.head(x)
-            logits = self.NRTL(logits, xT[:,0,0] + 0.5) #add 0.5 to revert the normalization
+            logits = self.NRTL(logits, X) #add 0.5 to revert the normalization
         else:
             logits = self.head(x)
 

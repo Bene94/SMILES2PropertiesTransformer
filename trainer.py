@@ -73,18 +73,26 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 
             src_padding_mask = (smile != wandb.config.padding_idx).transpose(0, 1)
 
-            with autocast(True):
-                #xt = xt.type(torch.half)
-                output = model(smile, xt) 
-                loss = criterion(output.squeeze(), target.squeeze())
-                loss = loss / len(target_chunks)
-            
-            scaler.scale(loss).backward()
-            
+            if wandb.config.mode == 'reg':
+                with autocast(True):
+                    #xt = xt.type(torch.half)
+                    output = model(smile, xt) 
+                    loss = criterion(output.squeeze(), target.squeeze())
+                    loss = loss / len(target_chunks)
+            if wandb.config.mode == 'NRTL':
+                with autocast(True):
+                    #xt = xt.type(torch.half)
+                    output = model(smile, xt) 
+                    loss = custom_MSE_loss(output, target.squeeze())
+                    loss = loss / len(target_chunks)
+
+            scaler.scale(loss).backward()  
+            log_scale = torch.log2(scaler._scale)      
             log_loss += loss.item()
         
         scaler.unscale_(optimizer)
         grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100000)
+
 
         scaler.step(optimizer)
         scaler.update()
@@ -103,6 +111,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         wandb.log({"epoch": epoch})
         wandb.log({"n_tokens": total_tokens})
         wandb.log({"compute": total_compute})
+        wandb.log({"loss scale": log_scale})
       
         if i % log_interval == 0 and i > 0:
             cur_loss = total_loss / log_interval
@@ -153,10 +162,6 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
                     
                     val_log_name = 'val_' + str(h) + '_loss'
                     wandb.log({val_log_name : val_loss})
-
-
-            
-
 
 def evaluate(eval_model, val_dataloader, criterion, config):
     eval_model.eval() # Turn on the evaluation mode
@@ -224,3 +229,5 @@ def evaluate(eval_model, val_dataloader, criterion, config):
     
     return total_loss / (len(val_dataloader)), total_output, total_target, [total_smile_idx, total_xT, total_index]
 
+def custom_MSE_loss(output, target):
+    return torch.mean(torch.clamp((output - target)**2, min=0.001, max=None))

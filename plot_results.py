@@ -10,7 +10,6 @@ import wandb
 import torch.nn as nn
 
 from nn_dataloader import *
-from nn_model import *
 
 #Function to compare the results
 

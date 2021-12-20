@@ -100,74 +100,11 @@ def main(name,data,calc,plot,save):
         print("Validation loss: ", val_1_loss)
         print("Validation loss: ", val_2_loss)
 
-
-        if save:
-            # check if save path exists
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
-            # save the results to a file
-            np.save(save_path + 'train_out.npy', train_out)
-            np.save(save_path + 'train_target.npy', train_target)
-            np.save(save_path + 'train_smile.npy', train_in[0])
-            np.save(save_path + 'train_xT.npy', train_in[1])
-            np.save(save_path + 'train_x.npy', train_in[2])
-
-            np.save(save_path + 'val_0_out.npy', val_0_out)
-            np.save(save_path + 'val_0_target.npy', val_0_target)
-            np.save(save_path + 'val_0_smile.npy', val_0_in[0])
-            np.save(save_path + 'val_0_xT.npy', val_0_in[1])
-            np.save(save_path + 'val_0_x.npy', val_0_in[2])
-
-            np.save(save_path + 'val_1_out.npy', val_1_out)
-            np.save(save_path + 'val_1_target.npy', val_1_target)
-            np.save(save_path + 'val_1_smile.npy', val_1_in[0])
-            np.save(save_path + 'val_1_xT.npy', val_1_in[1])
-            np.save(save_path + 'val_1_x.npy', val_1_in[2])
-
-            np.save(save_path + 'val_2_out.npy', val_2_out)
-            np.save(save_path + 'val_2_target.npy', val_2_target)
-            np.save(save_path + 'val_2_smile.npy', val_2_in[0])
-            np.save(save_path + 'val_2_xT.npy', val_2_in[1])
-            np.save(save_path + 'val_2_x.npy', val_2_in[2])
-
-    else:
-
-        train_out = np.load(save_path + 'train_out.npy')
-        train_target = np.load(save_path + 'train_target.npy')
-        val_0_out = np.load(save_path + 'val_0_out.npy')
-        val_0_target = np.load(save_path + 'val_0_target.npy')
-        val_1_out = np.load(save_path + 'val_1_out.npy')
-        val_1_target = np.load(save_path + 'val_1_target.npy')
-        val_2_out = np.load(save_path + 'val_2_out.npy')
-        val_2_target = np.load(save_path + 'val_2_target.npy')
-
-
-    if plot:
-        make_MSE_x(train_out, train_target, name = "train", save = True)
-        make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
-        make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
-        make_MSE_x(val_2_out, val_2_target, name = "val_2", save = True)
-
-
-
-        make_heatmap(train_out, train_target, name = "train", save = True)
-        make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
-        make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)
-        make_heatmap(val_2_out, val_2_target, name = "val_2", save = True)
-
-        make_historgam_delta(train_out, train_target, name = "train", save = True)
-        make_historgam_delta(val_0_out, val_0_target, name = "val_0", save = True)
-        make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True)
-        make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True)
-
-        if len(train_out) < 30000:
-            print('-' * 89)
-            print('Make Scatter...')
-            print('-' * 89)
-            train_out = np.concatenate((train_out, val_1_out, val_2_out), axis=0)
-            train_target = np.concatenate((train_target, val_1_target, val_2_target), axis=0)
-            
-            make_scatter(train_out, train_target, name = "train", save = True)
+        # find index of nan in output
+        train_nan = np.isnan(train_out)
+        val_0_nan = np.isnan(val_0_out)
+        val_1_nan = np.isnan(val_1_out)
+        val_2_nan = np.isnan(val_2_out)
 
 
 def load_model(path, name):

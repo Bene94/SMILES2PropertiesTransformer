@@ -62,14 +62,6 @@ class gamma_dataset(Dataset):
         xT = xT.type(torch.FloatTensor)
         #return the data and target
         return smiles, target, xT, smile_index, index 
-
-    def bin_data(self, config):
-        bound = config.bound
-        n_bins = config.bins
-        bins = np.linspace(-bound, bound, n_bins)
-        bins = np.append(bins, np.inf)
-        bins = np.append(-np.inf, bins)
-        self.train_target = np.digitize(self.train_target, bins)
     
     def __getitem__(self, index): 
         return self.train_target[index],  [self.train_data[index], self.xT[index], self.smile_index[index], self.index[index]]
