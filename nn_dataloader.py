@@ -1,9 +1,10 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-import matplotlib.pyplot as plt
 import os
 import progressbar as pb
+import pandas as pd
 import numpy as np
+import time
 
 ## load data from training_data\ trainig data called train_XXX and validation data calld val_xxx into dataloader.
 
@@ -13,9 +14,30 @@ class gamma_dataset(Dataset):
         self.data_type = data_type
         
         self.train_data, self.train_target, self.xT, self.smile_index, self.index = self.load_data(config.test)
+        self.load_comp_list(self)
+        
+        if config.aug :
+            self.aug = False
+        else:
+            self.aug = True
         
         if config.shift != 0:
            self.train_target = self.train_target + config.shift
+
+    def load_comp_list(self, comp_list_file):
+         
+        comp_list = pd.read_csv(self.root + 'comp_list.csv')
+        emb_list = np.empty((comp_list.shape[0],10), dtype=object)
+
+        for i in range(0, comp_list.shape[0]):
+            for j in range(0,10):
+                temp = comp_list['emb' + str(j)][i]
+                if str(temp) != 'nan':
+                    emb_list[i,j] = np.fromstring(temp[1:-1], sep=" ", dtype=np.int)
+
+        self.comp_list = emb_list
+        self.n_alias = comp_list['n_alias']
+
 
     def load_data(self,test):
         #laods the data from sefl.root  acroidng to type from batches in current direcory plus root
@@ -63,8 +85,32 @@ class gamma_dataset(Dataset):
         #return the data and target
         return smiles, target, xT, smile_index, index 
     
-    def __getitem__(self, index): 
+    def __getitem__old(self, index): 
         return self.train_target[index],  [self.train_data[index], self.xT[index], self.smile_index[index], self.index[index]]
+
+    def __getitem__(self,index):
+        
+        # time the function
+        sos = np.array((1,), dtype=np.int)
+        mos = np.array((2,), dtype=np.int)
+        eos = np.array((3,), dtype=np.int)
+
+        train_data = np.zeros(128, dtype=np.int)
+
+        comp_list = self.comp_list
+
+        # random number between 0 and 5 
+        SMILE1 = int(self.smile_index[index][0])
+        SMILE2 = int(self.smile_index[index][1])
+
+        rand1 = np.random.randint(0,int(self.n_alias[SMILE1]))
+        rand2 = np.random.randint(0,int(self.n_alias[SMILE2]))
+        emb = np.concatenate([sos,comp_list[SMILE1,rand1], mos, comp_list[SMILE2,rand2], eos])
+        if len(emb) > 128:
+            emb = np.concatenate([sos,comp_list[SMILE1,0], mos, comp_list[SMILE2,0], eos])
+        train_data[0:len(emb)] = emb
+        
+        return self.train_target[index], [train_data, self.xT[index], self.smile_index[index], self.index[index]]
 
     def __len__(self):
         if len(self.train_data.shape) == 1:
@@ -122,16 +168,5 @@ def load_data_full(config,local = False,test = False):
 
     return training_data
 
-
-
-
 if __name__ == '__main__':
-    train_dataset = gamma_dataset('TrainingData/', 'train')
-    val_dataset = gamma_dataset('TrainingData/', 'val')
-
-    train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
-    train_features, train_labels = next(iter(train_dataloader))
-    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=True, num_workers=4)
-
-
-
+    pass

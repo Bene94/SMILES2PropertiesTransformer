@@ -12,12 +12,12 @@ import data_processing_cosmo as dp
 
 
 def main():
-    file_path = '../raw_data/brouwer_exp/'
+    file_path = '../raw_data/t_cosmo/'
     solvent_list, solute_list, df_join = dp.load_exp_data(file_path) 
     smile_list = np.append(solvent_list, solute_list)
     smile_list = np.unique(smile_list)
     alias_dict = augment_smile(smile_list)
-    np.save('../raw_data/alias/alias_dict_brower.npy', alias_dict)
+    np.save('../raw_data/alias/alias_dict_cosmo.npy', alias_dict)
 
 
 

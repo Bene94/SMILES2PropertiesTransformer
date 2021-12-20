@@ -22,7 +22,7 @@ from plot_results import *
 @click.command()
 
 @click.option('--name','-n', default='211218-225820', help='Name of the modle')
-@click.option('--data','-d', default='data_xt', help='Path to the data if empty use datapath from modle config')
+@click.option('--data','-d', default='data_t', help='Path to the data if empty use datapath from modle config')
 
 @click.option('--calc','-c', default=True, help='Calculate results and eval')
 @click.option('--plot','-p', default=False, help='Plot results')

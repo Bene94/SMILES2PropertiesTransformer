@@ -28,6 +28,7 @@ from config import *
 
 @click.option('--mode', default="NRTL", help='Determines the mode: reg: does a regresstion; NRTL: use NRTL model as head')
 @click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
+@click.option('--aug', default=0, help='Determines if the data is augmented')
 
 @click.option('--lr', default= 0.0005, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
@@ -51,7 +52,7 @@ from config import *
 @click.option('--noval', default=False, help='All data is used for training')
 
 
-def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, shift, xt, stop_epo, noval):
+def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, aug, shift, xt, stop_epo, noval):
     
     name = str(emb) + '_' + str(nlay) + '_' + str(nhead) + '_' + '{:.0e}'.format(drp) + '_' + '{:.0e}'.format(wdecay) + '_' + '{:.0e}'.format(lr) +  '_' + str(btch) + '_' + str(epo)
     

@@ -23,7 +23,7 @@ from pandas.core.frame import DataFrame
 @click.option('--ll', default=-np.inf, help='lower limit of gamma')
 @click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
 
-@click.option('--aug', default=True, help='augment the smile data')
+@click.option('--aug', default=False, help='augment the smile data')
 @click.option('--max_aug', default=0, help='maximum number of augmentations')
 @click.option('--h2o', default=False, help='allows H2O in the validation set')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
@@ -42,13 +42,12 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
         file_path = "../raw_data/" 
         file_out = "../data/" + save_path + "/"
         vocab_path = "../" + vocab_path + "/"
-        alias_path = '../raw_data/alias/alias_dict_brower.npy'
+        alias_path = '../raw_data/alias/alias_dict_cosmo.npy'
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
         
-    if aug:
-        comp_list = aug_data(comp_list, alias_path=alias_path)
+    comp_list = aug_data(comp_list, alias_path=alias_path)
     
     ## apply the vocab to the smiles
     comp_list = apply_vocab(comp_list, vocab_dict)
@@ -75,7 +74,7 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
                 prefix = 'train'
             else:
                 prefix = 'val_' + str(i-1)
-            data_batches = aug_df(df, comp_list, batch_size=100000)
+            data_batches = aug_df(df, comp_list, aug, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow)
     
     # save comp
@@ -169,7 +168,7 @@ def load_vocab(file_path,vocab_name):
 def aug_data(comp_list,alias_path):
 
     alias_dict = np.load(alias_path, allow_pickle=True).item()
-    bar = pb.ProgressBar(maxval=len(comp_list), widgets=[pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(comp_list), widgets=['Get Aliases: ',pb.Timer(), pb.Bar(), pb.ETA()])
     bar.start()
     #add the alias to the new collumn alias to comp_list
     for i in range(len(comp_list)):
@@ -177,9 +176,10 @@ def aug_data(comp_list,alias_path):
         for j, alias in enumerate(alias_dict[comp_list.loc[i,'SMILE0']]):
             comp_list.loc[i,'SMILE' +str(j+1)] = alias
         comp_list.loc[i,'n_alias'] = len(alias_dict[comp_list.loc[i,'SMILE0']]) +1 
+    bar.finish()
     return comp_list
 
-def aug_df(df, comp_list, batch_size):
+def aug_df(df, comp_list, aug, batch_size):
     # add the alias to the new collumn alias to comp_list
 
     df_temp = df.copy()
@@ -215,8 +215,12 @@ def aug_df(df, comp_list, batch_size):
 
     index_solute = index_solute.astype(int)
     index_solvent = index_solvent.astype(int)
-    solute_n_alias = solute_n_alias.astype(int)
-    solvent_n_alias = solvent_n_alias.astype(int)
+    if aug == True:
+        solute_n_alias = solute_n_alias.astype(int)
+        solvent_n_alias = solvent_n_alias.astype(int)
+    else:
+        solute_n_alias = np.zeros((len(df_temp),), dtype=int)
+        solvent_n_alias = np.zeros((len(df_temp),), dtype=int)
     bar.finish()
 
     bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Processing data: ',pb.Timer(), pb.Bar(), pb.ETA()])
