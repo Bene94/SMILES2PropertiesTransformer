@@ -10,8 +10,6 @@ from torch.optim import lr_scheduler
 import wandb
 import click
 
-
-from nn_model import * 
 from nn_dataloader import *
 from plot_results import *
 from trainer import *

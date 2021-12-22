@@ -42,7 +42,7 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
         file_path = "../raw_data/" 
         file_out = "../data/" + save_path + "/"
         vocab_path = "../" + vocab_path + "/"
-        alias_path = '../raw_data/alias/alias_dict_cosmo.npy'
+        alias_path = '../raw_data/alias/alias_dict.npy'
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
@@ -208,6 +208,7 @@ def aug_df(df, comp_list, aug, batch_size):
 
     bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Indexing data: ',pb.Timer(), pb.Bar(), pb.ETA()])
     bar.start()
+
     for i in range(len(df_temp)):
         bar.update(i)
         [index_solute[i], solute_n_alias[i]] = comp_list_dic[df_temp['solute'].values[i]]
@@ -215,12 +216,14 @@ def aug_df(df, comp_list, aug, batch_size):
 
     index_solute = index_solute.astype(int)
     index_solvent = index_solvent.astype(int)
+
     if aug == True:
         solute_n_alias = solute_n_alias.astype(int)
         solvent_n_alias = solvent_n_alias.astype(int)
     else:
-        solute_n_alias = np.zeros((len(df_temp),), dtype=int)
-        solvent_n_alias = np.zeros((len(df_temp),), dtype=int)
+        solute_n_alias = np.ones((len(df_temp),), dtype=int)
+        solvent_n_alias = np.ones((len(df_temp),), dtype=int)
+    
     bar.finish()
 
     bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Processing data: ',pb.Timer(), pb.Bar(), pb.ETA()])

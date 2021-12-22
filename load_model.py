@@ -21,11 +21,11 @@ from plot_results import *
 
 @click.command()
 
-@click.option('--name','-n', default='211218-225820', help='Name of the modle')
-@click.option('--data','-d', default='data_t', help='Path to the data if empty use datapath from modle config')
+@click.option('--name','-n', default='211220-192228', help='Name of the modle')
+@click.option('--data','-d', default='exp_t', help='Path to the data if empty use datapath from modle config')
 
 @click.option('--calc','-c', default=True, help='Calculate results and eval')
-@click.option('--plot','-p', default=False, help='Plot results')
+@click.option('--plot','-p', default=True, help='Plot results')
 @click.option('--save','-s', default=True, help='Save results')
 
 
@@ -61,10 +61,10 @@ def main(name,data,calc,plot,save):
         print('Loading Data...')
         print('-' * 89)
 
-        train_dataset = gamma_dataset(data_path, 'train', config)
-        val_0_dataset = gamma_dataset(data_path, 'val_0', config)
-        val_1_dataset = gamma_dataset(data_path, 'val_1', config)
-        val_2_dataset = gamma_dataset(data_path, 'val_2', config)
+        train_dataset = gamma_dataset(data_path, 'train', config, aug = False)
+        val_0_dataset = gamma_dataset(data_path, 'val_0', config, aug = False)
+        val_1_dataset = gamma_dataset(data_path, 'val_1', config, aug = False)
+        val_2_dataset = gamma_dataset(data_path, 'val_2', config, aug = False)
 
         training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
         val_0_data = DataLoader(val_0_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
@@ -147,8 +147,6 @@ def main(name,data,calc,plot,save):
         make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
         make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
         make_MSE_x(val_2_out, val_2_target, name = "val_2", save = True)
-
-
 
         make_heatmap(train_out, train_target, name = "train", save = True)
         make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)

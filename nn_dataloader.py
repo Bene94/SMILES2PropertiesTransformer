@@ -9,17 +9,13 @@ import time
 ## load data from training_data\ trainig data called train_XXX and validation data calld val_xxx into dataloader.
 
 class gamma_dataset(Dataset):  
-    def __init__(self, root, data_type, config):
+    def __init__(self, root, data_type, config, aug=True):
         self.root = root
         self.data_type = data_type
         
         self.train_data, self.train_target, self.xT, self.smile_index, self.index = self.load_data(config.test)
         self.load_comp_list(self)
-        
-        if config.aug :
-            self.aug = False
-        else:
-            self.aug = True
+        self.aug = aug
         
         if config.shift != 0:
            self.train_target = self.train_target + config.shift
@@ -84,9 +80,6 @@ class gamma_dataset(Dataset):
         xT = xT.type(torch.FloatTensor)
         #return the data and target
         return smiles, target, xT, smile_index, index 
-    
-    def __getitem__old(self, index): 
-        return self.train_target[index],  [self.train_data[index], self.xT[index], self.smile_index[index], self.index[index]]
 
     def __getitem__(self,index):
         
@@ -99,17 +92,23 @@ class gamma_dataset(Dataset):
 
         comp_list = self.comp_list
 
-        # random number between 0 and 5 
         SMILE1 = int(self.smile_index[index][0])
         SMILE2 = int(self.smile_index[index][1])
 
-        rand1 = np.random.randint(0,int(self.n_alias[SMILE1]))
-        rand2 = np.random.randint(0,int(self.n_alias[SMILE2]))
+        if self.aug:
+            rand1 = np.random.randint(0,int(self.n_alias[SMILE1]))
+            rand2 = np.random.randint(0,int(self.n_alias[SMILE2]))
+        else :
+            rand1 = 0
+            rand2 = 0
+
         emb = np.concatenate([sos,comp_list[SMILE1,rand1], mos, comp_list[SMILE2,rand2], eos])
+        
         if len(emb) > 128:
             emb = np.concatenate([sos,comp_list[SMILE1,0], mos, comp_list[SMILE2,0], eos])
+
         train_data[0:len(emb)] = emb
-        
+
         return self.train_target[index], [train_data, self.xT[index], self.smile_index[index], self.index[index]]
 
     def __len__(self):
