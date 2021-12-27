@@ -20,7 +20,7 @@ from config import *
 
 @click.command()
 
-@click.option('--model_name', '-m', default='211126-160520', help='Name of the model')
+@click.option('--model_name', '-m', default='211220-192228', help='Name of the model')
 @click.option('--data_path', '-p',default='data_exp', help='Path to the data')
 @click.option('--exp_name', '-n',default='', help='Name of the experiment')
 
@@ -32,10 +32,11 @@ from config import *
 @click.option('--cuda', default=True, help='Use cuda')
 
 @click.option('--mult', '-x',default=2, help='Uses multibel val/train splits')
+@click.option('--ow', '-ow',default=0, help='if 1, overwrites existing outputs')
 
 
 
-def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult):
+def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow):
 
     name = model_name
 
@@ -90,11 +91,15 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
     outer_loop = mult
     
     # check if checkpoints exist
-    if os.path.exists(path_temp + xp_name + '/i.npy'):
+    if os.path.exists(path_temp + xp_name + '/i.npy') and not ow == 0:
         print("Loading checkpoint")
         i_start = np.load(path_temp + xp_name + '/i.npy')
     else:
         i_start = 0
+
+    # allocate memory for epo val loss
+
+    epo_val_loss = np.zeros((outer_loop,epochs,3))
 
     for i in range(i_start,outer_loop):
 
@@ -113,7 +118,14 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
         epoch_start = 0
         
         config.data_path = data_path + '/'  + str(i)
+
         training_data, val_0_data, val_1_data, val_2_data = load_data(config,local,test=False)
+
+        # load validaton data with larger batch size
+        temp_btch_size = config.batch_size
+        config.batch_size = 256
+        __ , val_0_data, val_1_data, val_2_data = load_data(config,local,test=False)
+        config.batch_size = temp_btch_size
 
         val_data_list = []
         val_data_list.append(val_0_data) 
@@ -142,6 +154,17 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
             train(model, criterion, optimizer, training_data, [], scheduler, epoch, wandb)
             
             torch.cuda.empty_cache()
+
+            epo_val_loss_0, __ , __ , __ = evaluate(model, val_0_data, criterion, config) 
+            epo_val_loss_1, __ , __ , __ = evaluate(model, val_1_data, criterion, config)
+            epo_val_loss_2, __ , __ , __ = evaluate(model, val_2_data, criterion, config)
+
+            epo_val_loss[i,epoch,0] = epo_val_loss_0
+            epo_val_loss[i,epoch,1] = epo_val_loss_1
+            epo_val_loss[i,epoch,2] = epo_val_loss_2
+
+            wandb.log({'epoch_val_loss_0': epo_val_loss_0, 'epoch_val_loss_1': epo_val_loss_1, 'epoch_val_loss_2': epo_val_loss_2})
+            wandb.log({'epoch': epoch})
 
             # evaluate the 3 validation sets
 
@@ -174,6 +197,8 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
         np.save(path_temp + xp_name + '/val_target_0_'+ str(i) +'.npy', val_target_0)
         np.save(path_temp + xp_name + '/val_target_1_'+ str(i) +'.npy', val_target_1)
         np.save(path_temp + xp_name + '/val_target_2_'+ str(i) +'.npy', val_target_2)
+
+    np.save(path_temp + xp_name + '/epo_val_loss', epo_val_loss)
         
 if __name__ == '__main__':
     main()

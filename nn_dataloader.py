@@ -26,7 +26,7 @@ class gamma_dataset(Dataset):
         emb_list = np.empty((comp_list.shape[0],10), dtype=object)
 
         for i in range(0, comp_list.shape[0]):
-            for j in range(0,10):
+            for j in range(0,10):   
                 temp = comp_list['emb' + str(j)][i]
                 if str(temp) != 'nan':
                     emb_list[i,j] = np.fromstring(temp[1:-1], sep=" ", dtype=np.int)

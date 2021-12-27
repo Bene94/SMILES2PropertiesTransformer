@@ -1,47 +1,38 @@
 import numpy as np
 import plot_results as pr
 import pandas as pd
+from plot_line_tuning_mult import load_data
 
 
 name = '211209-214402'
+name = '211223-032657' # modle with aug
 path_temp = '/home/bene/NNGamma/out_fine_tuen/'
 plot_path = '/home/bene/NNGamma/src/'
 save_path = '/home/bene/NNGamma/out_fine_tuen/' 
+data_path = path_temp + name + '/'
 #path_temp = '../temp/'
 
 group = True
 
 #load data
-val_predction_0 = np.load(path_temp + name + '/val_predction_0.npy')
-val_predction_1 = np.load(path_temp + name + '/val_predction_1.npy')
-val_predction_2 = np.load(path_temp + name + '/val_predction_2.npy')
 
-val_target_0 = np.load(path_temp + name + '/val_target_0.npy')
-val_target_1 = np.load(path_temp + name + '/val_target_1.npy')
-val_target_2 = np.load(path_temp + name + '/val_target_2.npy')
+type_list = ['0', '1', '2']
 
-val_input_0 = np.load(path_temp + name + '/val_input_0.npy')
-val_input_1 = np.load(path_temp + name + '/val_input_1.npy')
-val_input_2 = np.load(path_temp + name + '/val_input_2.npy')
+val_target_0, val_predction_0, mse_list_0, val_input_0 = load_data(data_path, type_list[0])
+val_target_1, val_predction_1, mse_list_1, val_input_1 = load_data(data_path, type_list[1])
+val_target_2, val_predction_2, mse_list_2, val_input_2 = load_data(data_path, type_list[2])
 
-# claculate MSE and MAE for each model
-mse_0 = np.mean(np.square(val_target_0 - val_predction_0))
-mse_1 = np.mean(np.square(val_target_1 - val_predction_1))
-mse_2 = np.mean(np.square(val_target_2 - val_predction_2))
+val_target_0 = np.concatenate(val_target_0)
+val_input_0 = np.concatenate(val_input_0)
+val_predction_0 = np.concatenate(val_predction_0)
 
-mea_0 = np.mean(np.abs(val_target_0 - val_predction_0))
-mea_1 = np.mean(np.abs(val_target_1 - val_predction_1))
-mea_2 = np.mean(np.abs(val_target_2 - val_predction_2))
+val_target_1 = np.concatenate(val_target_1)
+val_input_1 = np.concatenate(val_input_1)
+val_predction_1 = np.concatenate(val_predction_1)
 
-# print results
-print('MSE_0:', '{:.2f}'.format(np.mean(mse_0)))
-print('MAE_0:', '{:.2f}'.format(np.mean(mea_0)))
-
-print('MSE_1:', '{:.2f}'.format(np.mean(mse_1)))
-print('MAE_1:', '{:.2f}'.format(np.mean(mea_1)))
-
-print('MSE_2:', '{:.2f}'.format(np.mean(mse_2)))
-print('MAE_2:', '{:.2f}'.format(np.mean(mea_2)))
+val_target_2 = np.concatenate(val_target_2)
+val_input_2 = np.concatenate(val_input_2)
+val_predction_2 = np.concatenate(val_predction_2)
 
 if group:
     val_0 = pd.DataFrame({'input':val_input_0.squeeze(),'prediction': val_predction_0.squeeze(),'target': val_target_0.squeeze()})
@@ -82,6 +73,8 @@ print('length val2: ' + str(len(val_predction_2)))
 # turn np arrays into pandas dataframes for train and val
 
 train_df = pd.DataFrame(data={  'out':val_predction_2, 'target':val_target_2, 'x_index':val_input_2})
+
+train_df = pd.DataFrame(data={  'out':val_predction_1, 'target':val_target_1, 'x_index':val_input_1})
 
 
 print("Data Loading")

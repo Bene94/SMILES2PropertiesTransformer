@@ -98,8 +98,8 @@ def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
         
-    if aug:
-        comp_list = aug_data(comp_list, alias_path=alias_path)
+
+    comp_list = aug_data(comp_list, alias_path=alias_path)
     
     ## apply the vocab to the smiles
     comp_list = apply_vocab(comp_list, vocab_dict)  
@@ -112,7 +112,7 @@ def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, 
                 prefix = 'train'
             else:
                 prefix = 'val_' + str(i-1)
-            data_batches = aug_df(df, comp_list, batch_size=100000)
+            data_batches = aug_df(df, comp_list, aug, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow)
     
     # save comp
