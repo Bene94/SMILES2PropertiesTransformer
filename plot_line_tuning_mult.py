@@ -1,6 +1,7 @@
 import numpy as np
 import plot_results as pr
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def load_data(file_path, type):
 
@@ -17,8 +18,6 @@ def load_data(file_path, type):
         mse_list.append(mse)
 
     return target_list, prediction_list, mse_list, input_list
-
-
 
 if __name__ == '__main__':
 
@@ -122,7 +121,14 @@ if __name__ == '__main__':
     cosmo_data = cosmo_data.dropna()
 
     cosmo_data_target = cosmo_data['lnGamma_exp'].to_numpy(dtype=np.float64)
-    cosmo_data_out = cosmo_data['lnGamma'].to_numpy(dtype=np.float64)
-    pr.make_scatter(cosmo_data_out, cosmo_data_target, name = 'cosmo', path = plot_path, save=True)
+    cosmo_data_prediction = cosmo_data['lnGamma'].to_numpy(dtype=np.float64)
+
+    prediction_list = [cosmo_data_prediction, val_predction_0, val_predction_1, val_predction_2]
+    target_list = [cosmo_data_target, val_target_0, val_target_1, val_target_2]
+    name_list = ['cosmo', 'val_0', 'val_1', 'val_2']
+
+    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = '', save=False)
+
+
 
     

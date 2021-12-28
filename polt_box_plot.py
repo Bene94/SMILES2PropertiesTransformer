@@ -1,3 +1,4 @@
+
 import numpy as np
 from matplotlib import pyplot as plt
 import plot_results as pr
@@ -270,15 +271,29 @@ ax.set_yscale('log')
 ax.set_xlabel('n')
 ax.set_ylabel('loss')
 ax.set_title('Median loss as funciton of training data')
-ax.plot(n_list, [np.median(mse) for mse in mse_list_0], label='ft', linestyle='--', marker='o')
-ax.plot(n_list, [np.median(mse) for mse in mse_list_ut_0], label='ut', linestyle='--', marker='o')
-ax.plot(n_list, [np.median(mse) for mse in mse_list_f_aug_0], label='ft aug', linestyle='--', marker='o')
-ax.plot(n_list, [np.median(mse) for mse in mse_list_ut_aug_0], label='ut aug', linestyle='--', marker='o')
+mean_mse = [np.median(mse) for mse in mse_list_0]
+mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0]
+mean_mse_ft_aug = [np.median(mse) for mse in mse_list_f_aug_0]
+mean_mse_ut_aug = [np.median(mse) for mse in mse_list_ut_aug_0]
+
+
+ax.plot(n_list, mean_mse, label='ft', linestyle='--', marker='o')
+ax.plot(n_list, mean_mse_ut, label='ut', linestyle='--', marker='o')
+ax.plot(n_list, mean_mse_ft_aug, label='ft aug', linestyle='--', marker='o')
+ax.plot(n_list, mean_mse_ut_aug, label='ut aug', linestyle='--', marker='o')
+
+# add horizontal line at 0.35
+ax.axhline(y=0.35, color='k', linestyle='--', label='before fine tune')
+ax.axhline(y=0.16, color='k', linestyle='dashdot', label='after fine tune')
+
+
 
 # make y axis limit between 0.1 and 1 and make labeling not scientific
 ax.set_ylim(0.1, 5)
 # add a legend
 ax.legend(loc='upper right')
+# decrease ledgend size
+ax.legend(loc='upper right', prop={'size': 6})
 plt.show
 plt.savefig('plot/boxplot/mean_mse_val_0.png')
 

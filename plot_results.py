@@ -41,6 +41,34 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
     plt.savefig(path + 'plot/hist_delta_' + name)
 
+# funciton that makes a histogram of the diff but for multiple data sets in a singel plot
+def make_historgam_delta_mult(prediction_list, target_list, name_list, path = '', save=False):
+    
+    # make histogram of the output, use a normalised histogram constant bin width
+    delta_list = []
+    perc_data_list = []
+    weights_list = []
+    for i in range(len(prediction_list)):
+        # bin and normalise the data
+        delta = target_list[i] - prediction_list[i]
+        weights = np.ones_like(delta)/float(len(delta))
+        
+        delta_list.append(delta)
+        weights_list.append(weights)
+        perc_data_list.append(np.sum( (target_list[i] - prediction_list[i])**2 < 0.3**2 ) / len(target_list[i]) * 100)
+
+    plt.clf()
+    plt.hist(delta_list, bins=21, alpha=0.5, range=(-2,2), weights=weights_list)
+    plt.legend(name_list)
+    plt.ylabel('percentage')
+    plt.xlabel('delta ln gamma')
+    plt.xlim(-2,2)
+    # only two significant digits
+    plt.title('perc_data: ' + str(np.around(perc_data_list,0)))
+    plt.savefig(path + 'plot/hist_delta_mult')
+
+
+
 
 def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
