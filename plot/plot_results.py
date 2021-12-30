@@ -1,19 +1,15 @@
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize, LogNorm
-from matplotlib import cm
 import numpy as np
 
+from matplotlib.colors import Normalize, LogNorm
+from matplotlib import cm
 from scipy.stats import gaussian_kde as kde
 
-import wandb
-import torch.nn as nn
-
-from transprop.nn_dataloader import *
 
 #Function to compare the results
 
-def make_histogram(prediciton, target, name, path='hist/'):
+def make_histogram(prediciton, target, name, path=''):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
     plt.hist(target, bins=500, alpha=0.5, label='target', range=(min(target), max(target)))
@@ -22,9 +18,9 @@ def make_histogram(prediciton, target, name, path='hist/'):
     plt.ylabel('count')
     plt.xlim(-10,10)
     plt.title(name)
-    plt.savefig(path + 'hist_' + name)
+    plt.savefig(path + 'hist/hist_' + name)
 
-def make_historgam_delta(prediciton, target, name = '', path = 'hist/', save=False):
+def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
 
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
@@ -39,10 +35,10 @@ def make_historgam_delta(prediciton, target, name = '', path = 'hist/', save=Fal
     plt.xlabel('delta ln g')
     plt.xlim(-2,2)
     plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
-    plt.savefig(path + 'hist_delta_' + name)
+    plt.savefig(path + 'hist/hist_delta_' + name)
 
 # funciton that makes a histogram of the diff but for multiple data sets in a singel plot
-def make_historgam_delta_mult(prediction_list, target_list, name_list, path = 'hist/', save=False):
+def make_historgam_delta_mult(prediction_list, target_list, name_list, path = '', save=False):
     
     # make histogram of the output, use a normalised histogram constant bin width
     delta_list = []
@@ -65,10 +61,10 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = 'h
     plt.xlim(-2,2)
     # only two significant digits
     plt.title('perc_data: ' + str(np.around(perc_data_list,0)))
-    plt.savefig(path + 'hist_delta_mult')
+    plt.savefig(path + 'hist/hist_delta_mult')
 
 
-def make_heatmap(prediciton, target, name = '', path = 'heat/', save=False):
+def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.clf()
     plt.hist2d(target, prediciton, bins=101, norm=LogNorm())
@@ -86,9 +82,9 @@ def make_heatmap(prediciton, target, name = '', path = 'heat/', save=False):
     
     plt.ylabel('predicted value')
     plt.xlabel('ground truth')
-    plt.savefig(path + 'heat_' + name)
+    plt.savefig(path + 'heat/heat_' + name)
 
-def make_scatter(prediciton, target, name = '', path = 'scatter/', save=False):
+def make_scatter(prediciton, target, name = '', path = '', save=False):
     
     plt.clf()
     vals = []
@@ -118,11 +114,11 @@ def make_scatter(prediciton, target, name = '', path = 'scatter/', save=False):
     plt.ylim(min(min_target, min_pred), max(max_target, max_pred))
 
     if save:
-        plt.savefig(path + 'scatter_' + name)
+        plt.savefig(path + 'scatter/scatter_' + name)
     else:
         plt.show()
 
-def make_MSE_x(prediciton, target, name = '', path = 'hist/', save=False):
+def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     # devide data in bins with bound -20,20
     bins = np.linspace(-20,20,100)
     # calculate the relative mean squared error for each bin
@@ -153,9 +149,8 @@ def make_MSE_x(prediciton, target, name = '', path = 'hist/', save=False):
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     plt.title('MSE: ' + str(MSE))
     
-
     if save:
-        plt.savefig(path + 'MSE_' + name)
+        plt.savefig(path + 'hist/MSE_' + name)
  
 def makeColours( vals ):
 
@@ -173,7 +168,7 @@ def makeColours( vals ):
 
     return colours
     
-def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = 'boxplot/', save=False):
+def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '', save=False):
     # make one figure containting three subplots with boxplots for each n
     fig, ax = plt.subplots(3, 1, sharex=True)
     fig.subplots_adjust(hspace=0.5)
@@ -201,4 +196,4 @@ def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '
     # set the title of the figure to name
     fig.suptitle(name)
     if save:
-        plt.savefig(path + 'boxplot_' + name)
+        plt.savefig(path + 'boxplot/boxplot_' + name)

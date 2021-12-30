@@ -7,6 +7,7 @@ from plot_results import *
 
 name = '211116-164532'
 
+
 val_loss_array = np.load('../out_fine_tuen/'+ 'val_loss_array_' + name + '.npy', allow_pickle=True)
 val_prediction_array = np.load('../out_fine_tuen/'+ 'val_prediction_array_' + name + '.npy', allow_pickle=True)
 val_target_array = np.load('../out_fine_tuen/'+ 'val_target_array_' + name + '.npy', allow_pickle=True)

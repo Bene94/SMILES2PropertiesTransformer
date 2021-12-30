@@ -11,13 +11,13 @@ import click
 
 
 from nn_model import * 
-from nn_dataloader import *
+from transprop.nn_dataloader import *
 from plot_results import *
-from trainer import *
-import minGPT
-from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
-from load_model import *
-from config import *
+from transprop.trainer import *
+import transprop.minGPT as minGPT
+from transprop.cosine_annealing_warmup import CosineAnnealingWarmupRestarts
+from transprop.load_model import *
+from transprop.config import *
 
 @click.command()
 

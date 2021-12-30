@@ -2,7 +2,7 @@ XpV0(
     project: "GNN_T",
     containers: {
         "main": (
-            command: ["python", "main_script.py"],
+            command: ["python", "-u", "main_script.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),

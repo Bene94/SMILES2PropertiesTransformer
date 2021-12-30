@@ -1,6 +1,7 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
+
 import plot_results as pr
 
 
@@ -81,8 +82,6 @@ ax[2].set_ylabel('mse')
 # set the x ticks to n_list
 ax[0].set_xticklabels(n_list)
 
-
-
 plt.show()
 # save the figure
 plt.savefig('plot/boxplot_mse.png')
@@ -104,7 +103,7 @@ ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignmen
 ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
 
 plt.show()
-plt.savefig('plot/boxplot/mse_val_0.png')
+plt.savefig('boxplot/mse_val_0.png')
 
 # make one figure with just val 1
 fig, ax = plt.subplots(1, 1)

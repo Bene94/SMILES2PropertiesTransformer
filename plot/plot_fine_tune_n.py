@@ -3,10 +3,8 @@ import plot_results as pr
 import pandas as pd
 
 
-
 path_temp = '/home/bene/NNGamma/out_fine_tuen/'
 plot_path = '/home/bene/NNGamma/src/'
-#path_temp = '../temp/'
 
 group = True
 

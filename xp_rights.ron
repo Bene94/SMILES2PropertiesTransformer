@@ -2,7 +2,7 @@ XpV0(
     project: "GNN_T",
     containers: {
         "main": (
-            command: ["python", "permission_change.py"],
+            command: ["python", "-u", "change_owner.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),
@@ -15,11 +15,7 @@ XpV0(
                 "WANDB_API_KEY": "wandb-api-key",
             },
             volumes: 
-                {"/home/bene/NNGamma/data": "/mnt/xprun/data", 
-                "/home/bene/NNGamma/Models": "/mnt/xprun/out",
-                "/home/bene/NNGamma/Plot": "/mnt/xprun/plot",
-                "/home/bene/NNGamma/temp": "/mnt/xprun/temp",
-                "/home/bene/NNGamma/wandb": "/mnt/xprun/wandb",
+                {"/home/bene/NNGamma": "/mnt/xprun", 
             },
         ),
     }

@@ -5,7 +5,7 @@ import os.path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
-from nn_dataloader import *
+from transprop.nn_dataloader import *
 
 @dataclass()
 class Config:

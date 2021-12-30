@@ -7,10 +7,10 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-from trainer import *
-from nn_dataloader import *
+from transprop.trainer import *
+from transprop.nn_dataloader import *
 from nn_model import * 
-from load_model import *
+from transprop.load_model import *
 from simple_evaluation_utils import *
 
 # %% Parameters

@@ -29,9 +29,8 @@ if __name__ == '__main__':
     group = True
 
     path_temp = '/home/bene/NNGamma/out_fine_tuen/'
-    plot_path = '/home/bene/NNGamma/src/'
+    plot_path = '/home/bene/NNGamma/src/plot/'
     data_path = path_temp + name + '/'
-    #path_temp = '../temp/'
 
     type_list = ['0', '1', '2']
 
@@ -131,7 +130,7 @@ if __name__ == '__main__':
     target_list = [cosmo_data_target, val_target_0, val_target_1, val_target_2]
     name_list = ['cosmo', 'val_0', 'val_1', 'val_2']
 
-    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = '', save=False)
+    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False)
 
 
 

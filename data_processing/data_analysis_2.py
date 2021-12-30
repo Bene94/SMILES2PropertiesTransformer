@@ -1,4 +1,4 @@
-from nn_dataloader import *
+from transprop.nn_dataloader import *
 import matplotlib.pyplot as plt
 import torch
 import numpy as np
