@@ -2,7 +2,7 @@ XpV0(
     project: "evaluate",
     containers: {
         "main": (
-            command: ["python", "load_model.py"],
+            command: ["python", "-u","load_model.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),

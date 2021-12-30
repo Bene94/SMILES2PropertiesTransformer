@@ -2,7 +2,7 @@ XpV0(
     project: "GNN_FTS",
     containers: {
         "main": (
-            command: ["python", "fine_tune_mult.py"],
+            command: ["python", "-u", "fine_tune_mult.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),
@@ -22,7 +22,7 @@ XpV0(
                 {"/home/bene/NNGamma/data": "/mnt/xprun/data", 
                 "/home/bene/NNGamma/Models": "/mnt/xprun/out",
                 "/home/bene/NNGamma/Plot": "/mnt/xprun/plot",
-                "/home/bene/NNGamma/out_fine_tuen": "/mnt/xprun/temp",
+                "/home/bene/NNGamma/out_fine_tune": "/mnt/xprun/temp",
             },
         ),
     }

@@ -2,7 +2,7 @@ XpV0(
     project: "DUMMMY",
     containers: {
         "main": (
-            command: ["python", "dummy_run.py"],
+            command: ["python", "-u", "dummy_run.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),

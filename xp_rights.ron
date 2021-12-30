@@ -1,8 +1,8 @@
 XpV0(
-    project: "GNN_T",
+    project: "Get Up Stand Up",
     containers: {
         "main": (
-            command: ["python", "-u", "change_owner.py"],
+            command: ["python", "-u", "change_rights.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),
