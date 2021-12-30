@@ -33,7 +33,7 @@ from config import *
 
 @click.option('--mult', '-x',default=2, help='Uses multibel val/train splits')
 @click.option('--ow', '-ow',default=0, help='if 1, overwrites existing outputs')
-@click.option('--lval', '-lval',default=0, help='if 1, log validation loss evry epoch') 
+@click.option('--lval', '-lval',default=0, help='if 1, log validation loss every epoch') 
 
 
 
@@ -157,7 +157,6 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
             torch.cuda.empty_cache()
 
             if lval == 1:
-
                 epo_val_loss_0, __ , __ , __ = evaluate(model, val_0_data, criterion, config) 
                 epo_val_loss_1, __ , __ , __ = evaluate(model, val_1_data, criterion, config)
                 epo_val_loss_2, __ , __ , __ = evaluate(model, val_2_data, criterion, config)

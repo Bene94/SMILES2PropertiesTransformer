@@ -7,6 +7,7 @@ from plot_line_tuning_mult import load_data
 name = '211209-214402'
 name = '211223-032657' # modle with aug
 name = '211229-043706' # modle with leave n out
+name = '211230-050739' # modle with leave n out no water
 
 path_temp = '/home/bene/NNGamma/out_fine_tuen/'
 plot_path = '/home/bene/NNGamma/src/'
@@ -77,6 +78,8 @@ print('length val2: ' + str(len(val_predction_2)))
 train_df = pd.DataFrame(data={  'out':val_predction_2, 'target':val_target_2, 'x_index':val_input_2})
 
 train_df = pd.DataFrame(data={  'out':val_predction_1, 'target':val_target_1, 'x_index':val_input_1})
+
+train_df = pd.DataFrame(data={  'out':val_predction_0, 'target':val_target_0, 'x_index':val_input_0})
 
 
 print("Data Loading")

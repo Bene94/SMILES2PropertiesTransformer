@@ -24,9 +24,9 @@ if __name__ == '__main__':
     name = '211209-214402'
     name = '211214-125306' # model without aug
     name = '211223-032657' # modle with aug
-    name = '211229-043706' # modle with leave n out
+    name = '211230-050739' # modle with leave n out no water
 
-    group = False
+    group = True
 
     path_temp = '/home/bene/NNGamma/out_fine_tuen/'
     plot_path = '/home/bene/NNGamma/src/'
@@ -121,8 +121,11 @@ if __name__ == '__main__':
     cosmo_data = pd.read_csv(path_temp + 'BROUWER-COSMO-OUT.csv', sep=';')
     cosmo_data = cosmo_data.dropna()
 
+
     cosmo_data_target = cosmo_data['lnGamma_exp'].to_numpy(dtype=np.float64)
     cosmo_data_prediction = cosmo_data['lnGamma'].to_numpy(dtype=np.float64)
+
+    pr.make_scatter(cosmo_data_prediction, cosmo_data_target, name = 'cosmo', path = plot_path, save=True)
 
     prediction_list = [cosmo_data_prediction, val_predction_0, val_predction_1, val_predction_2]
     target_list = [cosmo_data_target, val_target_0, val_target_1, val_target_2]
