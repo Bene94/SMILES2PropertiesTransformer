@@ -1,20 +1,5 @@
 # Ignore the data file folders
-InputData/**
 wandb/**
-InputData_test/**
-TrainingData/**
-TrainingData_test/**
-TrainingData_red/**
-Data_no_tail/*
-Models/**
-Input_Reduced/**
-data/*
-plot/*
-
-heat_*
-val_*
-MSE_*
-scatter_*
 
 # Standard for python in vs code
 
