@@ -6,6 +6,8 @@ from data_processing.data_processing import *
 ## function to load the output of the modle and put it in a human readable excel file
 
 name = '211126-160520'
+name = '211220-192228' # modle with leave n out
+
 save_path = '/home/bene/NNGamma/out/' + name + '/'
 data_path = '/home/bene/NNGamma/data/exp_t/'
 vocab_path = "../vocab/"

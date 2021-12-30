@@ -33,10 +33,11 @@ from config import *
 
 @click.option('--mult', '-x',default=2, help='Uses multibel val/train splits')
 @click.option('--ow', '-ow',default=0, help='if 1, overwrites existing outputs')
+@click.option('--lval', '-lval',default=0, help='if 1, log validation loss evry epoch') 
 
 
 
-def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow):
+def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval):
 
     name = model_name
 
@@ -155,16 +156,18 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
             
             torch.cuda.empty_cache()
 
-            epo_val_loss_0, __ , __ , __ = evaluate(model, val_0_data, criterion, config) 
-            epo_val_loss_1, __ , __ , __ = evaluate(model, val_1_data, criterion, config)
-            epo_val_loss_2, __ , __ , __ = evaluate(model, val_2_data, criterion, config)
+            if lval == 1:
 
-            epo_val_loss[i,epoch,0] = epo_val_loss_0
-            epo_val_loss[i,epoch,1] = epo_val_loss_1
-            epo_val_loss[i,epoch,2] = epo_val_loss_2
+                epo_val_loss_0, __ , __ , __ = evaluate(model, val_0_data, criterion, config) 
+                epo_val_loss_1, __ , __ , __ = evaluate(model, val_1_data, criterion, config)
+                epo_val_loss_2, __ , __ , __ = evaluate(model, val_2_data, criterion, config)
 
-            wandb.log({'epoch_val_loss_0': epo_val_loss_0, 'epoch_val_loss_1': epo_val_loss_1, 'epoch_val_loss_2': epo_val_loss_2})
-            wandb.log({'epoch': epoch})
+                epo_val_loss[i,epoch,0] = epo_val_loss_0
+                epo_val_loss[i,epoch,1] = epo_val_loss_1
+                epo_val_loss[i,epoch,2] = epo_val_loss_2
+
+                wandb.log({'epoch_val_loss_0': epo_val_loss_0, 'epoch_val_loss_1': epo_val_loss_1, 'epoch_val_loss_2': epo_val_loss_2})
+                wandb.log({'epoch': epoch})
 
             # evaluate the 3 validation sets
 

@@ -6,6 +6,8 @@ from plot_line_tuning_mult import load_data
 
 name = '211209-214402'
 name = '211223-032657' # modle with aug
+name = '211229-043706' # modle with leave n out
+
 path_temp = '/home/bene/NNGamma/out_fine_tuen/'
 plot_path = '/home/bene/NNGamma/src/'
 save_path = '/home/bene/NNGamma/out_fine_tuen/' 

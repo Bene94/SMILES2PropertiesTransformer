@@ -10,7 +10,7 @@ def load_data(file_path, type):
     mse_list = []
     input_list = []
 
-    for i in range(0, 500):
+    for i in range(0, 80):
         target_list.append(np.load(file_path + 'val_target_'+ type + '_' + str(i) + '.npy'))
         prediction_list.append(np.load(file_path + 'val_predction_'+ type + '_' + str(i) + '.npy'))
         input_list.append(np.load(file_path + 'val_input_'+ type + '_' + str(i) + '.npy'))
@@ -24,8 +24,9 @@ if __name__ == '__main__':
     name = '211209-214402'
     name = '211214-125306' # model without aug
     name = '211223-032657' # modle with aug
+    name = '211229-043706' # modle with leave n out
 
-    group = True
+    group = False
 
     path_temp = '/home/bene/NNGamma/out_fine_tuen/'
     plot_path = '/home/bene/NNGamma/src/'

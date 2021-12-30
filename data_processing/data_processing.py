@@ -13,8 +13,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', "-p",default=["brouwer_exp"], help='Location of raw data', multiple=True)
-@click.option('--save_path', default="exp_t", help='Location of output data')
+@click.option('--file_path', '-p',default=["brouwer_exp"], help='Location of raw data', multiple=True)
+@click.option('--save_path', '-s', default="exp_t", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 @click.option('--source', default='COSMO', help='see if to select COSMO or EXP')
@@ -74,13 +74,13 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
                 prefix = 'train'
             else:
                 prefix = 'val_' + str(i-1)
-            data_batches = aug_df(df, comp_list, aug, batch_size=100000)
+            data_batches = prep_save(df, comp_list, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow)
     
     # save comp
     comp_list.to_csv(file_out + 'comp_list.csv', index=False)
 
-def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n):
+def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n, comp_list):
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/raw_data/" 
@@ -93,16 +93,8 @@ def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, 
         vocab_path = "../" + vocab_path + "/"
         alias_path = '../raw_data/alias/alias_dict_brower.npy'
 
-
-
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
-        
-
-    comp_list = aug_data(comp_list, alias_path=alias_path)
-    
-    ## apply the vocab to the smiles
-    comp_list = apply_vocab(comp_list, vocab_dict)  
+    df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
     df_list = split_data_test_val_exp_n(df_join, comp_list,seed, n)
 
     # make input data
@@ -112,11 +104,59 @@ def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, 
                 prefix = 'train'
             else:
                 prefix = 'val_' + str(i-1)
-            data_batches = aug_df(df, comp_list, aug, batch_size=100000)
-            save_batches(data_batches, file_out, prefix, ow)
-    
+            data_batches = prep_save(df, comp_list, batch_size=100000)
+            save_batches(data_batches, file_out, prefix, ow) 
     # save comp
     comp_list.to_csv(file_out + 'comp_list.csv', index=False)
+
+def processing_n_out(foler_name, save_path, vocab_path, ow, comp_list, systems, index):
+     
+    if os.environ.get('XPRUN_NAME') is not None:
+        file_path = "/mnt/xprun/raw_data/" 
+        file_out = "/mnt/xprun/data/" + save_path + "/"
+        vocab_path = "/mnt/xprun/" + vocab_path + "/"
+        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
+    else:
+        file_path = "../raw_data/" 
+        file_out = "../data/" + save_path + "/"
+        vocab_path = "../" + vocab_path + "/"
+        alias_path = '../raw_data/alias/alias_dict_brower.npy'
+
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
+    df_list = split_data_test_val_exp_n_out(df_join, comp_list, systems, index)
+
+    # make input data
+    for i, df in enumerate(df_list):
+        if not df.empty:
+            if i == 0:
+                prefix = 'train'
+            else:
+                prefix = 'val_' + str(i-1)
+            data_batches = prep_save(df, comp_list, batch_size=100000)
+            save_batches(data_batches, file_out, prefix, ow) 
+    # save comp
+    comp_list.to_csv(file_out + 'comp_list.csv', index=False)
+
+def get_comp_list(foler_name, vocab_path):
+    if os.environ.get('XPRUN_NAME') is not None:
+        file_path = "/mnt/xprun/raw_data/" 
+        vocab_path = "/mnt/xprun/" + vocab_path + "/"
+        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
+    else:
+        file_path = "../raw_data/" 
+        vocab_path = "../" + vocab_path + "/"
+        alias_path = '../raw_data/alias/alias_dict_brower.npy'
+
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    
+    df_join, comp_list, __, __  = load_exp_data(file_path, foler_name) 
+    comp_list = aug_data(comp_list, alias_path=alias_path)
+    comp_list = apply_vocab(comp_list, vocab_dict)
+
+    systems = df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+
+    return comp_list, systems
 
 def load_exp_data(file_path, foler_names):
     #load the data from the experiment 
@@ -126,7 +166,7 @@ def load_exp_data(file_path, foler_names):
         # list all files in the folder
         files = os.listdir(file_path + folder_name)
         # load all files into a panda
-        bar = pb.ProgressBar(maxval=len(files), widgets=["Processing files from " + folder_name + ": ",pb.Timer(), pb.Bar(), pb.ETA()])
+        bar = pb.ProgressBar(maxval=len(files), widgets=["Processing files from " + folder_name + ": ",pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
         bar.start()
         for i, file in enumerate(files):
             bar.update(i)
@@ -168,7 +208,7 @@ def load_vocab(file_path,vocab_name):
 def aug_data(comp_list,alias_path):
 
     alias_dict = np.load(alias_path, allow_pickle=True).item()
-    bar = pb.ProgressBar(maxval=len(comp_list), widgets=['Get Aliases: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(comp_list), widgets=['Get Aliases: ',pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
     bar.start()
     #add the alias to the new collumn alias to comp_list
     for i in range(len(comp_list)):
@@ -179,13 +219,28 @@ def aug_data(comp_list,alias_path):
     bar.finish()
     return comp_list
 
+def prep_save(df, comp_list, batch_size):
+    # converts the dataframe in np-arrays for saving and splits its in batches
+    smile_dict = pd.Series(comp_list.index.values,index=comp_list.SMILE0.values).to_dict()
+    df['solute_idx'] = df['solute'].map(smile_dict)
+    df['solvent_idx'] = df['solvent'].map(smile_dict)
+    df['solute_idx'] = df['solute_idx'].astype(int)
+    df['solvent_idx'] = df['solvent_idx'].astype(int)
+
+    df = df.drop(['solute','solvent'], axis=1)
+    df = df.dropna()
+
+    # split the dataframe into batches
+    df_list = np.array_split(df, int(np.ceil(len(df)/batch_size)))
+    return df_list
+
 def aug_df(df, comp_list, aug, batch_size):
     # add the alias to the new collumn alias to comp_list
 
     df_temp = df.copy()
     df_temp['emb'] = np.nan
     df_temp['emb'] = df_temp['emb'].astype(object)
-    bar = pb.ProgressBar(maxval=len(df_temp), widgets=[pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(df_temp), widgets=[pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
     bar.start()
 
     sos = np.array((1,))
@@ -206,7 +261,7 @@ def aug_df(df, comp_list, aug, batch_size):
         comp_list_dic[smile] = [i, comp_list.loc[i,'n_alias']]
 
 
-    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Indexing data: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Indexing data: ',pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
     bar.start()
 
     for i in range(len(df_temp)):
@@ -226,7 +281,7 @@ def aug_df(df, comp_list, aug, batch_size):
     
     bar.finish()
 
-    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Processing data: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Processing data: ',pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
     bar.start()
     count = 0
 
@@ -293,6 +348,8 @@ def get_idx_test_val(solvent_indx, solute_indx, frac, seed):
     return val_solvent_indx, val_solute_indx
 
 def split_data_test_val(df_join, val_solvent_indx, val_solute_indx, comp_list,seed):
+
+
      
     df_temp = df_join.copy()
     
@@ -330,15 +387,12 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
     df_temp_train = df_temp.loc[ ~df_temp.index.isin(df_temp_val_0.index) & ~df_temp.index.isin(df_temp_val_1.index)]
     
     #sample 10 % of the dataframe that is not in the validation set
-
     systems =  df_temp_train.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
     systems_val_2 = systems.sample(frac=0.01, random_state=seed)
    
-   
-    bar = pb.ProgressBar(maxval=len(systems_val_2), widgets=['Checking integrety of val sets: ',pb.Timer(), pb.Bar(), pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(systems_val_2), widgets=['Checking integrety of val sets: ',pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
     bar.start()
     count = 0
-
     
     df_temp_val_2 = pd.DataFrame(columns=df_temp_train.columns)
     
@@ -434,6 +488,54 @@ def split_data_test_val_exp_n(df_join, comp_list,seed, n):
 
     return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
 
+def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
+
+    systems_val_0 = systems.iloc[index]
+    systems_train = systems.drop(index)
+
+    df_temp_val_0 = pd.DataFrame(columns=df_join.columns)
+    df_temp_train = df_join.copy()
+
+    idx_solute = []
+    idx_solvent = []
+
+    for i in systems_val_0.index:
+        to_val_0 = df_join[(df_join['solvent'] == systems_val_0.loc[i,'solvent']) & (df_join['solute'] == systems_val_0.loc[i,'solute'])]
+        df_temp_val_0 = pd.concat([df_temp_val_0, to_val_0])
+    
+        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['solvent'] == systems_val_0.loc[i,'solvent']].index)
+        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['solute'] == systems_val_0.loc[i,'solute']].index)
+
+    for i in systems_val_0.index:
+        idx_solvent += df_join[df_join['solvent'] == systems_val_0.loc[i,'solvent']].index.tolist()
+        idx_solute += df_join[df_join['solute'] == systems_val_0.loc[i,'solute']].index.tolist()
+
+    idx_val_0 = set(df_temp_val_0.index)
+    # find the elements that are either in idx_solvent and idx_solute but not in idx_val_0
+    idx_solvent = list((set(idx_solvent) | set(idx_solute)) - idx_val_0)
+    df_temp_val_1 = df_join.loc[idx_solvent,:]
+
+    df_temp_val_2 = df_temp_train.sample(frac=0.05, random_state = index[0])
+    df_temp_train = df_temp_train.drop(df_temp_val_2.index)
+
+
+      
+    print("len of data: " + str(len(df_join)))
+    print("len of val_0: " + str(len(df_temp_val_0)))
+    print("len of val_1: " + str(len(df_temp_val_1)))
+    print("len of val_2: " + str(len(df_temp_val_2)))
+    print("len of train: " + str(len(df_temp_train)))
+    print("len of val_0 + val_1 + val_2 + train: " + str(len(df_temp_val_0) + len(df_temp_val_1) + len(df_temp_val_2) + len(df_temp_train)) )
+
+    # remove all nan form df_temp_train
+    df_temp_train = df_temp_train.dropna()
+    df_temp_train = df_temp_train.reset_index(drop=True)
+    df_temp_val_0 = df_temp_val_0.reset_index(drop=True)
+    df_temp_val_1 = df_temp_val_1.reset_index(drop=True)
+    df_temp_val_2 = df_temp_val_2.reset_index(drop=True)
+
+    return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
+
 def make_input_data(df, comp_list,batch_size):
 
     target = np.array(df.ioc[:,"lnGamma"])
@@ -467,9 +569,12 @@ def make_batches(data, batch_size):
 
 def save_batches(batches, folder_path, type, ow):
     # save batches to csv for either train or val batches are numpy arrays
-    bar = pb.ProgressBar(maxval=len(batches), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
+    bar = pb.ProgressBar(maxval=len(batches), widgets=['Save ' + type + ': ' ,pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
     bar.start()
 
+    # create folder if it does not exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
     # see if files exist in folder and delete them if overwrite is true
     if ow:
         #file ist without folders
@@ -485,7 +590,8 @@ def save_batches(batches, folder_path, type, ow):
         file_path = os.path.join(folder_path, type + '_' + str(num_files+i) + '.csv')
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        np.save(file_path, batch)
+        batch.to_csv(file_path, index=False)
+    bar.finish()
 
 def revert_vocab(df, comp_list):
     # look up the index in comp_list and return the smiles string first index is the solute second the solvent
@@ -498,7 +604,6 @@ def revert_vocab_index(df, comp_list):
     df['Solute'] = comp_list.loc[df['x_index'].to_numpy().astype(int), 'SMILE0'].tolist()
     df['Solvent'] = comp_list.loc[df['x_index'].to_numpy().astype(int), 'SMILE0'].tolist()
     return df
-
 
 if __name__ == "__main__":
     main()

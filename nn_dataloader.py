@@ -9,11 +9,11 @@ import time
 ## load data from training_data\ trainig data called train_XXX and validation data calld val_xxx into dataloader.
 
 class gamma_dataset(Dataset):  
-    def __init__(self, root, data_type, config, aug=True):
-        self.root = root
+    def __init__(self, data_path, data_type, config, aug=True):
+        self.data_path = data_path
         self.data_type = data_type
         
-        self.train_data, self.train_target, self.xT, self.smile_index, self.index = self.load_data(config.test)
+        self.data, self.train_target, self.xT, self.smile_index, self.index = self.load_data(config.test)
         self.load_comp_list(self)
         self.aug = aug
         
@@ -22,7 +22,7 @@ class gamma_dataset(Dataset):
 
     def load_comp_list(self, comp_list_file):
          
-        comp_list = pd.read_csv(self.root + 'comp_list.csv')
+        comp_list = pd.read_csv(self.data_path + 'comp_list.csv')
         emb_list = np.empty((comp_list.shape[0],10), dtype=object)
 
         for i in range(0, comp_list.shape[0]):
@@ -36,50 +36,31 @@ class gamma_dataset(Dataset):
 
 
     def load_data(self,test):
-        #laods the data from sefl.root  acroidng to type from batches in current direcory plus root
-        files = os.listdir(self.root)
+        files = os.listdir(self.data_path)
         #load all files into a numpy array from a cvs file
-        dirs = os.listdir(self.root)
-        files = [x for x in dirs if os.path.isfile(os.path.join(self.root, x))]
-        # progress bar for loading data 
-        #bar = pb.ProgressBar(maxval=len(files), widgets=[pb.Bar('=', '[', ']'), ' ', pb.Percentage(), ' ', pb.ETA()])
-        # load first file into data then append all other files data is a .npy file
-        data = np.array([])
-        for i in range(0, len(files)):
+        dirs = os.listdir(self.data_path)
+        files = [x for x in dirs if os.path.isfile(os.path.join(self.data_path, x))]
+        li = []
+        for filename in files:
             #bar.update(i)
-            if files[i].startswith(self.data_type) and not files[i].startswith("comp_list"):
-                # when the data array is empty create lese append
-                if data.size == 0:
-                    data = np.load(self.root + files[i])
-                else:
-                    data = np.append(data, np.load(self.root + files[i]), axis=0)
+            if filename.startswith(self.data_type) and not filename.startswith("comp_list"):
+                df = pd.read_csv(os.path.join(self.data_path, filename), index_col=None, header=0)
+                li.append(df)
+        data = pd.concat(li, axis=0, ignore_index=True)
 
-            if test and len(data) > 5000:
-                break
+        if test:
+            data = data.iloc[0:500,:]
 
         if data is None:
             print("No data " + self.data_type + " found")
             return [], [], [], [], []
 
-        target = data[:, 0]
-        smiles = data[:, 1:129]
-        xT = data[:,129:131]
-        smile_index = data[:,131:133]
-        if data.shape[1] == 134:
-            index = data[:,133]
-        else:
-            index = np.zeros(len(data))
+        target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
+        smile_index = torch.from_numpy(data[["solute_idx","solvent_idx"]].to_numpy()).int()
+        xT = torch.from_numpy(data[["x","T"]].to_numpy()).float()
+        index = torch.from_numpy(data["i"].to_numpy()).int()
 
-        smiles = torch.tensor(smiles)
-        target = torch.from_numpy(target)
-        xT = torch.from_numpy(xT)
-
-        smiles = smiles.type(torch.ByteTensor)
-        target = target.type(torch.FloatTensor)
-        target = target.view((target.shape[0],1,1))
-        xT = xT.type(torch.FloatTensor)
-        #return the data and target
-        return smiles, target, xT, smile_index, index 
+        return data, target, xT, smile_index, index 
 
     def __getitem__(self,index):
         
@@ -92,8 +73,8 @@ class gamma_dataset(Dataset):
 
         comp_list = self.comp_list
 
-        SMILE1 = int(self.smile_index[index][0])
-        SMILE2 = int(self.smile_index[index][1])
+        SMILE1 = int(self.data["solute_idx"][index])
+        SMILE2 = int(self.data["solvent_idx"][index])
 
         if self.aug:
             rand1 = np.random.randint(0,int(self.n_alias[SMILE1]))
@@ -112,9 +93,9 @@ class gamma_dataset(Dataset):
         return self.train_target[index], [train_data, self.xT[index], self.smile_index[index], self.index[index]]
 
     def __len__(self):
-        if len(self.train_data.shape) == 1:
+        if len(self.data.shape) == 1:
             return 1
-        return self.train_data.shape[0]
+        return self.data.shape[0]
 
 def load_data(config,local = False,test = False):
 
@@ -123,10 +104,10 @@ def load_data(config,local = False,test = False):
     else:
         data_path = os.path.join('/mnt/xprun/data/' + config.data_path + '/')
 
-    train_dataset = gamma_dataset(data_path, 'train', config)
-    val_0_dataset = gamma_dataset(data_path, 'val_0', config)
-    val_1_dataset = gamma_dataset(data_path, 'val_1', config)
-    val_2_dataset = gamma_dataset(data_path, 'val_2', config)
+    train_dataset = gamma_dataset(data_path, 'train', config, aug=True)
+    val_0_dataset = gamma_dataset(data_path, 'val_0', config, aug=False)
+    val_1_dataset = gamma_dataset(data_path, 'val_1', config, aug=False)
+    val_2_dataset = gamma_dataset(data_path, 'val_2', config, aug=False)
 
     if test:
         train_dataset.train_data = train_dataset.train_data[0:500]
