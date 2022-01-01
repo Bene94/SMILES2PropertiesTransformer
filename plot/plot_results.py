@@ -30,7 +30,7 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     delta = target - prediciton
     weights = np.ones_like(delta)/float(len(delta))
     plt.clf()
-    plt.hist(delta, bins=21, alpha=0.5, label='delta', range=(-2,2), weights=weights)
+    plt.hist(delta, bins=21, alpha=0.5, label='delta', range=(-2,2), weights=weights, edgecolor='black')
     plt.ylabel('count')
     plt.xlabel('delta ln g')
     plt.xlim(-2,2)
@@ -54,8 +54,10 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
         perc_data_list.append(np.sum( (target_list[i] - prediction_list[i])**2 < 0.3**2 ) / len(target_list[i]) * 100)
 
     plt.clf()
-    plt.hist(delta_list, bins=21, alpha=0.5, range=(-2,2), weights=weights_list)
+    plt.hist(delta_list, bins=21, alpha=0.5, range=(-2,2), weights=weights_list, edgecolor='black')
     plt.legend(name_list)
+    # balck border around the bars in the histogram
+
     plt.ylabel('percentage')
     plt.xlabel('delta ln gamma')
     plt.xlim(-2,2)

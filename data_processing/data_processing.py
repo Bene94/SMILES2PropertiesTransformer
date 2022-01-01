@@ -491,7 +491,6 @@ def split_data_test_val_exp_n(df_join, comp_list,seed, n):
 def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
 
     systems_val_0 = systems.iloc[index]
-    systems_train = systems.drop(index)
 
     df_temp_val_0 = pd.DataFrame(columns=df_join.columns)
     df_temp_train = df_join.copy()
@@ -515,11 +514,40 @@ def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
     idx_solvent = list((set(idx_solvent) | set(idx_solute)) - idx_val_0)
     df_temp_val_1 = df_join.loc[idx_solvent,:]
 
-    df_temp_val_2 = df_temp_train.sample(frac=0.05, random_state = index[0])
-    df_temp_train = df_temp_train.drop(df_temp_val_2.index)
+    train_systems = df_temp_train.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+    
+    val_2_systems = train_systems.sample(frac=0.05, random_state= index[0])
 
+    df_temp_val_2 = pd.DataFrame(columns=df_join.columns)
+    to_val = pd.DataFrame(columns=df_join.columns)
 
-      
+    for i in val_2_systems.index:
+        temp_to_val = df_join[(df_join['solvent'] == val_2_systems.loc[i,'solvent']) & (df_join['solute'] == val_2_systems.loc[i,'solute'])]
+        df_temp_train = df_temp_train.drop(temp_to_val.index)
+        to_val = pd.concat([to_val, temp_to_val])
+    
+    train_solvents = set(df_temp_train['solvent'].unique().tolist())
+    train_solutes = set(df_temp_train['solute'].unique().tolist())
+
+    to_val_solvents = set(to_val['solvent'].unique().tolist())
+    to_val_solutes = set(to_val['solute'].unique().tolist())
+
+    not_train_solvents = to_val_solvents - train_solvents
+    not_train_solutes = to_val_solutes - train_solutes
+
+    to_val.reset_index(inplace=True, drop=True)
+
+    
+    temp = to_val[to_val['solute'].isin(list(not_train_solutes)) & to_val['solvent'].isin(list(not_train_solvents))]
+    df_temp_val_0 = pd.concat([df_temp_val_0, temp])
+    to_val = to_val.drop(temp.index)
+
+    temp = to_val[to_val['solute'].isin(list(not_train_solutes)) | to_val['solvent'].isin(list(not_train_solvents))]
+    df_temp_val_1 = pd.concat([df_temp_val_1, temp])
+    to_val = to_val.drop(temp.index)
+
+    df_temp_val_2 = pd.concat([df_temp_val_2, to_val])
+
     print("len of data: " + str(len(df_join)))
     print("len of val_0: " + str(len(df_temp_val_0)))
     print("len of val_1: " + str(len(df_temp_val_1)))
@@ -528,8 +556,9 @@ def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
     print("len of val_0 + val_1 + val_2 + train: " + str(len(df_temp_val_0) + len(df_temp_val_1) + len(df_temp_val_2) + len(df_temp_train)) )
 
     # remove all nan form df_temp_train
+    # remove index of df_temp_val_0
     df_temp_train = df_temp_train.dropna()
-    df_temp_train = df_temp_train.reset_index(drop=True)
+    df_temp_train = df_temp_train.reset_index(drop=True )
     df_temp_val_0 = df_temp_val_0.reset_index(drop=True)
     df_temp_val_1 = df_temp_val_1.reset_index(drop=True)
     df_temp_val_2 = df_temp_val_2.reset_index(drop=True)

@@ -9,15 +9,14 @@ import torch.nn as nn
 import wandb
 import click
 
-
-from nn_model import * 
 from transprop.nn_dataloader import *
-from plot_results import *
 from transprop.trainer import *
 import transprop.minGPT as minGPT
 from transprop.cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 from transprop.load_model import *
 from transprop.config import *
+
+from plot.plot_results import *
 
 @click.command()
 

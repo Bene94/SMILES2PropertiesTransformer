@@ -7,9 +7,10 @@ import os
 
 import wandb
 
-import minGPT as minGPT 
-from nn_dataloader import *
-from trainer import *
+import transprop.minGPT as minGPT 
+from transprop.nn_dataloader import *
+from transprop.trainer import *
+import transprop.config as config
 
 def load_model(path, name):
     # load config file

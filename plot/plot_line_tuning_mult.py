@@ -2,18 +2,27 @@ import numpy as np
 import plot_results as pr
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
-def load_data(file_path, type):
+def load_data(file_path, val_type):
 
     target_list = []
     prediction_list = []
     mse_list = []
     input_list = []
 
-    for i in range(0, 80):
-        target_list.append(np.load(file_path + 'val_target_'+ type + '_' + str(i) + '.npy'))
-        prediction_list.append(np.load(file_path + 'val_predction_'+ type + '_' + str(i) + '.npy'))
-        input_list.append(np.load(file_path + 'val_input_'+ type + '_' + str(i) + '.npy'))
+    file_list = os.listdir(file_path)
+    # sort
+    file_list.sort()
+    for files in file_list:
+        if files.startswith('val_target_'+ val_type + '_'):
+            target_list.append(np.load(file_path + files))
+        if files.startswith('val_predction_'+ val_type + '_'):
+            prediction_list.append(np.load(file_path + files))
+        if files.startswith('val_input_'+ val_type + '_'):
+            input_list.append(np.load(file_path + files))
+    
+    for i in range(0, len(target_list)):
         mse = np.mean(np.square(target_list[i] - prediction_list[i]))
         mse_list.append(mse)
 
@@ -24,11 +33,11 @@ if __name__ == '__main__':
     name = '211209-214402'
     name = '211214-125306' # model without aug
     name = '211223-032657' # modle with aug
-    name = '211230-050739' # modle with leave n out no water
+    name = '211231-031659' # modle with leave n out no water
 
     group = True
 
-    path_temp = '/home/bene/NNGamma/out_fine_tuen/'
+    path_temp = '/home/bene/NNGamma/out_fine_tune/'
     plot_path = '/home/bene/NNGamma/src/plot/'
     data_path = path_temp + name + '/'
 

@@ -10,9 +10,9 @@ import wandb
 import click
 
 
-from tnn_model import * 
+
 from transprop.nn_dataloader import *
-from plot_results import *
+from plot.plot_results import *
 from transprop.trainer import *
 import transprop.minGPT as minGPT
 from transprop.cosine_annealing_warmup import CosineAnnealingWarmupRestarts
