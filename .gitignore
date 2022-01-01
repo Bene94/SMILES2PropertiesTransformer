@@ -2,7 +2,7 @@
 wandb/**
 
 # Standard for python in vs code
-
+*.png
 .DS_Store
 .huskyrc.json
 out
