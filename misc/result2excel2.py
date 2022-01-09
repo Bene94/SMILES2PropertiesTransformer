@@ -1,17 +1,46 @@
+import os
+import sys
+
+# add current path to sys.path
+sys.path.append(os.getcwd())
+
 import numpy as np
-import plot_results as pr
 import pandas as pd
-from plot_line_tuning_mult import load_data
+
+
+def load_data(file_path, val_type):
+
+    target_list = []
+    prediction_list = []
+    mse_list = []
+    input_list = []
+
+    file_list = os.listdir(file_path)
+    # sort
+    file_list.sort()
+    for files in file_list:
+        if files.startswith('val_target_'+ val_type + '_'):
+            target_list.append(np.load(file_path + files))
+        if files.startswith('val_predction_'+ val_type + '_'):
+            prediction_list.append(np.load(file_path + files))
+        if files.startswith('val_input_'+ val_type + '_'):
+            input_list.append(np.load(file_path + files))
+    
+    for i in range(0, len(target_list)):
+        mse = np.mean(np.square(target_list[i] - prediction_list[i]))
+        mse_list.append(mse)
+
+    return target_list, prediction_list, mse_list, input_list
 
 
 name = '211209-214402'
 name = '211223-032657' # modle with aug
 name = '211229-043706' # modle with leave n out
-name = '211230-050739' # modle with leave n out no water
+name = '211231-031659' # modle with leave n out no water
 
-path_temp = '/home/bene/NNGamma/out_fine_tuen/'
+path_temp = '/home/bene/NNGamma/out_fine_tune/'
 plot_path = '/home/bene/NNGamma/src/'
-save_path = '/home/bene/NNGamma/out_fine_tuen/' 
+save_path = '/home/bene/NNGamma/out_fine_tune/' 
 data_path = path_temp + name + '/'
 #path_temp = '../temp/'
 
@@ -75,16 +104,20 @@ print('length val2: ' + str(len(val_predction_2)))
 
 # turn np arrays into pandas dataframes for train and val
 
-train_df = pd.DataFrame(data={  'out':val_predction_2, 'target':val_target_2, 'x_index':val_input_2})
+train_df_2 = pd.DataFrame(data={  'out':val_predction_2, 'target':val_target_2, 'x_index':val_input_2})
 
-train_df = pd.DataFrame(data={  'out':val_predction_1, 'target':val_target_1, 'x_index':val_input_1})
+train_df_1 = pd.DataFrame(data={  'out':val_predction_1, 'target':val_target_1, 'x_index':val_input_1})
 
-train_df = pd.DataFrame(data={  'out':val_predction_0, 'target':val_target_0, 'x_index':val_input_0})
+train_df_0 = pd.DataFrame(data={  'out':val_predction_0, 'target':val_target_0, 'x_index':val_input_0})
 
 
 print("Data Loading")
 
-train_df.to_excel(save_path + name + '.xlsx', index=False)
+# save all to excel file
+
+train_df_0.to_excel(save_path + 'train_df_0.xlsx')
+train_df_1.to_excel(save_path + 'train_df_1.xlsx')
+train_df_2.to_excel(save_path + 'train_df_2.xlsx')
 # save high error data to excel
 #df = df[ np.abs(df['out']-df['target']) > 0.5]
 #df.to_excel(save_path + name + '_high_error.xlsx', index=False)

@@ -3,15 +3,14 @@ import numpy as np
 import os
 from numpy.random import default_rng
 ## function to create multiple splits of the data
+
 file_path = ["brouwer_exp"]
 vocab_path = "vocab"
 ow = True
 
-exclude_H2O = True
-edge_H2O = False
-only_H2O = False
+exclude_H2O = False
+only_H2O = True 
 
-num_splits = 200
 
 data_path = '../data/'
 #data_path = '/mnt/xprun/data/'
@@ -25,17 +24,12 @@ if exclude_H2O:
     h2o_index = systems[systems.solvent == 'O'].index
     index_list = np.setdiff1d(index_list, h2o_index)
     save_path = "data_exp_noH2O"
-elif edge_H2O:
-    h2o_index = systems[systems.solvent == 'O'].index
-    solutes = systems.solute[h2o_index]
-    solutes = solutes.drop_duplicates()
-    index_list = systems[systems.solute.isin(solutes)].index
-    index_list = np.setdiff1d(index_list, h2o_index)
-    save_path = "data_exp_edgeH2O"
+    num_splits = 200
 elif only_H2O:
     index_list = systems[systems.solvent == 'O'].index
+    index_list = np.array(index_list)
     save_path = "data_exp_onlyH2O"
-
+    num_splits = 20
 
 # shuffle the index list
 rng = default_rng(0)

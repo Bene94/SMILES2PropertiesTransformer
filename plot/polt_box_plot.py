@@ -31,237 +31,31 @@ def load_data(n_list, file_path, type):
 
 
 
-data_path = "/home/bene/NNGamma/out_fine_tuen/n_"
 n_list = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 600, 700, 800, 1000] #, 2000] # , 100, 500, 1000]
 
 type_list = ['0', '1','2']
 
-target_list_0, prediction_list_0, mse_list_0 = load_data(n_list, data_path, type_list[0])
-target_list_1, prediction_list_1, mse_list_1 = load_data(n_list, data_path, type_list[1])
-target_list_2, prediction_list_2, mse_list_2 = load_data(n_list, data_path, type_list[2])
+if False:
+    data_path = "/home/bene/NNGamma/out_fine_tuen/n_"
+    target_list_0, prediction_list_0, mse_list_0 = load_data(n_list, data_path, type_list[0])
+    target_list_1, prediction_list_1, mse_list_1 = load_data(n_list, data_path, type_list[1])
+    target_list_2, prediction_list_2, mse_list_2 = load_data(n_list, data_path, type_list[2])
 
-
-data_path = "/home/bene/NNGamma/out_fine_tuen/n_ut_"
-target_list_ut_0, prediction_list_ut_0, mse_list_ut_0 = load_data(n_list, data_path, type_list[0])
-target_list_ut_1, prediction_list_ut_1, mse_list_ut_1 = load_data(n_list, data_path, type_list[1])
-target_list_ut_2, prediction_list_ut_2, mse_list_ut_2 = load_data(n_list, data_path, type_list[2])
-
-data_path = "/home/bene/NNGamma/out_fine_tuen/n_f_aug_"
-target_list_f_aug_0, prediction_list_f_aug_0, mse_list_f_aug_0 = load_data(n_list, data_path, type_list[0])
-target_list_f_aug_1, prediction_list_f_aug_1, mse_list_f_aug_1 = load_data(n_list, data_path, type_list[1])
-target_list_f_aug_2, prediction_list_f_aug_2, mse_list_f_aug_2 = load_data(n_list, data_path, type_list[2])
-
-data_path = "/home/bene/NNGamma/out_fine_tuen/n_ut_aug_"
-target_list_ut_aug_0, prediction_list_ut_aug_0, mse_list_ut_aug_0 = load_data(n_list, data_path, type_list[0])
-target_list_ut_aug_1, prediction_list_ut_aug_1, mse_list_ut_aug_1 = load_data(n_list, data_path, type_list[1])
-target_list_ut_aug_2, prediction_list_ut_aug_2, mse_list_ut_aug_2 = load_data(n_list, data_path, type_list[2])
-
-# make a figure with three subplots sharing both x axes with the mse list as boxplot
-
-fig, ax = plt.subplots(3, 1)
-#  y axis limit between 0 and 1
-ax[0].set_ylim(0, 1)
-ax[1].set_ylim(0, 1)
-ax[2].set_ylim(0, 1)
-
-ax[0].boxplot(mse_list_0)
-ax[1].boxplot(mse_list_1)
-ax[2].boxplot(mse_list_2)
-
-ax[0].set_title('val 0')
-ax[1].set_title('val 1')
-ax[2].set_title('val 2')
-
-ax[0].set_xlabel('n')
-ax[1].set_xlabel('n')
-ax[2].set_xlabel('n')
-
-ax[0].set_ylabel('mse')
-ax[1].set_ylabel('mse')
-ax[2].set_ylabel('mse')
-# set the x ticks to n_list
-ax[0].set_xticklabels(n_list)
-
-plt.show()
-# save the figure
-plt.savefig('plot/boxplot_mse.png')
-
-# make one figure with just val 0
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_0)
-ax.plot(range(1,len(n_list)+1), [np.median(mse) for mse in mse_list_0], label='val 0', linestyle='--', marker='o')
-ax.set_title('val 0')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# draw a line at 0.35 and 0.22
-ax.axhline(y=0.35, color='r', linestyle='--')
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('boxplot/mse_val_0.png')
-
-# make one figure with just val 1
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_1)
-ax.set_title('val 1')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# add line with mean mse
-# draw a line at 0.35 and 0.22
-
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_val_1.png')
-
-
-# make one figure with just val 2
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_2)
-ax.set_title('val 2')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# draw a line at 0.35 and 0.22
-ax.axhline(y=0.35, color='r', linestyle='--')
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_val_2.png')
-
-
-# make one figure with just val 0
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_ut_0)
-ax.plot(range(1,len(n_list)+1), [np.median(mse) for mse in mse_list_ut_0], label='val 0', linestyle='--', marker='o')
-ax.set_title('val 0')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# draw a line at 0.35 and 0.22
-ax.axhline(y=0.35, color='r', linestyle='--')
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_ut_0.png')
-
-
-# make one figure with just val 1
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_ut_1)
-ax.set_title('val 1')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# add line with mean mse
-# draw a line at 0.35 and 0.22
-
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_ut_1.png')
-
-
-# make one figure with just val 2
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_ut_2)
-ax.set_title('val 2')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# draw a line at 0.35 and 0.22
-ax.axhline(y=0.35, color='r', linestyle='--')
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_ut_2.png')
-
-
-# make one figure with just val 0
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_f_aug_0)
-ax.plot(range(1,len(n_list)+1), [np.median(mse) for mse in mse_list_f_aug_0], label='val 0', linestyle='--', marker='o')
-ax.set_title('val 0')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# draw a line at 0.35 and 0.22
-ax.axhline(y=0.35, color='r', linestyle='--')
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_ft_0.png')
-
-
-# make one figure with just val 1
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_f_aug_1)
-ax.set_title('val 1')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# add line with mean mse
-# draw a line at 0.35 and 0.22
-
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_ft_1.png')
-
-
-# make one figure with just val 2
-fig, ax = plt.subplots(1, 1)
-ax.boxplot(mse_list_f_aug_0)
-ax.set_title('val 2')
-ax.set_xlabel('n')
-ax.set_ylabel('mse')
-ax.set_xticklabels(n_list)
-ax.set_ylim(0, 1)
-# draw a line at 0.35 and 0.22
-ax.axhline(y=0.35, color='r', linestyle='--')
-ax.axhline(y=0.22, color='r', linestyle='--')
-# lable the line as "before fine tune" and "after fine tune" on the right side of the plot
-ax.text(len(n_list) + 1, 0.35, 'before fine tune', rotation=90, verticalalignment='center')
-ax.text(len(n_list) + 0.7, 0.22, 'after fine tune', rotation=90, verticalalignment='center')
-
-plt.show()
-plt.savefig('plot/boxplot/mse_ft_2.png')
-
-index = 3
+if False:
+    data_path = "/home/bene/NNGamma/out_fine_tuen/n_ut_"
+    target_list_ut_0, prediction_list_ut_0, mse_list_ut_0 = load_data(n_list, data_path, type_list[0])
+    target_list_ut_1, prediction_list_ut_1, mse_list_ut_1 = load_data(n_list, data_path, type_list[1])
+    target_list_ut_2, prediction_list_ut_2, mse_list_ut_2 = load_data(n_list, data_path, type_list[2])
+if True:
+    data_path = "/home/bene/NNGamma/out_fine_tuen/n_f_aug_"
+    target_list_f_aug_0, prediction_list_f_aug_0, mse_list_f_aug_0 = load_data(n_list, data_path, type_list[0])
+    target_list_f_aug_1, prediction_list_f_aug_1, mse_list_f_aug_1 = load_data(n_list, data_path, type_list[1])
+    target_list_f_aug_2, prediction_list_f_aug_2, mse_list_f_aug_2 = load_data(n_list, data_path, type_list[2])
+if False:
+    data_path = "/home/bene/NNGamma/out_fine_tuen/n_ut_aug_"
+    target_list_ut_aug_0, prediction_list_ut_aug_0, mse_list_ut_aug_0 = load_data(n_list, data_path, type_list[0])
+    target_list_ut_aug_1, prediction_list_ut_aug_1, mse_list_ut_aug_1 = load_data(n_list, data_path, type_list[1])
+    target_list_ut_aug_2, prediction_list_ut_aug_2, mse_list_ut_aug_2 = load_data(n_list, data_path, type_list[2])
 
 # plot the mean mse for each n in a log log plot
 fig, ax = plt.subplots(1, 1)
@@ -270,16 +64,16 @@ ax.set_yscale('log')
 ax.set_xlabel('n')
 ax.set_ylabel('loss')
 ax.set_title('Median loss as funciton of training data')
-mean_mse = [np.median(mse) for mse in mse_list_0]
-mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0]
+#mean_mse = [np.median(mse) for mse in mse_list_0]
+#mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0]
 mean_mse_ft_aug = [np.median(mse) for mse in mse_list_f_aug_0]
-mean_mse_ut_aug = [np.median(mse) for mse in mse_list_ut_aug_0]
+#mean_mse_ut_aug = [np.median(mse) for mse in mse_list_ut_aug_0]
 
 
-ax.plot(n_list, mean_mse, label='ft', linestyle='--', marker='o')
-ax.plot(n_list, mean_mse_ut, label='ut', linestyle='--', marker='o')
-ax.plot(n_list, mean_mse_ft_aug, label='ft aug', linestyle='--', marker='o')
-ax.plot(n_list, mean_mse_ut_aug, label='ut aug', linestyle='--', marker='o')
+#ax.plot(n_list, mean_mse, label='ft', linestyle='--', marker='o')
+#ax.plot(n_list, mean_mse_ut, label='ut', linestyle='--', marker='o')
+#ax.plot(n_list, mean_mse_ft_aug, label='ft aug', linestyle='--', marker='o')
+#ax.plot(n_list, mean_mse_ut_aug, label='ut aug', linestyle='--', marker='o')
 
 # add horizontal line at 0.35
 ax.axhline(y=0.35, color='k', linestyle='--', label='before fine tune')

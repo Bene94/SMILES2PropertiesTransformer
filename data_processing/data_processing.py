@@ -80,7 +80,7 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
     # save comp
     comp_list.to_csv(file_out + 'comp_list.csv', index=False)
 
-def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n, comp_list):
+def processing_n_in(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n, comp_list):
     
     if os.environ.get('XPRUN_NAME') is not None:
         file_path = "/mnt/xprun/raw_data/" 
@@ -95,7 +95,7 @@ def processing_n(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, 
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
-    df_list = split_data_test_val_exp_n(df_join, comp_list,seed, n)
+    df_list = split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n)
 
     # make input data
     for i, df in enumerate(df_list):
@@ -348,8 +348,6 @@ def get_idx_test_val(solvent_indx, solute_indx, frac, seed):
     return val_solvent_indx, val_solute_indx
 
 def split_data_test_val(df_join, val_solvent_indx, val_solute_indx, comp_list,seed):
-
-
      
     df_temp = df_join.copy()
     
@@ -440,8 +438,10 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
 
     return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
 
-def split_data_test_val_exp_n(df_join, comp_list,seed, n):
+def split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n):
     
+    df_join = df_join[(df_join['solvent'] != 'O') & (df_join['solute'] != 'O')]
+
     systems =  df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
     systems_train = systems.sample(n=n, random_state=seed)
 
@@ -471,7 +471,9 @@ def split_data_test_val_exp_n(df_join, comp_list,seed, n):
 
     df_temp_val_1 = df_join.drop(df_temp_val_2.index)
     df_temp_val_1 = df_temp_val_1.drop(df_temp_val_0.index)
-      
+
+    # drop water from val 0
+    
     print("len of data: " + str(len(df_join)))
     print("len of val_0: " + str(len(df_temp_val_0)))
     print("len of val_1: " + str(len(df_temp_val_1)))

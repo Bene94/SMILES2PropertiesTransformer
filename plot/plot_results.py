@@ -21,7 +21,7 @@ def make_histogram(prediciton, target, name, path=''):
     plt.savefig(path + 'hist/hist_' + name)
 
 def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
-
+    plt.rcParams['text.usetex'] = True
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
 
@@ -32,14 +32,14 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     plt.clf()
     plt.hist(delta, bins=21, alpha=0.5, label='delta', range=(-2,2), weights=weights, edgecolor='black')
     plt.ylabel('count')
-    plt.xlabel('delta ln g')
+    plt.xlabel(r'$\Delta$ ln $\gamma_\infty$')
     plt.xlim(-2,2)
-    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
+    #plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
     plt.savefig(path + 'hist/hist_delta_' + name)
 
 # funciton that makes a histogram of the diff but for multiple data sets in a singel plot
-def make_historgam_delta_mult(prediction_list, target_list, name_list, path = '', save=False):
-    
+def make_historgam_delta_mult(prediction_list, target_list, name_list, path = '', save=False, color_list = None):
+    plt.rcParams['text.usetex'] = True
     # make histogram of the output, use a normalised histogram constant bin width
     delta_list = []
     perc_data_list = []
@@ -52,22 +52,38 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
         delta_list.append(delta)
         weights_list.append(weights)
         perc_data_list.append(np.sum( (target_list[i] - prediction_list[i])**2 < 0.3**2 ) / len(target_list[i]) * 100)
-
+        
     plt.clf()
-    plt.hist(delta_list, bins=21, alpha=0.5, range=(-2,2), weights=weights_list, edgecolor='black')
-    plt.legend(name_list)
-    # balck border around the bars in the histogram
+    # use color list if provided
+    if color_list is not None:
+        colours = color_list
+    else:
+        colours = makeColours( np.concatenate(delta_list) )
+    plt.hist(delta_list, bins=21, alpha=0.5, range=(-2,2), weights=weights_list, edgecolor='black', color=colours)
 
-    plt.ylabel('percentage')
-    plt.xlabel('delta ln gamma')
+    # set the color of the first 3 histograms to be similar
+    # make text for legend by addeing the perc_data to the name
+    lable_list = []
+    for i in range(len(name_list)):
+        lable_list.append(name_list[i])
+    plt.legend(lable_list)
+    # print percent data in a textbox in the top left corner
+    plt.text(0.05, 0.9, '\% of $\Delta$ ln $\gamma_\infty$ $<$ 0.3: ', transform=plt.gca().transAxes)
+    for i in range(len(perc_data_list)):
+        plt.text(0.05, 0.85 - i*0.05, '\quad ' + name_list[i]+ ': '+  str(np.around(perc_data_list[i],1)), transform=plt.gca().transAxes, fontsize=8)
+
+    plt.text(0.95, 0.4, '* addopted form Damayl et al. compared to\n the Dortmund Datenbank. UNIFAC has a\n $\Delta$ ln $\gamma_\infty$ $<$ 0.3 \% of 71.0', transform=plt.gca().transAxes, fontsize=6, horizontalalignment='right')
+
+    plt.ylabel(r'Frac. of data')
+    plt.xlabel(r"$\Delta$ ln $\gamma_\infty$")
     plt.xlim(-2,2)
-    # only two significant digits
-    plt.title('perc_data: ' + str(np.around(perc_data_list,0)))
-    plt.savefig(path + 'hist/hist_delta_mult')
+    # save high res image
+    plt.savefig(path + 'hist/hist_delta_mult', dpi=900)
 
 
 def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
+    plt.rcParams['text.usetex'] = True
     plt.clf()
     plt.hist2d(target, prediciton, bins=101, norm=LogNorm())
     heatmap, xedges, yedges = np.histogram2d(target.squeeze(), prediciton.squeeze(), bins=2000)
@@ -82,13 +98,14 @@ def make_heatmap(prediciton, target, name = '', path = '', save=False):
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
     plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
     
-    plt.ylabel('predicted value')
-    plt.xlabel('ground truth')
+    plt.ylabel(r'$\gamma_\infty^{prd.}$')
+    plt.xlabel(r'$\gamma_\infty^{exp.}$')
     plt.savefig(path + 'heat/heat_' + name)
 
-def make_scatter(prediciton, target, name = '', path = '', save=False):
-    
+def make_scatter(prediciton, target, name = '', path = '', save=False): 
+    plt.rcParams['text.usetex'] = True
     plt.clf()
+    plt.rc
     vals = []
     vals.append(target)
     vals.append(prediciton)
@@ -96,12 +113,12 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
 
     # use smaller dots for the points
     plt.scatter(target, prediciton, c=colors, s=1)
-    plt.ylabel('predicted value')
-    plt.xlabel('ground truth')
+    plt.ylabel(r'$\gamma_\infty^{prd.}$')
+    plt.xlabel(r'$\gamma_\infty^{exp.}$')
 
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
-    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
+    plt.title(r'MSE: {0} MAE: {1}'.format(MSE, MAE))
 
     # add two lines to the plot to show +- 0.1 delta
     plt.plot([-20,20], [-19.7, 20.3], 'k--', lw=1)

@@ -36,6 +36,7 @@ if __name__ == '__main__':
     name = '211231-031659' # modle with leave n out no water
 
     group = True
+    scatter = False
 
     path_temp = '/home/bene/NNGamma/out_fine_tune/'
     plot_path = '/home/bene/NNGamma/src/plot/'
@@ -98,6 +99,10 @@ if __name__ == '__main__':
         val_target_0 = val_0['target'].to_numpy()
         val_target_1 = val_1['target'].to_numpy()
         val_target_2 = val_2['target'].to_numpy()
+        
+        val_input_0 = val_0['input'].to_numpy()
+        val_input_1 = val_1['input'].to_numpy()
+        val_input_2 = val_2['input'].to_numpy()
 
     print('data loaded')
     print('length val0: ' + str(len(val_predction_0)))
@@ -115,31 +120,85 @@ if __name__ == '__main__':
     pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
     max = int(2e5)
-
-    pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', path = plot_path, save=True)
-    print('val_0_fine done')
-    pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1', path = plot_path, save=True)
-    print('val_1_fine done')
-    pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', path = plot_path, save=True)
-    print('val_2_fine done')
-    print('scatter plots made')
+    if scatter:
+        pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', path = plot_path, save=True)
+        print('val_0_fine done')
+        pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1', path = plot_path, save=True)
+        print('val_1_fine done')
+        pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', path = plot_path, save=True)
+        print('val_2_fine done')
+        print('scatter plots made')
 
     # load cvs with data from COSMO
+
 
     cosmo_data = pd.read_csv(path_temp + 'BROUWER-COSMO-OUT.csv', sep=';')
     cosmo_data = cosmo_data.dropna()
 
+    cosmo_sac_data = pd.read_csv(path_temp + 'COSMO-SAC.csv', sep=';')
+    cosmo_sac_data = cosmo_sac_data.dropna()
+
+    UNIFAC_data = pd.read_csv(path_temp + 'UNIFAC_out.csv', sep=';')
+    UNIFAC_data = UNIFAC_data.dropna()
+    
+    damay_data = pd.read_csv(path_temp + 'data_Damay_et.al.csv', sep=';')
+    #here we have to fake the Damay data with the same format as the COSMO data
+    damay_data = damay_data.to_numpy()
+    damay_data = damay_data * 1000
+    damay_data_target = np.zeros(1000)
+    damay_data_prediction = np.zeros(1000)
+    for i in range(len(damay_data)):
+        value = 0.2 * i - 1.6
+        damay_data_target[int(np.sum(damay_data[0:i])):int(np.sum(damay_data[0:i+1]))] = value
+    damay_data_target[int(np.sum(damay_data)):] = 9999
 
     cosmo_data_target = cosmo_data['lnGamma_exp'].to_numpy(dtype=np.float64)
     cosmo_data_prediction = cosmo_data['lnGamma'].to_numpy(dtype=np.float64)
-
     pr.make_scatter(cosmo_data_prediction, cosmo_data_target, name = 'cosmo', path = plot_path, save=True)
 
-    prediction_list = [cosmo_data_prediction, val_predction_0, val_predction_1, val_predction_2]
-    target_list = [cosmo_data_target, val_target_0, val_target_1, val_target_2]
-    name_list = ['cosmo', 'val_0', 'val_1', 'val_2']
+    i_val_0 = set(val_0['input'].to_numpy())
+    i_val_1 = set(val_1['input'].to_numpy())
+    i_val_2 = set(val_2['input'].to_numpy())
+    i_cosmo = set(cosmo_data['i'].to_numpy())
+    i_cosmo_sac = set(cosmo_sac_data['i'].to_numpy())
+    i_UNIFAC = set(UNIFAC_data['i'].to_numpy())
 
-    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False)
+    # find common i's
+    i_common = i_UNIFAC.intersection(i_val_0).intersection(i_val_1).intersection(i_val_2).intersection(i_cosmo).intersection(i_cosmo_sac)
+
+    # filter data
+    cosmo_data_target = cosmo_data[cosmo_data['i'].isin(i_common)]['lnGamma_exp'].to_numpy(dtype=np.float64)
+    cosmo_data_prediction = cosmo_data[cosmo_data['i'].isin(i_common)]['lnGamma'].to_numpy(dtype=np.float64)
+    
+    UNIFAC_data_target = UNIFAC_data[UNIFAC_data['i'].isin(i_common)]['lnGamma_exp'].to_numpy(dtype=np.float64)
+    UNIFAC_data_prediction = UNIFAC_data[UNIFAC_data['i'].isin(i_common)]['lnGamma_UNIFAC'].to_numpy(dtype=np.float64)
+
+    cosmo_sac_data_target = cosmo_sac_data[cosmo_sac_data['i'].isin(i_common)]['lnGamma_exp'].to_numpy(dtype=np.float64)
+    cosmo_sac_data_prediction1 = cosmo_sac_data[cosmo_sac_data['i'].isin(i_common)]['lnGamma_SAC'].to_numpy(dtype=np.float64)
+    cosmo_sac_data_prediction3 = cosmo_sac_data[cosmo_sac_data['i'].isin(i_common)]['lnGamma_SAC3'].to_numpy(dtype=np.float64)
+
+    val_predction_0 = val_0[val_0['input'].isin(i_common)]['prediction'].to_numpy(dtype=np.float64)
+    val_predction_1 = val_1[val_1['input'].isin(i_common)]['prediction'].to_numpy(dtype=np.float64)
+    val_predction_2 = val_2[val_2['input'].isin(i_common)]['prediction'].to_numpy(dtype=np.float64)
+
+    val_target_0 = val_0[val_0['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
+    val_target_1 = val_1[val_1['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
+    val_target_2 = val_2[val_2['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
+
+    prediction_list = [cosmo_sac_data_prediction1, cosmo_sac_data_prediction3, cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
+    target_list = [cosmo_sac_data_target, cosmo_sac_data_target, cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
+    
+    print('data filtered')
+    print('length cosmo_data_prediction: ' + str(len(cosmo_data_prediction)))
+    print('length cosmo_sac_data_prediction1: ' + str(len(cosmo_sac_data_prediction1)))
+    print('length cosmo_sac_data_prediction3: ' + str(len(cosmo_sac_data_prediction3)))
+    print('length val_predction_0: ' + str(len(val_predction_0)))
+    print('length val_predction_1: ' + str(len(val_predction_1)))
+    print('length val_predction_2: ' + str(len(val_predction_2)))
+    
+    color_list = ['lightcoral', 'indianred', 'brown', 'red', 'coral','lightsteelblue', 'cornflowerblue', 'royalblue']
+    name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$', 'COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
+    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False, color_list = color_list)
 
 
 

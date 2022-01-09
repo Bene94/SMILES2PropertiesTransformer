@@ -22,6 +22,8 @@ from transprop.config import *
 @click.option('--model_name', '-m', default='211220-192228', help='Name of the model')
 @click.option('--data_path', '-p',default='data_exp', help='Path to the data')
 @click.option('--exp_name', '-n',default='', help='Name of the experiment')
+@click.option('--group', '-g', default='none', help='groups for the experiment')
+@click.option('--n_start', '-s', default=-1, help='set to be processed if -1 all')
 
 @click.option('--batch_size', '-b', default=32, help='Batch size')
 @click.option('--epochs', '-e',default=20, help='Number of epochs')
@@ -36,7 +38,7 @@ from transprop.config import *
 
 
 
-def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval):
+def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval, group, n_start):
 
     name = model_name
 
@@ -81,8 +83,10 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
 
     lr_schedule = 'cosine'
 
-    wandb.init(project='GNN_001_FT_mult', entity='bene94', name=name, config=config)
+    wandb.init(project='GNN_002_FT_mult', entity='bene94', name=name, config=config)
     wandb.watch(model)
+
+    wandb.log({'Group': group})
 
     print("=" * 50)
     print("Start of training")
@@ -96,6 +100,10 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
         i_start = np.load(path_temp + xp_name + '/i.npy')
     else:
         i_start = 0
+
+    if n_start != -1:
+        i_start = n_start
+        outer_loop = n_start + 1
 
     # allocate memory for epo val loss
 

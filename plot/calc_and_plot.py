@@ -36,6 +36,7 @@ def main(name,data,calc,plot,save):
         path_model = '../Models/'
         data_path = '../data/' + data + '/'
         save_path = '../out/' + name +  '/'
+        plot_path = '/home/bene/NNGamma/src/plot/'
 
     model, config = load_model(path_model,name)
 
@@ -132,20 +133,20 @@ def main(name,data,calc,plot,save):
 
 
     if plot:
-        make_MSE_x(train_out, train_target, name = "train", save = True)
-        make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True)
-        make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True)
-        make_MSE_x(val_2_out, val_2_target, name = "val_2", save = True)
+        make_MSE_x(train_out, train_target, name = "train", save = True, path=plot_path)
+        make_MSE_x(val_0_out, val_0_target, name = "val_0", save = True, path=plot_path)
+        make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True, path=plot_path)
+        make_MSE_x(val_2_out, val_2_target, name = "val_2", save = True, path=plot_path)
 
-        make_heatmap(train_out, train_target, name = "train", save = True)
-        make_heatmap(val_0_out, val_0_target, name = "val_0", save = True)
-        make_heatmap(val_1_out, val_1_target, name = "val_1", save = True)
-        make_heatmap(val_2_out, val_2_target, name = "val_2", save = True)
+        make_heatmap(train_out, train_target, name = "train", save = True, path=plot_path)
+        make_heatmap(val_0_out, val_0_target, name = "val_0", save = True, path=plot_path)
+        make_heatmap(val_1_out, val_1_target, name = "val_1", save = True, path=plot_path)
+        make_heatmap(val_2_out, val_2_target, name = "val_2", save = True, path=plot_path)
 
-        make_historgam_delta(train_out, train_target, name = "train", save = True)
-        make_historgam_delta(val_0_out, val_0_target, name = "val_0", save = True)
-        make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True)
-        make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True)
+        make_historgam_delta(train_out, train_target, name = "train", save = True, path=plot_path)
+        make_historgam_delta(val_0_out, val_0_target, name = "val_0", save = True, path=plot_path)
+        make_historgam_delta(val_1_out, val_1_target, name = "val_1", save = True, path=plot_path)
+        make_historgam_delta(val_2_out, val_2_target, name = "val_2", save = True, path=plot_path)
 
         if len(train_out) < 30000:
             print('-' * 89)
@@ -154,7 +155,7 @@ def main(name,data,calc,plot,save):
             train_out = np.concatenate((train_out, val_1_out, val_2_out), axis=0)
             train_target = np.concatenate((train_target, val_1_target, val_2_target), axis=0)
             
-            make_scatter(train_out, train_target, name = "train", save = True)
+            make_scatter(train_out, train_target, name = "train", save = True, path=plot_path)
 
 if __name__ == '__main__':
     main()
