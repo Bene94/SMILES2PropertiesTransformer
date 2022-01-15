@@ -3,6 +3,11 @@ import plot_results as pr
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import sys
+
+sys.path.append('data_processing/')
+
+from data_processing import get_comp_list 
 
 def load_data(file_path, val_type):
 
@@ -21,7 +26,6 @@ def load_data(file_path, val_type):
             prediction_list.append(np.load(file_path + files))
         if files.startswith('val_input_'+ val_type + '_'):
             input_list.append(np.load(file_path + files))
-    
     for i in range(0, len(target_list)):
         mse = np.mean(np.square(target_list[i] - prediction_list[i]))
         mse_list.append(mse)
@@ -33,14 +37,21 @@ if __name__ == '__main__':
     name = '211209-214402'
     name = '211214-125306' # model without aug
     name = '211223-032657' # modle with aug
-    name = '211231-031659' # modle with leave n out no water
+    name = '211231-031659' # modle with leave n out no water 
+    name = 'f_t_211220-192228_220112-105727'
+    name = 'f_t_211220-192228_220114-185541' # V2 run
 
     group = True
-    scatter = False
+    scatter = True
 
+    comp_list_path = '/home/bene/NNGamma/data/data_exp_noH2O_1000/0/comp_list.csv'
+    comp_lsit_path = '/home/bene/NNGamma/data/data_exp_onlyH2O_1000_V2/0/comp_list.csv'
     path_temp = '/home/bene/NNGamma/out_fine_tune/'
     plot_path = '/home/bene/NNGamma/src/plot/'
     data_path = path_temp + name + '/'
+
+    file_path = ["brouwer_exp_c"]
+    vocab_path = "vocab"
 
     type_list = ['0', '1', '2']
 
@@ -109,15 +120,52 @@ if __name__ == '__main__':
     print('length val1: ' + str(len(val_predction_1)))
     print('length val2: ' + str(len(val_predction_2)))
 
-    pr.make_heatmap(val_predction_0, val_target_0, 'val_0_fine' , path = plot_path, save=True)
-    pr.make_heatmap(val_predction_1, val_target_1, 'val_1_fine' , path = plot_path, save=True)
-    pr.make_heatmap(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
+    pr.make_heatmap(val_predction_0, val_target_0, r'val0' , path = plot_path, save=True)
+    pr.make_heatmap(val_predction_1, val_target_1, r'val1' , path = plot_path, save=True)
+    pr.make_heatmap(val_predction_2, val_target_2, r'val2' , path = plot_path, save=True)
 
     print('heatmaps plotted')
 
     pr.make_historgam_delta(val_predction_0, val_target_0, 'val_0_fine' , path = plot_path, save=True)
     pr.make_historgam_delta(val_predction_1, val_target_1, 'val_1_fine' , path = plot_path, save=True)
     pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
+
+    pr.plot_err_sorted(val_predction_0, val_target_0, r'val_0_fine' , path = plot_path, save=True)
+    pr.plot_err_sorted(val_predction_1, val_target_1, r'val_1_fine' , path = plot_path, save=True)
+    pr.plot_err_sorted(val_predction_2, val_target_2, r'val_2_fine' , path = plot_path, save=True)
+
+
+    comp_list, systems, df_join = get_comp_list(file_path, vocab_path)
+    h2o_index = df_join[(df_join.solvent == 'O') | (df_join.solute == 'O')].i
+    
+    ## seperate prediction and target data
+    # chekc if val_input_0 continas h2o_index
+
+    h2o_val_0_index = np.where(np.in1d(val_input_0, h2o_index))[0]
+    h2o_val_1_index = np.where(np.in1d(val_input_1, h2o_index))[0]
+    h2o_val_2_index = np.where(np.in1d(val_input_2, h2o_index))[0]
+
+    h2o_val_0_pred = val_predction_0[h2o_val_0_index]
+    h2o_val_0_target = val_target_0[h2o_val_0_index]
+
+    h2o_val_1_pred = val_predction_1[h2o_val_1_index]
+    h2o_val_1_target = val_target_1[h2o_val_1_index]
+
+    h2o_val_2_pred = val_predction_2[h2o_val_2_index]
+    h2o_val_2_target = val_target_2[h2o_val_2_index]
+
+    no_h2o_val_0_index = np.where(np.in1d(val_input_0, h2o_index, invert=True))[0]
+    no_h2o_val_1_index = np.where(np.in1d(val_input_1, h2o_index, invert=True))[0]
+    no_h2o_val_2_index = np.where(np.in1d(val_input_2, h2o_index, invert=True))[0]
+
+    no_h2o_val_0_pred = val_predction_0[no_h2o_val_0_index]
+    no_h2o_val_0_target = val_target_0[no_h2o_val_0_index]
+    
+    no_h2o_val_1_pred = val_predction_1[no_h2o_val_1_index]
+    no_h2o_val_1_target = val_target_1[no_h2o_val_1_index]
+
+    no_h2o_val_2_pred = val_predction_2[no_h2o_val_2_index]
+    no_h2o_val_2_target = val_target_2[no_h2o_val_2_index]    
 
     max = int(2e5)
     if scatter:
@@ -127,7 +175,22 @@ if __name__ == '__main__':
         print('val_1_fine done')
         pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', path = plot_path, save=True)
         print('val_2_fine done')
+        if h2o_val_0_target != []:
+            pr.make_scatter(h2o_val_0_pred, h2o_val_0_target, name = 'h2o_val_0', path = plot_path, save=True)
+        print('h2o_val_0_fine done')
+        pr.make_scatter(h2o_val_1_pred[0:max], h2o_val_1_target[:max], name = 'h2o_val_1', path = plot_path, save=True)
+        print('h2o_val_1_fine done')
+        pr.make_scatter(h2o_val_2_pred[:max], h2o_val_2_target[:max], name = 'h2o_val_2', path = plot_path, save=True)
+        print('h2o_val_2_fine done')
+        pr.make_scatter(no_h2o_val_0_pred, no_h2o_val_0_target, name = 'no_h2o_val_0', path = plot_path, save=True)
+        print('no_h2o_val_0_fine done')
+        pr.make_scatter(no_h2o_val_1_pred[0:max], no_h2o_val_1_target[:max], name = 'no_h2o_val_1', path = plot_path, save=True)
+        print('no_h2o_val_1_fine done')
+        pr.make_scatter(no_h2o_val_2_pred[:max], no_h2o_val_2_target[:max], name = 'no_h2o_val_2', path = plot_path, save=True)
+        print('no_h2o_val_2_fine done')
         print('scatter plots made')
+  
+
 
     # load cvs with data from COSMO
 

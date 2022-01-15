@@ -4,27 +4,27 @@ import os
 from numpy.random import default_rng
 ## function to create multiple splits of the data
 
-file_path = ["brouwer_exp"]
+file_path = ["brouwer_exp_c"]
 vocab_path = "vocab"
 ow = True
 
-exclude_H2O = False
-only_H2O = True 
+exclude_H2O = True
+only_H2O = False 
 
 
 data_path = '../data/'
 #data_path = '/mnt/xprun/data/'
 
-comp_list, systems = dc.get_comp_list(file_path, vocab_path)
+comp_list, systems, __ = dc.get_comp_list(file_path, vocab_path)
 n_unique = len(systems)
 index_list = np.arange(0,n_unique)
 # find systems with water as solvent
 
 if exclude_H2O:
-    h2o_index = systems[systems.solvent == 'O'].index
+    h2o_index = systems[(systems.solvent == 'O') | (systems.solute == 'O')].index
     index_list = np.setdiff1d(index_list, h2o_index)
-    save_path = "data_exp_noH2O"
-    num_splits = 200
+    num_splits = 1000
+    save_path = "data_exp_noH2O_" + str(num_splits)  + '_V2'
 elif only_H2O:
     index_list = systems[systems.solvent == 'O'].index
     index_list = np.array(index_list)

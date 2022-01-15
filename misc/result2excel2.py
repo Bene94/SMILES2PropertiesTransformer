@@ -37,11 +37,15 @@ name = '211209-214402'
 name = '211223-032657' # modle with aug
 name = '211229-043706' # modle with leave n out
 name = '211231-031659' # modle with leave n out no water
+name = 'f_t_211220-192228_220112-105727'
 
 path_temp = '/home/bene/NNGamma/out_fine_tune/'
 plot_path = '/home/bene/NNGamma/src/'
 save_path = '/home/bene/NNGamma/out_fine_tune/' 
 data_path = path_temp + name + '/'
+
+
+
 #path_temp = '../temp/'
 
 group = True

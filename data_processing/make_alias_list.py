@@ -5,24 +5,23 @@ import numpy as np
 import progressbar as pb
 
 from SmilesEnumerator import SmilesEnumerator
-import data_processing_cosmo as dp
+import data_processing as dp
 
 
 ## script to make a list of aliases for the molecules in the database
 
 
 def main():
-    file_path = '../raw_data/t_cosmo/'
-    solvent_list, solute_list, df_join = dp.load_exp_data(file_path)
+    file_path = '../raw_data/'
+    folder_names = ['t_cosmo', 'brouwer_exp_c', 'inf_cosmo'] 
+    df, complete_list, solvent_indx, solute_indx = dp.load_exp_data(file_path, folder_names)
+    solvent_list = df.solvent.tolist()
+    solute_list = df.solute.tolist()
     smile_list = np.append(solvent_list, solute_list)
-    file_path = '../raw_data/brouwer_exp/'
-    solvent_list, solute_list, df_join = dp.load_exp_data(file_path)
-    smile_list = np.append(smile_list, solute_list)
-    smile_list = np.append(smile_list, solvent_list)
 
     smile_list = np.unique(smile_list)
     alias_dict = augment_smile(smile_list)
-    np.save('../raw_data/alias/alias_dict.npy', alias_dict)
+    np.save('../raw_data/alias/alias_dict_brower.npy', alias_dict)
 
 
 

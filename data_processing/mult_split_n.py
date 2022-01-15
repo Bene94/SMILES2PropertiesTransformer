@@ -21,7 +21,7 @@ num_splits = 200
 
 n_list = [10, 20, 30, 40, 50 , 100, 200, 300, 400, 500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]
 
-n_list = [1000]
+n_list = [3000, 4000, 5000]
 
 comp_list, __ = dc.get_comp_list(file_path, vocab_path)
 

@@ -226,7 +226,9 @@ def evaluate(eval_model, val_dataloader, criterion, config):
                     total_smile_idx = np.append(total_smile_idx, smile_indx_chunks[j].cpu().numpy(),axis=0)
                     total_index = np.append(total_index, idx_chunks[j].cpu().numpy(),axis=0)
 
-    
+    if len(total_output) == 0:
+        return [], [], [], [[],[],[]]
+
     return total_loss / (len(val_dataloader)), total_output, total_target, [total_smile_idx, total_xT, total_index]
 
 def custom_MSE_loss(output, target):

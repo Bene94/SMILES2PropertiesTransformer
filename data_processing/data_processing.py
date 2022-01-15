@@ -33,16 +33,7 @@ def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow, 
 
 def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source):
     
-    if os.environ.get('XPRUN_NAME') is not None:
-        file_path = "/mnt/xprun/raw_data/" 
-        file_out = "/mnt/xprun/data/" + save_path + "/"
-        vocab_path = "/mnt/xprun/" + vocab_path + "/"
-        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
-    else:
-        file_path = "../raw_data/" 
-        file_out = "../data/" + save_path + "/"
-        vocab_path = "../" + vocab_path + "/"
-        alias_path = '../raw_data/alias/alias_dict.npy'
+    file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
@@ -82,16 +73,8 @@ def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, se
 
 def processing_n_in(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n, comp_list):
     
-    if os.environ.get('XPRUN_NAME') is not None:
-        file_path = "/mnt/xprun/raw_data/" 
-        file_out = "/mnt/xprun/data/" + save_path + "/"
-        vocab_path = "/mnt/xprun/" + vocab_path + "/"
-        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
-    else:
-        file_path = "../raw_data/" 
-        file_out = "../data/" + save_path + "/"
-        vocab_path = "../" + vocab_path + "/"
-        alias_path = '../raw_data/alias/alias_dict_brower.npy'
+    file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
+
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
@@ -111,16 +94,8 @@ def processing_n_in(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_au
 
 def processing_n_out(foler_name, save_path, vocab_path, ow, comp_list, systems, index):
      
-    if os.environ.get('XPRUN_NAME') is not None:
-        file_path = "/mnt/xprun/raw_data/" 
-        file_out = "/mnt/xprun/data/" + save_path + "/"
-        vocab_path = "/mnt/xprun/" + vocab_path + "/"
-        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
-    else:
-        file_path = "../raw_data/" 
-        file_out = "../data/" + save_path + "/"
-        vocab_path = "../" + vocab_path + "/"
-        alias_path = '../raw_data/alias/alias_dict_brower.npy'
+    file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
+
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
@@ -139,14 +114,8 @@ def processing_n_out(foler_name, save_path, vocab_path, ow, comp_list, systems, 
     comp_list.to_csv(file_out + 'comp_list.csv', index=False)
 
 def get_comp_list(foler_name, vocab_path):
-    if os.environ.get('XPRUN_NAME') is not None:
-        file_path = "/mnt/xprun/raw_data/" 
-        vocab_path = "/mnt/xprun/" + vocab_path + "/"
-        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
-    else:
-        file_path = "../raw_data/" 
-        vocab_path = "../" + vocab_path + "/"
-        alias_path = '../raw_data/alias/alias_dict_brower.npy'
+
+    file_path, file_out, vocab_path, alias_path  =  get_paths('', vocab_path) 
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     
@@ -156,7 +125,7 @@ def get_comp_list(foler_name, vocab_path):
 
     systems = df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
 
-    return comp_list, systems
+    return comp_list, systems, df_join
 
 def load_exp_data(file_path, foler_names):
     #load the data from the experiment 
@@ -623,6 +592,20 @@ def save_batches(batches, folder_path, type, ow):
             os.makedirs(folder_path)
         batch.to_csv(file_path, index=False)
     bar.finish()
+
+def get_paths(save_path, vocab_path):
+    if os.environ.get('XPRUN_NAME') is not None:
+        file_path = "/mnt/xprun/raw_data/" 
+        file_out = "/mnt/xprun/data/" + save_path + "/"
+        vocab_path = "/mnt/xprun/" + vocab_path + "/"
+        alias_path = "/mnt/xprun/raw_data/alias/alias_dict.npy"
+    else:
+        file_path = "../raw_data/" 
+        file_out = "../data/" + save_path + "/"
+        vocab_path = "../" + vocab_path + "/"
+        alias_path = '../raw_data/alias/alias_dict_brouwer.npy'
+    return file_path, file_out, vocab_path, alias_path
+
 
 def revert_vocab(df, comp_list):
     # look up the index in comp_list and return the smiles string first index is the solute second the solvent

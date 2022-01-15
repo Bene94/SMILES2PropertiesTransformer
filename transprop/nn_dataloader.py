@@ -14,7 +14,8 @@ class gamma_dataset(Dataset):
         self.data_type = data_type
         
         self.data, self.train_target, self.xT, self.smile_index, self.index = self.load_data(config.test)
-        self.load_comp_list(self)
+        if len(self.data) != 0:
+            self.load_comp_list(self)
         self.aug = aug
         
         if config.shift != 0:
@@ -46,14 +47,16 @@ class gamma_dataset(Dataset):
             if filename.startswith(self.data_type) and not filename.startswith("comp_list"):
                 df = pd.read_csv(os.path.join(self.data_path, filename), index_col=None, header=0)
                 li.append(df)
+
+        
+        if li == []:
+            print("No data " + self.data_type + " found")
+            return [], [], [], [], []
+        
         data = pd.concat(li, axis=0, ignore_index=True)
 
         if test:
             data = data.iloc[0:500,:]
-
-        if data is None:
-            print("No data " + self.data_type + " found")
-            return [], [], [], [], []
 
         target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
         smile_index = torch.from_numpy(data[["solute_idx","solvent_idx"]].to_numpy()).int()
@@ -63,6 +66,9 @@ class gamma_dataset(Dataset):
         return data, target, xT, smile_index, index 
 
     def __getitem__(self,index):
+    
+        if len(self.data) == 0:
+            return [], [], [], [], []
         
         # time the function
         sos = np.array((1,), dtype=np.int)
@@ -93,6 +99,8 @@ class gamma_dataset(Dataset):
         return self.train_target[index], [train_data, self.xT[index], self.smile_index[index], self.index[index]]
 
     def __len__(self):
+        if len(self.data) == 0:
+            return 0
         if len(self.data.shape) == 1:
             return 1
         return self.data.shape[0]
@@ -124,9 +132,19 @@ def load_data(config,local = False,test = False):
 
 
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
-    val_0_data = DataLoader(val_0_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
-    val_1_data = DataLoader(val_1_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
-    val_2_data = DataLoader(val_2_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+
+    if len(val_0_dataset) > 0:
+        val_0_data = DataLoader(val_0_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+    else:
+        val_0_data = []
+    if len(val_1_dataset) > 0:
+        val_1_data = DataLoader(val_1_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+    else:
+        val_1_data = []
+    if len(val_2_dataset) > 0:
+        val_2_data = DataLoader(val_2_dataset, batch_size=config.batch_size, shuffle=False, num_workers=0)
+    else:
+        val_2_data = []
 
     return training_data, val_0_data, val_1_data, val_2_data
 

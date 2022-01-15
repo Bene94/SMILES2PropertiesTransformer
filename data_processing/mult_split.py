@@ -3,7 +3,7 @@ import numpy as np
 import os
 from numpy.random import default_rng
 ## function to create multiple splits of the data
-file_path = ["brouwer_exp"]
+file_path = ["brouwer_exp_c"]
 save_path = "data_exp"
 vocab_path = "vocab"
 ow = True

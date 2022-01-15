@@ -10,7 +10,8 @@ model = 'untrained_model'
 model = '211220-192228'
 
 aug = 1 # 0: no aug, 1: aug
-
+lval_int = 0
+lval = 0
 
 comand_s = 'xp run /home/bene/NNGamma/src/xprun_fine_mult.ron -p 3 --include-dirty' 
 comand_e = ' -- -m ' + model + ' -l 1e-4 -x 200 '
@@ -19,7 +20,7 @@ n_list = [20, 30, 40, 50 , 100, 200, 300, 400, 500, 600, 700, 800, 1000] # , 200
 #n_list = [2000, 3000, 4000, 5000]
 
 
-n_list = [1000]
+n_list = [3000, 4000, 5000]
 
 for n in n_list:
     epo = int(200)
@@ -36,13 +37,14 @@ for n in n_list:
 
     save_path = save_path + str(n)
     group = save_path
-    
-    for i in range(0, 200):
-        if i % 10 == 0:
-            lval = 1
-        else:
-            lval = 0
+            
+
+    for i in range(0,200):
+        if lval_int != 0:
+            if i % lval_int == 0:
+                lval = 1
+
         now_str = now.strftime("%Y%m%d-%H%M%S")[2:]
         xp_name = save_path + '_' + str(i) + '_' + now_str
-        comand = comand_s + ' --name=' + xp_name + str(i) + comand_e + '-p ' + path + ' -e ' + str(epo) + ' -n ' + save_path + ' -g ' + group + ' -s ' + str(i) + ' -lval ' + str(lval)
+        comand = comand_s + ' --name=' + xp_name + str(i) + comand_e + '-p ' + path + ' -ow ' + str(1) + ' -e ' + str(epo) + ' -n ' + save_path + ' -g ' + group + ' -s ' + str(i) + ' -lval ' + str(lval)
         os.system(comand)

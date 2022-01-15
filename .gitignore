@@ -1,5 +1,6 @@
 # Ignore the data file folders
 wandb/**
+*.png
 
 # Standard for python in vs code
 *.png

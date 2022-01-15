@@ -19,7 +19,7 @@ from transprop.nn_dataloader import *
 @click.command()
 
 @click.option('--name','-n', default='211220-192228', help='Name of the modle')
-@click.option('--data','-d', default='exp_t', help='Path to the data if empty use datapath from modle config')
+@click.option('--data','-d', default='data_exp_n/n_3000/4/', help='Path to the data if empty use datapath from modle config')
 
 @click.option('--calc','-c', default=True, help='Calculate results and eval')
 @click.option('--plot','-p', default=True, help='Plot results')

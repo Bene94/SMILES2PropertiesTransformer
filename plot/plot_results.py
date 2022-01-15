@@ -36,6 +36,7 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     plt.xlim(-2,2)
     #plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
     plt.savefig(path + 'hist/hist_delta_' + name)
+    plt.rcParams['text.usetex'] = False
 
 # funciton that makes a histogram of the diff but for multiple data sets in a singel plot
 def make_historgam_delta_mult(prediction_list, target_list, name_list, path = '', save=False, color_list = None):
@@ -79,7 +80,7 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
     plt.xlim(-2,2)
     # save high res image
     plt.savefig(path + 'hist/hist_delta_mult', dpi=900)
-
+    plt.rcParams['text.usetex'] = False
 
 def make_heatmap(prediciton, target, name = '', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
@@ -101,6 +102,9 @@ def make_heatmap(prediciton, target, name = '', path = '', save=False):
     plt.ylabel(r'$\gamma_\infty^{prd.}$')
     plt.xlabel(r'$\gamma_\infty^{exp.}$')
     plt.savefig(path + 'heat/heat_' + name)
+
+    plt.rcParams['text.usetex'] = False
+
 
 def make_scatter(prediciton, target, name = '', path = '', save=False): 
     plt.rcParams['text.usetex'] = True
@@ -129,13 +133,18 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
     max_target = max(target)
     min_pred = min(prediciton)
     max_pred = max(prediciton)
-    plt.xlim(min(min_target, min_pred), max(max_target, max_pred))
-    plt.ylim(min(min_target, min_pred), max(max_target, max_pred))
+    #plt.xlim(min(min_target, min_pred), max(max_target, max_pred))
+    #plt.ylim(min(min_target, min_pred), max(max_target, max_pred))
+
+    plt.ylim(-5, 16)
+    plt.xlim(-5, 16)
 
     if save:
         plt.savefig(path + 'scatter/scatter_' + name)
     else:
         plt.show()
+    plt.rcParams['text.usetex'] = False
+
 
 def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     # devide data in bins with bound -20,20
@@ -216,3 +225,63 @@ def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '
     fig.suptitle(name)
     if save:
         plt.savefig(path + 'boxplot/boxplot_' + name)
+
+def plot_err_sorted_combined(val_predction_0, val_target_0, val_predction_1, val_target_1, val_predction_2, val_target_2, name = '', path = '', save=False):
+    # make one figure containting three subplots with boxplots for each n
+    fig, ax = plt.subplots(3, 1, sharex=True)
+    fig.subplots_adjust(hspace=0.5)
+
+    # calc error
+    err_0 = np.abs(val_target_0 - val_predction_0)
+    err_1 = np.abs(val_target_1 - val_predction_1)
+    err_2 = np.abs(val_target_2 - val_predction_2)
+    
+    # axis limit for all subplots to 2
+
+    ax[0].set_ylim(0,2)
+    ax[1].set_ylim(0,2)
+    ax[2].set_ylim(0,2)
+
+    mse_list_0_sorted = np.sort(err_0)
+    mse_list_1_sorted = np.sort(err_1)
+    mse_list_2_sorted = np.sort(err_2)
+
+    ax[0].set_title('Val 0')
+    ax[0].plot(mse_list_0_sorted)
+    ax[1].set_title('Val 1')
+    ax[1].plot(mse_list_1_sorted)
+    ax[2].set_title('Val 2')
+    ax[2].plot(mse_list_2_sorted)
+
+
+    ax[0].set_xlim(0,len(mse_list_0_sorted))
+    ax[1].set_xlim(0,len(mse_list_1_sorted))
+    ax[2].set_xlim(0,len(mse_list_2_sorted))
+
+    # lable the boxplots with the n values
+
+    # set the title of the figure to name
+    fig.suptitle(name)
+    if save:
+        plt.savefig(path + 'sorted/mse_sorted_' + name)
+
+def plot_err_sorted(prediction, target, name = '', path = '', save=False):
+    # make one figure containting three subplots with boxplots for each n
+    plt.clf()
+    err = np.abs(target - prediction)
+    # axis limit for all subplots to 2
+
+    mse_list_sorted = np.sort(err)
+
+    plt.plot(mse_list_sorted)
+
+    plt.xlim(0,len(mse_list_sorted))
+    
+    plt.title(name)
+
+    plt.ylim(0,max(mse_list_sorted))
+    # plot horizontal line at 0.3
+    plt.axhline(y=0.3, color='r', linestyle='-')
+
+    if save:
+        plt.savefig(path + 'sorted/mse_sorted_' + name)
