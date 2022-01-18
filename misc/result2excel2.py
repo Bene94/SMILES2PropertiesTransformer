@@ -38,6 +38,7 @@ name = '211223-032657' # modle with aug
 name = '211229-043706' # modle with leave n out
 name = '211231-031659' # modle with leave n out no water
 name = 'f_t_211220-192228_220112-105727'
+name = 'f_t_211220-192228_220114-185541' # V2 run
 
 path_temp = '/home/bene/NNGamma/out_fine_tune/'
 plot_path = '/home/bene/NNGamma/src/'
@@ -119,9 +120,9 @@ print("Data Loading")
 
 # save all to excel file
 
-train_df_0.to_excel(save_path + 'train_df_0.xlsx')
-train_df_1.to_excel(save_path + 'train_df_1.xlsx')
-train_df_2.to_excel(save_path + 'train_df_2.xlsx')
+train_df_0.to_excel(save_path + name + 'train_df_0.xlsx')
+train_df_1.to_excel(save_path + name + 'train_df_1.xlsx')
+train_df_2.to_excel(save_path + name + 'train_df_2.xlsx')
 # save high error data to excel
 #df = df[ np.abs(df['out']-df['target']) > 0.5]
 #df.to_excel(save_path + name + '_high_error.xlsx', index=False)

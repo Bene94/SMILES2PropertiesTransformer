@@ -89,12 +89,12 @@ class gamma_dataset(Dataset):
             rand1 = 0
             rand2 = 0
 
-        emb = np.concatenate([sos,comp_list[SMILE1,rand1], mos, comp_list[SMILE2,rand2], eos])
+        seq = np.concatenate([sos,comp_list[SMILE1,rand1], mos, comp_list[SMILE2,rand2], eos])
         
-        if len(emb) > 128:
-            emb = np.concatenate([sos,comp_list[SMILE1,0], mos, comp_list[SMILE2,0], eos])
-
-        train_data[0:len(emb)] = emb
+        if len(seq) > 128:
+            seq = np.concatenate([sos,comp_list[SMILE1,0], mos, comp_list[SMILE2,0], eos])
+        seq = seq[:128]
+        train_data[0:len(seq)]
 
         return self.train_target[index], [train_data, self.xT[index], self.smile_index[index], self.index[index]]
 

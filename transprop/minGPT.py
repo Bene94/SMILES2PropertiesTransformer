@@ -94,7 +94,8 @@ class NRTL_head(nn.Module):
 
     def forward(self, x, X):
 
-        x_out = torch.zeros(x.shape[0] , 1, device=self.device, requires_grad=True)
+        x = x.type(torch.float64)
+        x_out = torch.zeros(x.shape[0] , 1, device=self.device, requires_grad=True, dtype=torch.float64)
 
         G_12 = torch.exp(-x[:,0] * x[:,1])
         G_21 = torch.exp(-x[:,0] * x[:,2])

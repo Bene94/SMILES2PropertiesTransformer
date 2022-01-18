@@ -144,10 +144,12 @@ def load_exp_data(file_path, foler_names):
             df = pd.concat([df, temp_df], ignore_index=True)
         bar.finish()
     # remove all nan rows
-    df = df.dropna()
-    df = df.reset_index(drop=True)
     if not 'i' in df.columns:
         df['i'] = 1 
+    df.i[df.i.isna()] = 0
+
+    df = df.dropna()
+    df = df.reset_index(drop=True)
 
     solvent_list = df['solvent'].drop_duplicates()
     solute_list = df['solute'].drop_duplicates()

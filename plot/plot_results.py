@@ -34,6 +34,7 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     plt.ylabel('count')
     plt.xlabel(r'$\Delta$ ln $\gamma_\infty$')
     plt.xlim(-2,2)
+    plt.title(r'{}'.format( '\n MSE: ' + str(MSE) + '\n MAE: ' + str(MAE) + '\n $\Delta$ ln $\gamma_\infty < 0.3$: ' + str(perc_data) + '\%'))
     #plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
     plt.savefig(path + 'hist/hist_delta_' + name)
     plt.rcParams['text.usetex'] = False

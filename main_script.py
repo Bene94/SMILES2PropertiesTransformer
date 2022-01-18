@@ -139,6 +139,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     wandb.init(project=project, entity='bene94', name=name, config=config, resume="allow", id=config.id)
     wandb.watch(model)
     wandb.log({"xp_name": config.xp_name})
+    wandb.log({"mode": mode})
     
     print('-' * 89)
     print('Training...')
