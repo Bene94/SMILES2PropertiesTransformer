@@ -135,7 +135,7 @@ class UNIQUAC_head(nn.Module):
         lng_c_2 = 1 - r2/r1 + torch.log(r2/r1) - z/2 * q2 * (1- (r2*q1)/(r1*q2) + torch.log((r2*q1)/(r1*q2)))
 
         lng_r_1 = q1 * ( 1- torch.log((q1* X[:,1] * tau_12 + q2* (1-X[:,1]) * tau_21)/(q1 * X[:,1] + q2 (1-X[:,1])))) # This is not yet correct
- 
+        x_out = 0
         return x_out
 
 class GPT(nn.Module):

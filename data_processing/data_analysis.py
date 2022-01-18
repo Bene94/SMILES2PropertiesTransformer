@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import sys
 import os.path
 sys.path.append(
@@ -21,7 +21,7 @@ class Config:
 
 ## function to compare the data from experimental and simulation data
 
-path_data = os.path.join('/home/bene/NNGamma/data/data_t/')
+path_data = os.path.join('/home/bene/NNGamma/data/data_xt/')
 
 config = Config(data_path=path_data, shift=0)
 
@@ -29,7 +29,6 @@ data = gamma_dataset(path_data, '', config)
 
 target = data.train_target
 xT = data.xT
-smile = data.train_data
 x = xT[:,0]
 T = xT[:,1]
 target = torch.squeeze(target)

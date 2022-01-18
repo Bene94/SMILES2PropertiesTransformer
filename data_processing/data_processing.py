@@ -13,8 +13,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', '-p',default=["brouwer_exp"], help='Location of raw data', multiple=True)
-@click.option('--save_path', '-s', default="exp_t", help='Location of output data')
+@click.option('--file_path', '-p',default=["x_cosmo"], help='Location of raw data', multiple=True)
+@click.option('--save_path', '-s', default="data_x", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 @click.option('--source', default='COSMO', help='see if to select COSMO or EXP')

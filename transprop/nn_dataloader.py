@@ -94,7 +94,7 @@ class gamma_dataset(Dataset):
         if len(seq) > 128:
             seq = np.concatenate([sos,comp_list[SMILE1,0], mos, comp_list[SMILE2,0], eos])
         seq = seq[:128]
-        train_data[0:len(seq)]
+        train_data[0:len(seq)] = seq
 
         return self.train_target[index], [train_data, self.xT[index], self.smile_index[index], self.index[index]]
 
