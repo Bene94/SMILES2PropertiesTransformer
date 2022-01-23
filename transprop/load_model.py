@@ -22,13 +22,13 @@ def load_model(path, name):
             config_file = file
     # remove last 4 characters from config file name
     config_file = config_file[:-4]
-    config = pickle.load(open(path + config_file + '.pkl', 'rb'))
+    config = pickle.load(open(path + name + '.pkl', 'rb'))
 
     #config = convert_config(config)
 
     # load model
     model = minGPT.GPT(config)
-    model.load_state_dict(torch.load(path + config_file + '.pth'))
+    model.load_state_dict(torch.load(path + name + '.pth'))
     model.eval()
     return model, config
 

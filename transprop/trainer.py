@@ -79,8 +79,13 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
                     output = model(smile, xt) 
                     loss = criterion(output.squeeze(), target.squeeze())
                     loss = loss / len(target_chunks)
+                    # check if loss is nan
+                    if math.isnan(loss.item()):
+                        pass
+
+
             if wandb.config.mode == 'NRTL':
-                with autocast(True):
+                with autocast(False):
                     #xt = xt.type(torch.half)
                     output = model(smile, xt) 
                     loss = custom_MSE_loss(output, target.squeeze())
@@ -91,8 +96,10 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
             log_loss += loss.item()
         
         scaler.unscale_(optimizer)
-        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100000)
-
+        if wandb.config.mode == 'NRTL':
+            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 20)
+        else:
+            grad_norm = 0
 
         scaler.step(optimizer)
         scaler.update()

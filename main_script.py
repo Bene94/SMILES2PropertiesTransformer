@@ -45,7 +45,7 @@ from transprop.config import *
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
-@click.option('--test', default=False, help='If true smale dataset is used')
+@click.option('--test', default=0, help='If true smale dataset is used')
 @click.option('--project', default='test', help='wandb project name')
 
 @click.option('--shift', default=0, help='Shift the data')
@@ -76,6 +76,11 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
             xp_name = log_name
         else:
             xp_name = 'local_test' + str(random())
+
+    if test == 1:
+        test = True
+    else:
+        test = False
 
     if cuda:
         device = torch.device('cuda')

@@ -96,7 +96,7 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
     outer_loop = mult
     
     # check if checkpoints exist
-    if os.path.exists(path_temp + xp_name + '/i.npy') and not ow == 0:
+    if os.path.exists(path_temp + xp_name + '/i.npy') and  ow == 0:
         print("Loading checkpoint")
         i_start = np.load(path_temp + xp_name + '/i.npy')
     else:

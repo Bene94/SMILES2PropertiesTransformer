@@ -117,20 +117,6 @@ def load_data(config,local = False,test = False):
     val_1_dataset = gamma_dataset(data_path, 'val_1', config, aug=False)
     val_2_dataset = gamma_dataset(data_path, 'val_2', config, aug=False)
 
-    if test:
-        train_dataset.train_data = train_dataset.train_data[0:500]
-        train_dataset.train_target = train_dataset.train_target[0:500]
-
-        val_0_dataset.train_data = val_0_dataset.train_data[0:2]
-        val_0_dataset.train_target = val_0_dataset.train_target[0:2]
-
-        val_1_dataset.train_data = val_1_dataset.train_data[0:2]
-        val_1_dataset.train_target = val_1_dataset.train_target[0:2]
-
-        val_2_dataset.train_data = val_2_dataset.train_data[0:2]
-        val_2_dataset.train_target = val_2_dataset.train_target[0:2]
-
-
     training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
 
     if len(val_0_dataset) > 0:
