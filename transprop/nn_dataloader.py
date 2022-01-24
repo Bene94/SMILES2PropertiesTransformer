@@ -58,7 +58,14 @@ class gamma_dataset(Dataset):
         if test:
             data = data.iloc[0:500,:]
 
-        target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
+        # check if collum lnGamma exists
+        if 'lnGamma' in data.columns:
+            target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
+        else: 
+            # concatenate lnGamma_1 and lnGamma_2 with width 2 
+            target = torch.from_numpy(np.stack((data["lnGamma_1"].to_numpy(), data["lnGamma_2"].to_numpy()), axis=1)).float()
+
+        
         smile_index = torch.from_numpy(data[["solute_idx","solvent_idx"]].to_numpy()).int()
         xT = torch.from_numpy(data[["x","T"]].to_numpy()).float()
         index = torch.from_numpy(data["i"].to_numpy()).int()

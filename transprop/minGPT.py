@@ -87,7 +87,6 @@ class NRTL_head(nn.Module):
         x[1] = tau_12
         x[2] = tau_21
     """
-
     def __init__(self, config):
         super().__init__()
         self.device = config.device
@@ -95,13 +94,13 @@ class NRTL_head(nn.Module):
     def forward(self, x, X):
 
         x = x.type(torch.float64)
-        x_out = torch.zeros(x.shape[0] , 1, device=self.device, requires_grad=True, dtype=torch.float64)
+        x_out = torch.zeros(x.shape[0] , 2, device=self.device, dtype=torch.float64)
 
         G_12 = torch.exp(-x[:,0] * x[:,1])
         G_21 = torch.exp(-x[:,0] * x[:,2])
 
-        x_out = (1-X) ** 2 * (x[:,2] * (G_21 / (X + (1-X) * G_21)) **2 + (x[:,1] * G_12)/ ((1-X) + X * G_12)**2)
-        #x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_21)**2)
+        x_out[:,0] = (1-X) ** 2 * (x[:,2] * (G_21 / (X + (1-X) * G_21)) **2 + (x[:,1] * G_12)/ ((1-X) + X * G_12)**2)
+        x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_21)**2)
 
         return x_out
 

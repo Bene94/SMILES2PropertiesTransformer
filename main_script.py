@@ -26,7 +26,7 @@ from transprop.config import *
 @click.option('--wdecay', default=0.0, help='Weight decay')
 @click.option('--drp', default=0.0, help='Dropout rate')
 
-@click.option('--mode', default="reg", help='Determines the mode: reg: does a regresstion; NRTL: use NRTL model as head')
+@click.option('--mode', default="NRTL", help='Determines the mode: reg: does a regresstion; NRTL: use NRTL model as head')
 @click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
 @click.option('--aug', default=0, help='Determines if the data is augmented')
 
@@ -41,7 +41,7 @@ from transprop.config import *
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 @click.option('--stop_epo', default=0, help='Number of epochs to stop warmup')
 
-@click.option('--data', default='data_xt', help='Location of dataset')
+@click.option('--data', default='data_x', help='Location of dataset')
 
 @click.option('--cuda', default=True, help='Using GPU')
 @click.option('--log_name', default='', help='Using GPU')
@@ -81,6 +81,8 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         test = True
     else:
         test = False
+
+    test = False
 
     if cuda:
         device = torch.device('cuda')
