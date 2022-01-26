@@ -117,6 +117,9 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
         val_data_list.append(val_1_data)
         val_data_list.append(val_2_data)
 
+    # init the gradScaler
+    scaler = GradScaler(init_scale=8192) 
+
     # see if file with name xp_name exists
     if os.path.isfile(path_temp + config.xp_name + '_epoch.pkl'):
         model, config, optimizer, scheduler, epoch_start = load_checkpoint(config)
@@ -163,7 +166,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
 
         epoch_start_time = time.time()
 
-        train(model, criterion, optimizer, training_data, val_data_list, scheduler, epoch, wandb)
+        train(model, criterion, optimizer, training_data, val_data_list, scheduler, epoch, wandb, scaler)
 
         torch.cuda.empty_cache()
 

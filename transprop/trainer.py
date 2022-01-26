@@ -14,7 +14,7 @@ from torch.nn.modules import activation
 
 
 
-def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, scheduler, epoch, wandb):
+def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, scheduler, epoch, wandb, scaler):
     
     model.train() # Turn on the train mode
     total_loss = 0.
@@ -28,8 +28,6 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
     total_compute = 6 * wandb.config.params * epoch * len(train_dataloader) * train_dataloader.batch_size * 1e-6
 
     start_time = time.time()
-    
-    scaler = GradScaler(init_scale=8192) 
 
     n_steps = len(train_dataloader)
 
@@ -79,13 +77,9 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
                     output = model(smile, xt) 
                     loss = criterion(output.squeeze(), target.squeeze())
                     loss = loss / len(target_chunks)
-                    # check if loss is nan
-                    if math.isnan(loss.item()):
-                        pass
-
 
             if wandb.config.mode == 'NRTL':
-                with autocast(False):
+                with autocast(True):
                     #xt = xt.type(torch.half)
                     output = model(smile, xt) 
                     loss = custom_MSE_loss(output, target.squeeze())

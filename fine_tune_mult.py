@@ -154,13 +154,15 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
               
             scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=total_steps, gamma=1)
 
-
+            # init the gradScaler
+        
+        scaler = GradScaler(init_scale=8192) 
 
         for epoch in range(epoch_start, config.epoch):
 
             epoch_start_time = time.time()
 
-            train(model, criterion, optimizer, training_data, [], scheduler, epoch, wandb)
+            train(model, criterion, optimizer, training_data, [], scheduler, epoch, wandb, scaler)
             
             torch.cuda.empty_cache()
 
