@@ -31,12 +31,12 @@ from pandas.core.frame import DataFrame
 def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow, h2o, source):
     processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source)
 
-def processing(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source):
+def processing(folder_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source):
     
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
+    df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, folder_name)
         
     comp_list = aug_data(comp_list, alias_path=alias_path)
     

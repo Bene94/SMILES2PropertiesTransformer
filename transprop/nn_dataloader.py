@@ -24,10 +24,11 @@ class gamma_dataset(Dataset):
     def load_comp_list(self, comp_list_file):
          
         comp_list = pd.read_csv(self.data_path + 'comp_list.csv')
-        emb_list = np.empty((comp_list.shape[0],10), dtype=object)
+        n_emb = int((comp_list.shape[1]-1) / 2)
+        emb_list = np.empty((comp_list.shape[0],n_emb), dtype=object)
 
         for i in range(0, comp_list.shape[0]):
-            for j in range(0,10):   
+            for j in range(0,n_emb):   
                 temp = comp_list['emb' + str(j)][i]
                 if str(temp) != 'nan':
                     emb_list[i,j] = np.fromstring(temp[1:-1], sep=" ", dtype=np.int)

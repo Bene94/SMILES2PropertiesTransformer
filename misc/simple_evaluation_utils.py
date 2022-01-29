@@ -23,7 +23,13 @@ class gamma_dataset(Dataset):
 
     def load_data(self,data):
 
-        target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
+        # check if collum lnGamma exists
+        if 'lnGamma' in data.columns:
+            target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
+        else: 
+            # concatenate lnGamma_1 and lnGamma_2 with width 2 
+            target = torch.from_numpy(np.stack((data["lnGamma_1"].to_numpy(), data["lnGamma_2"].to_numpy()), axis=1)).float()
+            
         smile_index = torch.from_numpy(data[["solute_idx","solvent_idx"]].to_numpy()).int()
         xT = torch.from_numpy(data[["x","T"]].to_numpy()).float()
         index = torch.from_numpy(data["i"].to_numpy()).int()
@@ -71,19 +77,20 @@ class gamma_dataset(Dataset):
         return self.data.shape[0]
 
 
-def smile2input(solvent,solute,x,T):
+def smile2input_NRTL(solvent,solute,x,T):
     
     vocab_path = '../vocab/'
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
 
-    df = pd.DataFrame(columns=['solvent','solute','lnGamma','x','T'])
+    df = pd.DataFrame(columns=['solvent','solute','lnGamma_1', 'lnGamma_2','x','T'])
 
     for x_i in x:
         for T_j in T:
-            df = df.append({'solvent':solvent, 'solute':solute, 'lnGamma':0, 'x':x_i, 'T':T_j, 'i': 0}, ignore_index=True)
+            df = df.append({'solvent':solvent, 'solute':solute, 'lnGamma_1':0, 'lnGamma_2':0, 'x':x_i, 'T':T_j, 'i': 0}, ignore_index=True)
     
     df.reset_index(drop=False, inplace=True)
-    df.lnGamma = df.lnGamma.astype(float)
+    df.lnGamma_1 = df.lnGamma_1.astype(float)
+    df.lnGamma_2 = df.lnGamma_2.astype(float)
     df.x = df.x.astype(float)
     df.T = df['T'].astype(float)
     df.i = df['i'].astype(int)

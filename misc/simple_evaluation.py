@@ -23,16 +23,15 @@ model_name =  '220118-040417'
 device = 'cuda'
 #device = 'cpu'
 
-solvent = "CC(=O)C"
-solute = "c1ccccc1C"
+solvent = "0"
+solute = "C=O"
 
 T = 298.15
 
 x = np.linspace(0, 1, num=20)
 T = np.linspace(T, T, 1)
 
-data_loader_solute = smile2input(solute, solvent, x ,T)
-data_loader_solvent = smile2input(solvent, solute, 1-x ,T)
+data_loader_solute = smile2input_NRTL(solute, solvent, x ,T)
 # %% Load model
 
 model, config = load_model(model_path,model_name)
@@ -42,19 +41,15 @@ criterion = nn.MSELoss()
 # time evaluation
 start = time.time()
 __, gamma_solute, __, __ = evaluate(model, data_loader_solute, criterion, config)
-__, gamma_solvent, __, __ = evaluate(model, data_loader_solvent, criterion, config)
-gamma_solvent = np.flip(gamma_solvent)
-
-mean = (gamma_solute + np.flip(gamma_solvent)) / 2
 end = time.time()
 print("Evaluation time: ", end - start)
-
+gamma_solute = np.reshape(gamma_solute, (int(len(gamma_solute)/2),2))
 
 # plot train out over x 
 fig, ax = plt.subplots()
 # use dashed lines
-ax.plot(x, gamma_solute, 'r--', label='solute')
-ax.plot(1-x, gamma_solvent, 'b--', label='solvent')
+ax.plot(x, gamma_solute[:,0], 'r--', label='solute')
+ax.plot(x, gamma_solute[:,1], 'b--', label='solvent')
 
 
 ax.set_title(str(T[0]) + " K")

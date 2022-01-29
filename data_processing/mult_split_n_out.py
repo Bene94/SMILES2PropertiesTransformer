@@ -4,12 +4,12 @@ import os
 from numpy.random import default_rng
 ## function to create multiple splits of the data
 
-file_path = ["brouwer_exp_c"]
+file_path = ["D"]
 vocab_path = "vocab"
 ow = True
 
 exclude_H2O = True
-only_H2O = False 
+only_H2O = False
 
 
 data_path = '../data/'
@@ -23,8 +23,9 @@ index_list = np.arange(0,n_unique)
 if exclude_H2O:
     h2o_index = systems[(systems.solvent == 'O') | (systems.solute == 'O')].index
     index_list = np.setdiff1d(index_list, h2o_index)
-    num_splits = 1000
+    num_splits = 77
     save_path = "data_exp_noH2O_" + str(num_splits)  + '_V2'
+    save_path = "data_D_noH2O_" + str(num_splits)  + '_V2'
 elif only_H2O:
     index_list = systems[systems.solvent == 'O'].index
     index_list = np.array(index_list)

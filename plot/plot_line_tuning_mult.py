@@ -258,6 +258,28 @@ if __name__ == '__main__':
     print('length val_predction_0: ' + str(len(val_predction_0)))
     print('length val_predction_1: ' + str(len(val_predction_1)))
     print('length val_predction_2: ' + str(len(val_predction_2)))
+
+    print('MSE of COSMO SAC2002: ' + str(np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction1)**2)))
+    print('MSE of COSMO SACdsp: ' + str(np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction3)**2)))
+    print('MSE of COSMO: ' + str(np.mean((cosmo_data_target - cosmo_data_prediction)**2)))
+    print('MSE of UNIFAC: ' + str(np.mean((UNIFAC_data_target - UNIFAC_data_prediction)**2)))
+    print('MSE of Damay: ' + str(np.mean((damay_data_target - damay_data_prediction)**2)))
+
+    print('MSE of VAL_0: ' + str(np.mean((val_target_0 - val_predction_0)**2)))
+    print('MSE of VAL_1: ' + str(np.mean((val_target_1 - val_predction_1)**2)))
+    print('MSE of VAL_2: ' + str(np.mean((val_target_2 - val_predction_2)**2)))
+    # calcualte the mean absolute error
+    print('MEA of COSMO SAC2002: ' + str(np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction1))))
+    print('MEA of COSMO SACdsp: ' + str(np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction3))))
+    print('MEA of COSMO: ' + str(np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))))
+    print('MEA of UNIFAC: ' + str(np.mean(np.abs(UNIFAC_data_target - UNIFAC_data_prediction))))
+    print('MEA of Damay: ' + str(np.mean(np.abs(damay_data_target - damay_data_prediction))))
+
+    print('MEA of VAL_0: ' + str(np.mean(np.abs(val_target_0 - val_predction_0))))
+    print('MEA of VAL_1: ' + str(np.mean(np.abs(val_target_1 - val_predction_1))))
+    print('MEA of VAL_2: ' + str(np.mean(np.abs(val_target_2 - val_predction_2))))
+    
+
     
     color_list = ['lightcoral', 'indianred', 'brown', 'red', 'coral','lightsteelblue', 'cornflowerblue', 'royalblue']
     name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$', 'COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']

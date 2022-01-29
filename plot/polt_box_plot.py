@@ -109,11 +109,26 @@ ax.set_xlabel('n')
 ax.set_ylabel('loss')
 ax.set_title('Mean loss as funciton of training data')
 #mean_mse = [np.median(mse) for mse in mse_list_0]
-#mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0]
-mean_mse_ft_aug_0 = [np.nanmean(mse) for mse in mse_list_f_aug_0]
-mean_mse_ft_aug_1 = [np.nanmean(mse) for mse in mse_list_f_aug_1]
-mean_mse_ft_aug_2 = [np.nanmean(mse) for mse in mse_list_f_aug_2]
-#mean_mse_ut_aug = [np.median(mse) for mse in mse_list_ut_aug_0]
+#mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0
+mse_ft_aug_0 = []
+mse_ft_aug_1 = []
+mse_ft_aug_2 = []
+
+for i in range(len(target_list_f_aug_0)):
+    temp_mse_0 = []
+    temp_mse_1 = []
+    temp_mse_2 = []
+    for j in range(len(target_list_f_aug_0[i])):
+        temp_mse_0.append(np.nanmean(np.square(target_list_f_aug_0[i][j] - prediction_list_f_aug_0[i][j])))
+        temp_mse_1.append(np.nanmean(np.square(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
+        temp_mse_2.append(np.nanmean(np.square(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
+    mse_ft_aug_0.append(temp_mse_0)
+    mse_ft_aug_1.append(temp_mse_1)
+    mse_ft_aug_2.append(temp_mse_2)
+
+mean_mse_ft_aug_0 = [np.nanmean(mse) for mse in mse_ft_aug_0]
+mean_mse_ft_aug_1 = [np.nanmean(mse) for mse in mse_ft_aug_1]
+mean_mse_ft_aug_2 = [np.nanmean(mse) for mse in mse_ft_aug_2]
 
 ax.plot(n_list, mean_mse_ft_aug_0, label='ft aug 0', linestyle='--', marker='o')
 ax.plot(n_list, mean_mse_ft_aug_1, label='ft aug 1', linestyle='--', marker='*')
@@ -121,10 +136,12 @@ ax.plot(n_list, mean_mse_ft_aug_2, label='ft aug 2', linestyle='--', marker='v')
 
 # add horizontal line at 0.35
 ax.axhline(y=0.35, color='k', linestyle='--', label='before fine tune')
-ax.axhline(y=0.16, color='k', linestyle='dashdot', label='after fine tune')
+ax.axhline(y=0.13, color='k', linestyle='dashdot', label='after fine tune Val 0', c='0.85')
+ax.axhline(y=0.08, color='k', linestyle='dashdot', label='after fine tune Val 1', c='0.85')
+ax.axhline(y=0.04, color='k', linestyle='dashdot', label='after fine tune Val 2', c='0.85')
 
 # make y axis limit between 0.05 and 0.4 and make labeling not scientific
-ax.set_ylim(0.05, 0.4)
+ax.set_ylim(0.03, 0.4)
 ax.set_yticks([0.05, 0.1, 0.2, 0.3, 0.4])
 ax.set_yticklabels(['0.05', '0.1', '0.2', '0.3', '0.4'])
 # add a legend
