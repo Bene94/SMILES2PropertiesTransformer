@@ -7,7 +7,7 @@ now_str = now_str.replace(" ", "_")
 
 model = '211220-192228'
 model = 'untrained_model'
-model = '211220-192228'
+model = '220127-180116'
 
 aug = 1 # 0: no aug, 1: aug
 lval_int = 0
@@ -38,5 +38,5 @@ for i in range(0,n_split):
     xp_name = save_path + '_' + str(i)
     comand = comand_s + ' --name=' + xp_name + comand_e + '-p ' + path + ' -ow ' + str(1) + ' -e '
     comand = comand + str(epo) + ' -n ' + save_path + ' -g ' + group + ' -s ' + str(i) + ' -lval ' + str(lval)
-    comand = comand + ' -w DNN_FT' + ' -b 128'
+    comand = comand + ' -w DNN_FT' + ' -b 16'
     os.system(comand)

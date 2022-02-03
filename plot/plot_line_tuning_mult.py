@@ -40,8 +40,11 @@ if __name__ == '__main__':
     name = '211231-031659' # modle with leave n out no water 
     name = 'f_t_211220-192228_220112-105727'
     name = 'f_t_211220-192228_220114-185541' # V2 run
+    name = 'f_t_220127-180116_220131-015826' # D Run
+    name = 'f_t_220127-180116_220131-025308' # D Run 
+    #name = 'f_t_220129-105213_220131-075615' # new V2 run with new base model
 
-    group = True
+    group = False
     scatter = True
 
     comp_list_path = '/home/bene/NNGamma/data/data_exp_noH2O_1000/0/comp_list.csv'

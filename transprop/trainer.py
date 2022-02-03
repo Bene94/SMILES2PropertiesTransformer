@@ -77,9 +77,6 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
                     output = model(smile, xt) 
                     loss = criterion(output.squeeze(), target.squeeze())
                     loss = loss / len(target_chunks)
-                    # check if loss is nan
-                    if math.isnan(loss.item()):
-                        pass
 
             if wandb.config.mode == 'NRTL':
                 with autocast(False):

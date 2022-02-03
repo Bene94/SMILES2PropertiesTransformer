@@ -116,5 +116,46 @@ def smile2input_NRTL(solvent,solute,x,T):
     dataloader = DataLoader(dataset, batch_size=512, shuffle=False)
 
     return dataloader
+
+def smile2input(solvent,solute,x,T):
+    
+    vocab_path = '../vocab/'
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+
+    df = pd.DataFrame(columns=['solvent','solute','lnGamma','x','T'])
+
+    for x_i in x:
+        for T_j in T:
+            df = df.append({'solvent':solvent, 'solute':solute, 'lnGamma':0, 'x':x_i, 'T':T_j, 'i': 0}, ignore_index=True)
+    
+    df.reset_index(drop=False, inplace=True)
+    df.lnGamma = df.lnGamma.astype(float)
+    df.x = df.x.astype(float)
+    df.T = df['T'].astype(float)
+    df.i = df['i'].astype(int)
+
+    solvent_list = df['solvent'].drop_duplicates()
+    solute_list = df['solute'].drop_duplicates()
+
+    complete_list = pd.concat([solute_list, solvent_list])
+    complete_list = complete_list.drop_duplicates()
+    complete_list.reset_index(drop=True, inplace=True)
+    complete_list = pd.DataFrame({'n_alias':np.ones(complete_list.shape[0]),'SMILE0':complete_list })
+
+    # get the index of the solven_list and solute_list
+    solvent_indx = complete_list.index[complete_list['SMILE0'].isin(solvent_list)]
+    solute_indx = complete_list.index[complete_list['SMILE0'].isin(solute_list)]
+
+    # make new dataframe with same names
+    complete_list = apply_vocab(complete_list, vocab_dict)
+    data_batches = prep_save(df, complete_list, batch_size=100000)
+
+    # hack this into a dataloader
+    dataset = gamma_dataset(complete_list, data_batches[0])
+    dataloader = DataLoader(dataset, batch_size=512, shuffle=False)
+
+    return dataloader
+    
+
     
 

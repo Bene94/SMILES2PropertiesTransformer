@@ -5,7 +5,7 @@ from plot_results import *
 
 # load data
 
-name = '211116-164532'
+name = 'f_t_220129-105213_220131-230011'
 
 
 val_loss_array = np.load('../out_fine_tuen/'+ 'val_loss_array_' + name + '.npy', allow_pickle=True)

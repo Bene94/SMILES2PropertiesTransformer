@@ -100,6 +100,36 @@ for i in range(0, len(input_list_f_aug_2)):
 # print input_list_f_aug_x_number as a table with n_list as header using tabulate
 print(tabulate([input_list_f_aug_0_number, input_list_f_aug_1_number, input_list_f_aug_2_number], headers=n_list, tablefmt="fancy_grid", showindex=True))
 
+# reduce the validation set to a consistent set
+
+cutoff_val_0 = 3
+cutoff_val_1 = 8
+cutoff_val_2 = 9
+
+input_set_aug_0 = np.array([item for sublist in input_list_f_aug_0[5] for item in sublist])
+input_set_aug_1 = np.array([item for sublist in input_list_f_aug_1[8] for item in sublist])
+
+# check where input_set_aug_0[i] contains input_set_aug_0
+for i in range(0, len(input_list_f_aug_0)):
+    for j in range(0, len(input_list_f_aug_0[i])):     
+        temp_input = np.array(input_list_f_aug_1[i][j])
+        # check where temp_input does not contain input_set_aug_0
+        remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_0]
+        input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
+        target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
+        prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
+
+for i in range(0, len(input_list_f_aug_1)):
+    for j in range(0, len(input_list_f_aug_1[i])):
+        temp_input = np.array(input_list_f_aug_1[i][j])
+        # check where temp_input does not contain input_set_aug_0
+        remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_1]
+        input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
+        target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
+        prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
+
+
+
 
 # plot the mean mse for each n in a log log plot
 fig, ax = plt.subplots(1, 1)
@@ -130,9 +160,9 @@ mean_mse_ft_aug_0 = [np.nanmean(mse) for mse in mse_ft_aug_0]
 mean_mse_ft_aug_1 = [np.nanmean(mse) for mse in mse_ft_aug_1]
 mean_mse_ft_aug_2 = [np.nanmean(mse) for mse in mse_ft_aug_2]
 
-ax.plot(n_list, mean_mse_ft_aug_0, label='ft aug 0', linestyle='--', marker='o')
-ax.plot(n_list, mean_mse_ft_aug_1, label='ft aug 1', linestyle='--', marker='*')
 ax.plot(n_list, mean_mse_ft_aug_2, label='ft aug 2', linestyle='--', marker='v')
+ax.plot(n_list[0:cutoff_val_1], mean_mse_ft_aug_1[0:cutoff_val_1], label='ft aug 1', linestyle='--', marker='*')
+ax.plot(n_list[0:cutoff_val_0], mean_mse_ft_aug_0[0:cutoff_val_0], label='ft aug 0', linestyle='--', marker='o')
 
 # add horizontal line at 0.35
 ax.axhline(y=0.35, color='k', linestyle='--', label='before fine tune')

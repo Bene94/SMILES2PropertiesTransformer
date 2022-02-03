@@ -1,5 +1,12 @@
 # %% 
 # This is a simple script to evaluate the modle for custom data pairs
+import os
+import sys
+
+# add current path to sys.path
+sys.path.append(os.getcwd())
+# %% 
+# This is a simple script to evaluate the modle for custom data pairs
 
 
 # %% Imports
@@ -16,6 +23,7 @@ from simple_evaluation_utils import *
 model_path = '/home/bene/NNGamma/Models/'
 model_name = 'local_test_fine'
 model_name =  '211123-110140'
+model_name = 'f_t_220127-180116_220131-015826'
 device = 'cuda'
 device = 'cpu'
 

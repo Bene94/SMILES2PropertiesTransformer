@@ -100,8 +100,8 @@ def make_heatmap(prediciton, target, name = '', path = '', save=False):
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
     plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
     
-    plt.ylabel(r'$\gamma_\infty^{prd.}$')
-    plt.xlabel(r'$\gamma_\infty^{exp.}$')
+    plt.ylabel(r'$ln \gamma_\infty^{prd.}$')
+    plt.xlabel(r'$ln \gamma_\infty^{exp.}$')
     plt.savefig(path + 'heat/heat_' + name)
 
     plt.rcParams['text.usetex'] = False
@@ -118,8 +118,8 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
 
     # use smaller dots for the points
     plt.scatter(target, prediciton, c=colors, s=1)
-    plt.ylabel(r'$\gamma_\infty^{prd.}$')
-    plt.xlabel(r'$\gamma_\infty^{exp.}$')
+    plt.ylabel(r'$ln \gamma_\infty^{prd.}$')
+    plt.xlabel(r'$ln \gamma_\infty^{exp.}$')
 
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
