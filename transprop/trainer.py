@@ -71,27 +71,20 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 
             src_padding_mask = (smile != wandb.config.padding_idx).transpose(0, 1)
 
-            if wandb.config.mode == 'reg':
-                with autocast(True):
-                    #xt = xt.type(torch.half)
-                    output = model(smile, xt) 
-                    loss = criterion(output.squeeze(), target.squeeze())
-                    loss = loss / len(target_chunks)
-
-            if wandb.config.mode == 'NRTL':
-                with autocast(False):
-                    #xt = xt.type(torch.half)
-                    output = model(smile, xt) 
-                    loss = custom_MSE_loss(output, target.squeeze())
-                    loss = loss / len(target_chunks)
+            with autocast(True):
+                #xt = xt.type(torch.half)
+                output = model(smile, xt) 
+                loss = criterion(output.squeeze(), target.squeeze())
+                loss = loss / len(target_chunks)
 
             scaler.scale(loss).backward()  
             log_scale = torch.log2(scaler._scale)      
             log_loss += loss.item()
         
         scaler.unscale_(optimizer)
-        if wandb.config.mode == 'NRTL':
-            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 20)
+        if wandb.config.mode == 'NRTL' or wandb.config.mode == 'NRTL-T':
+            #torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
+            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
         else:
             grad_norm = 0
 

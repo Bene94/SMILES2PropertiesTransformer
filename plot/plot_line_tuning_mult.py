@@ -40,12 +40,12 @@ if __name__ == '__main__':
     name = '211231-031659' # modle with leave n out no water 
     name = 'f_t_211220-192228_220112-105727'
     name = 'f_t_211220-192228_220114-185541' # V2 run
-    name = 'f_t_220127-180116_220131-015826' # D Run
-    name = 'f_t_220127-180116_220131-025308' # D Run 
+    #name = 'f_t_220127-180116_220131-015826' # D Run
+    #name = 'f_t_220127-180116_220131-025308' # D Run 
     #name = 'f_t_220129-105213_220131-075615' # new V2 run with new base model
 
-    group = False
-    scatter = True
+    group = True
+    scatter = False
 
     comp_list_path = '/home/bene/NNGamma/data/data_exp_noH2O_1000/0/comp_list.csv'
     comp_lsit_path = '/home/bene/NNGamma/data/data_exp_onlyH2O_1000_V2/0/comp_list.csv'
@@ -250,9 +250,6 @@ if __name__ == '__main__':
     val_target_0 = val_0[val_0['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
     val_target_1 = val_1[val_1['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
     val_target_2 = val_2[val_2['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
-
-    prediction_list = [cosmo_sac_data_prediction1, cosmo_sac_data_prediction3, cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
-    target_list = [cosmo_sac_data_target, cosmo_sac_data_target, cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
     
     print('data filtered')
     print('length cosmo_data_prediction: ' + str(len(cosmo_data_prediction)))
@@ -284,10 +281,17 @@ if __name__ == '__main__':
     
 
     
-    color_list = ['lightcoral', 'indianred', 'brown', 'red', 'coral','lightsteelblue', 'cornflowerblue', 'royalblue']
-    name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$', 'COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
-    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False, color_list = color_list)
-
-
-
+    #color_list = ['lightcoral', 'indianred', 'brown', 'red', 'coral','lightsteelblue', 'cornflowerblue', 'royalblue']
+    #name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$', 'COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
     
+#    prediction_list = [cosmo_sac_data_prediction1, cosmo_sac_data_prediction3, cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
+#   target_list = [cosmo_sac_data_target, cosmo_sac_data_target, cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
+
+    prediction_list = [cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
+    target_list = [cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
+
+
+    color_list = ['lightcoral', 'brown', 'lightgreen','lightsteelblue', 'cornflowerblue', 'royalblue']
+    name_list = ['COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
+
+    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False, color_list = color_list)

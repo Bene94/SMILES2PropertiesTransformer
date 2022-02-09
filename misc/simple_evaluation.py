@@ -21,17 +21,17 @@ from simple_evaluation_utils import *
 model_path = '/home/bene/NNGamma/temp/'
 model_path = '/home/bene/NNGamma/Models/'
 model_name = 'local_test_fine'
-model_name = '220118-040417'
-model_name = '220127-180116'
+model_name = '220118-040417' # NRTL
+model_name = '220127-180116' #reg
 device = 'cuda'
 #device = 'cpu'
 
-solvent = "0"
+solvent = "CCCO"
 solute = "C=O"
-
+solute = "CCC"
 T = 298.15
 
-x = np.linspace(0, 1, num=20)
+x = np.linspace(0, 1, num=200)
 T = np.linspace(T, T, 1)
 
 # %% Load model
@@ -64,8 +64,8 @@ else:
 # plot train out over x 
 fig, ax = plt.subplots()
 # use dashed lines
-ax.plot(x, gamma_solute[:,0], 'r--', label='solute')
-ax.plot(x, gamma_solute[:,1], 'b--', label='solvent')
+ax.plot(x, gamma_solute[:,0], 'r*', label='solute')
+ax.plot(x, gamma_solute[:,1], 'b*', label='solvent')
 
 
 ax.set_title(str(T[0]) + " K")

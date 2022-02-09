@@ -10,10 +10,12 @@ modefied by BWi
 """
 
 import math
+from matplotlib.pyplot import xkcd
 
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from torch.cuda.amp import autocast
 
 
 class CausalSelfAttention(nn.Module):
@@ -90,17 +92,74 @@ class NRTL_head(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.device = config.device
+        self.linear = nn.Linear(config.embed_size, 3)
+
 
     def forward(self, x, X):
 
-        x = x.type(torch.float64)
-        x_out = torch.zeros(x.shape[0] , 2, device=self.device, dtype=torch.float64)
+        x = self.linear(x)
+
+        #x = x.type(torch.float64)
+        x_out = torch.zeros(x.shape[0] , 2, device=self.device)
 
         G_12 = torch.exp(-x[:,0] * x[:,1])
         G_21 = torch.exp(-x[:,0] * x[:,2])
 
         x_out[:,0] = (1-X) ** 2 * (x[:,2] * (G_21 / (X + (1-X) * G_21)) **2 + (x[:,1] * G_12)/ ((1-X) + X * G_12)**2)
         x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_21)**2)
+
+        return x_out
+
+class NRTL_T_head(nn.Module):
+    """
+    An Head using the NRTL modle takes 3 parameters:
+        alpha = x[0] + x[1] * T 
+        tau_12 = x[2] + x[3] / T + x[4] * lnT + x[5] * T
+        tau_21 = x[6] + x[7] / T + x[8] * lnT + x[9] * T
+    """
+    def __init__(self, config):
+        super().__init__()
+        self.device = config.device
+        self.linear = nn.Linear(config.embed_size, 10) # reduce the embedding to number of NRTL-T parameters
+        self.layer_norm = nn.LayerNorm(10)
+        
+    def forward(self, x, X, T):
+        
+
+        limits = torch.zeros(10, 1, device=self.device)
+        limits[0] = 1
+        limits[1] = 0.002
+        limits[2] = 1500
+        limits[3] = 50000
+        limits[4] = 500
+        limits[5] = 3
+        limits[6] = 1500
+        limits[7] = 50000
+        limits[8] = 500
+        limits[9] = 3
+
+
+        x = self.linear(x)
+        x = x / 1000
+        x = (torch.sigmoid(x) * 2 -1) * limits.T * 0.5
+
+        with autocast(False): 
+            X = X.type(torch.float64)
+            T = T.type(torch.float64)
+            x = x.type(torch.float64)
+
+            #x = x.type(torch.float64)
+            x_out = torch.zeros(x.shape[0] , 2, device=self.device)
+
+            alpha = x[:,0] + x[:,1] * T
+            tau_12 = x[:,2] + x[:,3] / T + x[:,4] * torch.log(T) + x[:,5] * T
+            tau_21 = x[:,6] + x[:,7] / T + x[:,8] * torch.log(T) + x[:,9] * T
+
+            G_12 = torch.exp(-alpha * tau_12)
+            G_21 = torch.exp(-alpha * tau_21)
+
+            x_out[:,0] = (1-X) ** 2 * (x[:,2] * (G_21 / (X + (1-X) * G_21)) **2 + (x[:,1] * G_12)/ ((1-X) + X * G_12)**2)
+            x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_21)**2)
 
         return x_out
 
@@ -114,6 +173,8 @@ class UNIQUAC_head(nn.Module):
         x[4] = tau_12
         x[5] = tau_21
 
+    Not yet implemented
+    
     """
 
     def __init__(self, config):
@@ -158,13 +219,12 @@ class GPT(nn.Module):
         self.ln_f = nn.LayerNorm(config.embed_size)
         self.decoder = nn.Linear(config.embed_size, config.embed_size)
         
-        if self.regression:
+        if config.mode == 'reg':
             self.head = nn.Linear(config.embed_size, 1)
         elif config.mode == 'NRTL':
-            self.head = nn.Linear(config.embed_size, 3)
-            self.NRTL = NRTL_head(config)
-        else:
-            self.head = nn.Linear(config.embed_size, config.bins + 2)
+            self.head = NRTL_head(config)
+        elif config.mode == 'NRTL-T':
+            self.head = NRTL_T_head(config)
         
         
         self.block_size = config.block_size
@@ -184,7 +244,7 @@ class GPT(nn.Module):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
         
-        self.head.bias.data.fill_(0) # this is only for current data
+        #self.head.bias.data.fill_(0) # this is only for current data
 
     def configure_optimizers(self, config):
         """
@@ -235,9 +295,16 @@ class GPT(nn.Module):
     def forward(self, idx, xT, targets=None):
         b, t = idx.size()
         #assert t <= self.block_size, "Cannot forward, model block size is exhausted."
+        
         if self.config.mode == 'NRTL':
             X = xT[:,0] + 0.5
             xT[:,0] = 0
+        if self.config.mode == 'NRTL-T':
+            X = xT[:,0] + 0.5
+            T = (xT[:,1] + 1) * 298.5 
+            xT[:,0] = 0
+            xT[:,1] = 0
+        
         xT = torch.unsqueeze(xT,1)
         xT_proj = self.xT_lin(xT)
 
@@ -263,11 +330,11 @@ class GPT(nn.Module):
         x = F.relu(x)
 
         if self.config.mode == 'NRTL':
-            logits = self.head(x)
-            logits = self.NRTL(logits, X) #add 0.5 to revert the normalization
-        else:
+            logits = self.head(x,X)
+        if self.config.mode == 'NRTL-T':
+            logits = self.head(x,X,T)
+        if self.config.mode == 'reg':
             logits = self.head(x)
 
         logits = logits.squeeze()
-
         return logits

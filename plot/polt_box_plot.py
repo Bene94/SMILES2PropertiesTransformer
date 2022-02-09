@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 from tabulate import tabulate
+from scipy.optimize import curve_fit
+from torch import std 
 
 
 import plot_results as pr
@@ -58,7 +60,7 @@ def load_data(file_path, val_type):
 
 n_list = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 600, 700, 800, 1000] #, 2000] # , 100, 500, 1000]
 
-n_list = [10, 50, 100, 500, 999, 1000, 2000, 3000, 4000, 5000]
+n_list = [10, 20, 50, 100, 200, 500, 1000, 2000, 3000, 4000, 5000]
 type_list = ['0', '1','2']
 
 if False:
@@ -100,14 +102,14 @@ for i in range(0, len(input_list_f_aug_2)):
 # print input_list_f_aug_x_number as a table with n_list as header using tabulate
 print(tabulate([input_list_f_aug_0_number, input_list_f_aug_1_number, input_list_f_aug_2_number], headers=n_list, tablefmt="fancy_grid", showindex=True))
 
-# reduce the validation set to a consistent set
+# reduce the validation set to a consistent seti
 
-cutoff_val_0 = 3
-cutoff_val_1 = 8
+cutoff_val_0 = 6
+cutoff_val_1 = 9
 cutoff_val_2 = 9
 
-input_set_aug_0 = np.array([item for sublist in input_list_f_aug_0[5] for item in sublist])
-input_set_aug_1 = np.array([item for sublist in input_list_f_aug_1[8] for item in sublist])
+input_set_aug_0 = np.array([item for sublist in input_list_f_aug_0[cutoff_val_0] for item in sublist])
+input_set_aug_1 = np.array([item for sublist in input_list_f_aug_1[cutoff_val_1] for item in sublist])
 
 # check where input_set_aug_0[i] contains input_set_aug_0
 for i in range(0, len(input_list_f_aug_0)):
@@ -152,6 +154,7 @@ for i in range(len(target_list_f_aug_0)):
         temp_mse_0.append(np.nanmean(np.square(target_list_f_aug_0[i][j] - prediction_list_f_aug_0[i][j])))
         temp_mse_1.append(np.nanmean(np.square(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
         temp_mse_2.append(np.nanmean(np.square(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
+
     mse_ft_aug_0.append(temp_mse_0)
     mse_ft_aug_1.append(temp_mse_1)
     mse_ft_aug_2.append(temp_mse_2)
@@ -160,9 +163,47 @@ mean_mse_ft_aug_0 = [np.nanmean(mse) for mse in mse_ft_aug_0]
 mean_mse_ft_aug_1 = [np.nanmean(mse) for mse in mse_ft_aug_1]
 mean_mse_ft_aug_2 = [np.nanmean(mse) for mse in mse_ft_aug_2]
 
-ax.plot(n_list, mean_mse_ft_aug_2, label='ft aug 2', linestyle='--', marker='v')
-ax.plot(n_list[0:cutoff_val_1], mean_mse_ft_aug_1[0:cutoff_val_1], label='ft aug 1', linestyle='--', marker='*')
-ax.plot(n_list[0:cutoff_val_0], mean_mse_ft_aug_0[0:cutoff_val_0], label='ft aug 0', linestyle='--', marker='o')
+ax.plot(n_list, mean_mse_ft_aug_2, label='ft aug 2', linestyle='', marker='v', color='#1f77b4')
+ax.plot(n_list[0:cutoff_val_1], mean_mse_ft_aug_1[0:cutoff_val_1], label='ft aug 1', linestyle='', marker='*', color='#ff7f0e')
+ax.plot(n_list[0:cutoff_val_0], mean_mse_ft_aug_0[0:cutoff_val_0], label='ft aug 0', linestyle='', marker='o',  color='#2ca02c')
+
+# calculate the upper and lower 95% confident intervall of the mean mse
+mse_ft_aug_0_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_aug_0])
+mse_ft_aug_1_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_aug_1])
+mse_ft_aug_2_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_aug_2])
+
+ax.fill_between(n_list, mse_ft_aug_2_ci[:,0], mse_ft_aug_2_ci[:,1], color='#1f77b4', alpha=0.2)
+ax.fill_between(n_list[0:cutoff_val_1], mse_ft_aug_1_ci[0:cutoff_val_1,0], mse_ft_aug_1_ci[0:cutoff_val_1,1], color='#ff7f0e', alpha=0.2)
+ax.fill_between(n_list[0:cutoff_val_0], mse_ft_aug_0_ci[0:cutoff_val_0,0], mse_ft_aug_0_ci[0:cutoff_val_0,1], color='#2ca02c', alpha=0.2)
+
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=5)
+fig.tight_layout()
+plt.show()
+
+# fit a exponential regression into the data and plot it
+exp_fuc = lambda x, a, b: a * x**b
+x = np.array(n_list)
+y = np.array(mean_mse_ft_aug_0)
+p0 = [1, -0.0001]
+popt, pcov = curve_fit(exp_fuc, x, y, p0)
+x_fit = np.linspace(min(x), max(x), 200)
+ax.plot(x_fit, exp_fuc(x_fit, *popt), label='fit', linestyle='--',  color='#2ca02c')
+# write the fit parameters into the plot next to the line
+ax.text(0.1, 0.35, 'val 0\na = %.4f\nb = %.4f' % tuple(popt), transform=ax.transAxes)
+y = np.array(mean_mse_ft_aug_1)
+p0 = [1, -0.0001]
+popt, pcov = curve_fit(exp_fuc, x, y, p0)
+x_fit = np.linspace(min(x), max(x), 200)
+ax.plot(x_fit, exp_fuc(x_fit, *popt), label='fit', linestyle='--',  color='#ff7f0e')
+# write the fit parameters into the plot
+ax.text(0.1, 0.2, 'val 1 \na = %.4f\nb = %.4f' % tuple(popt), transform=ax.transAxes)
+y = np.array(mean_mse_ft_aug_2)
+p0 = [1, -0.0001] 
+popt, pcov = curve_fit(exp_fuc, x, y, p0)
+x_fit = np.linspace(min(x), max(x), 200)
+ax.plot(x_fit, exp_fuc(x_fit, *popt), label='fit', linestyle='--',  color='#1f77b4')
+# write the fit parameters into the plot
+ax.text(0.1, 0.05, 'val 2 \na = %.4f\nb = %.4f' % tuple(popt), transform=ax.transAxes)
 
 # add horizontal line at 0.35
 ax.axhline(y=0.35, color='k', linestyle='--', label='before fine tune')
@@ -175,6 +216,7 @@ ax.set_ylim(0.03, 0.4)
 ax.set_yticks([0.05, 0.1, 0.2, 0.3, 0.4])
 ax.set_yticklabels(['0.05', '0.1', '0.2', '0.3', '0.4'])
 # add a legend
+ax.set_xlim(min(n_list), max(n_list))
 ax.legend(loc='upper right')
 # decrease ledgend size
 ax.legend(loc='upper right', prop={'size': 6})

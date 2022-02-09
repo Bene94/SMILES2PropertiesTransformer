@@ -61,7 +61,7 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
         colours = color_list
     else:
         colours = makeColours( np.concatenate(delta_list) )
-    plt.hist(delta_list, bins=21, alpha=0.5, range=(-2,2), weights=weights_list, edgecolor='black', color=colours)
+    plt.hist(delta_list, bins=11, alpha=0.5, range=(-1,1), weights=weights_list, edgecolor='black', color=colours)
 
     # set the color of the first 3 histograms to be similar
     # make text for legend by addeing the perc_data to the name
@@ -78,7 +78,8 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
 
     plt.ylabel(r'Frac. of data')
     plt.xlabel(r"$\Delta$ ln $\gamma_\infty$")
-    plt.xlim(-2,2)
+    plt.xlim(-1,1)
+    plt.x_tick_labels = [-1, -0.5, -0.3, 0, 0.3, 0.5, 1]
     # save high res image
     plt.savefig(path + 'hist/hist_delta_mult', dpi=900)
     plt.rcParams['text.usetex'] = False
