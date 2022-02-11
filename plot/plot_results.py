@@ -287,3 +287,31 @@ def plot_err_sorted(prediction, target, name = '', path = '', save=False):
 
     if save:
         plt.savefig(path + 'sorted/mse_sorted_' + name)
+
+def plot_err_curve_mult(prediction_list, target_list, name_list, name = '', path = '', save=False):
+    # make one figure that shows the sorted error curve for each model as MSE
+
+    plt.clf()
+    # axis limit for all subplots to 2
+    plt.ylim(0,2)
+    # plot horizontal line at 0.3
+    plt.axhline(y=0.3, color='r', linestyle='-')
+
+    # calc error
+    err_MSE_list = [ np.sqrt(np.mean((target - prediction)**2)) for prediction, target in zip(prediction_list, target_list) ]
+
+    # sort error list
+    err_list_sorted = [np.sort(err) for err in err_list]
+
+    # plot error curve for each model
+    for err in err_list_sorted:
+        plt.plot(err)
+
+    # set title of the figure to name
+    plt.suptitle(name)
+    plt.legend(name_list)
+
+    if save:
+        plt.savefig(path + 'sorted/mse_sorted_' + name)
+
+

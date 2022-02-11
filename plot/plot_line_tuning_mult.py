@@ -1,3 +1,4 @@
+from operator import truediv
 import numpy as np
 import plot_results as pr
 import pandas as pd
@@ -295,3 +296,4 @@ if __name__ == '__main__':
     name_list = ['COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
 
     pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False, color_list = color_list)
+    pr.plot_err_curve_mult(prediction_list, target_list, name_list, name = '', path = 'mult', save=True)
