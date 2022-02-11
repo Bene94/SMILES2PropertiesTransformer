@@ -297,14 +297,14 @@ def plot_err_curve_mult(prediction_list, target_list, name_list, name = '', path
     # plot horizontal line at 0.3
     plt.axhline(y=0.3, color='r', linestyle='-')
 
-    # calc error
-    err_MSE_list = [ np.sqrt(np.mean((target - prediction)**2)) for prediction, target in zip(prediction_list, target_list) ]
-
-    # sort error list
-    err_list_sorted = [np.sort(err) for err in err_list]
+    mse_list_sorted = []
+    # calc MSE error
+    for i in range(len(prediction_list)):
+        err = [ np.sqrt(np.mean(target - prediction)**2) for prediction, target in zip(prediction_list[i], target_list[i])]
+        mse_list_sorted.append(np.sort(err))
 
     # plot error curve for each model
-    for err in err_list_sorted:
+    for err in mse_list_sorted:
         plt.plot(err)
 
     # set title of the figure to name
