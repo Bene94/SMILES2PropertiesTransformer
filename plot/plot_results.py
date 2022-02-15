@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from matplotlib.colors import Normalize, LogNorm
-from matplotlib import cm
+from matplotlib import cm, markers
 from scipy.stats import gaussian_kde as kde
 
 
@@ -84,33 +84,42 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
     plt.savefig(path + 'hist/hist_delta_mult', dpi=900)
     plt.rcParams['text.usetex'] = False
 
-def make_heatmap(prediciton, target, name = '', path = '', save=False):
+def make_heatmap(prediciton, target, name = '', title='', path = '', save=False):
     # make histogram of the output, use a normalised histogram constant bin width
     plt.rcParams['text.usetex'] = True
     plt.clf()
-    plt.hist2d(target, prediciton, bins=101, norm=LogNorm())
+    plt.rcParams.update({'font.size': 18})
+    plt.hist2d(target, prediciton, bins=301, norm=LogNorm())
     heatmap, xedges, yedges = np.histogram2d(target.squeeze(), prediciton.squeeze(), bins=2000)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    # extend the bottom margin to make the labels fit
     plt.imshow(heatmap.T, extent=extent, origin='lower')
-    plt.show()
-    plt.xlim(xedges[0],xedges[-1])
-    plt.ylim(yedges[0],yedges[-1])
+    plt.xlim(-15,15)
+    plt.ylim(-15,15)
     plt.colorbar()
 
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
-    plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE))
+    #add MSE and MEA to the top left corner in two lines and white text
+    plt.text(0.05, 0.9, 'MSE: ' + str(MSE), transform=plt.gca().transAxes, color='white')
+    plt.text(0.05, 0.8, 'MAE: ' + str(MAE), transform=plt.gca().transAxes, color='white')
+
+    plt.title(title)
     
-    plt.ylabel(r'$ln \gamma_\infty^{prd.}$')
-    plt.xlabel(r'$ln \gamma_\infty^{exp.}$')
-    plt.savefig(path + 'heat/heat_' + name)
+    plt.ylabel(r'$\ln\gamma^\infty_{\mathrm{prd.}}$')
+    plt.xlabel(r'$\ln\gamma^\infty_{\mathrm{truth}}$')
+    plt.savefig(path + 'heat/heat_' + name, dpi=600)
+
+    plt.tight_layout()
+    plt.show()
 
     plt.rcParams['text.usetex'] = False
 
 
-def make_scatter(prediciton, target, name = '', path = '', save=False): 
-    plt.rcParams['text.usetex'] = True
+def make_scatter(prediciton, target, name = '', title = '',path = '', save=False): 
     plt.clf()
+    plt.rcParams['text.usetex'] = True
+    plt.rcParams.update({'font.size': 14})
     plt.rc
     vals = []
     vals.append(target)
@@ -119,28 +128,26 @@ def make_scatter(prediciton, target, name = '', path = '', save=False):
 
     # use smaller dots for the points
     plt.scatter(target, prediciton, c=colors, s=1)
-    plt.ylabel(r'$ln \gamma_\infty^{prd.}$')
-    plt.xlabel(r'$ln \gamma_\infty^{exp.}$')
+    plt.ylabel(r'$\ln\gamma^\infty_\mathrm{prd.}$')
+    plt.xlabel(r'$\ln\gamma^\infty_\mathrm{exp.}$')
 
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
     MAE = np.around(np.mean( np.abs(target - prediciton) ),2)
-    plt.title(r'MSE: {0} MAE: {1}'.format(MSE, MAE))
-
+    # write MSE and MEA in the top left corner in two lines
+    plt.text(0.05, 0.9, 'MSE: ' + str(MSE), transform=plt.gca().transAxes)
+    plt.text(0.05, 0.8, 'MAE: ' + str(MAE), transform=plt.gca().transAxes)
     # add two lines to the plot to show +- 0.1 delta
     plt.plot([-20,20], [-19.7, 20.3], 'k--', lw=1)
     plt.plot([-20,20], [-20.3, 19.7], 'k--', lw=1)
-    
-    # set axix to max and min of target or prediciton
-    min_target = min(target)
-    max_target = max(target)
-    min_pred = min(prediciton)
-    max_pred = max(prediciton)
-    #plt.xlim(min(min_target, min_pred), max(max_target, max_pred))
-    #plt.ylim(min(min_target, min_pred), max(max_target, max_pred))
+
+    plt.title(title)
 
     plt.ylim(-5, 16)
     plt.xlim(-5, 16)
 
+    plt.xticks([-5, 0, 5, 10, 15])
+    plt.yticks([-5, 0, 5, 10, 15])
+    # increase fond size
     if save:
         plt.savefig(path + 'scatter/scatter_' + name)
     else:
@@ -267,51 +274,28 @@ def plot_err_sorted_combined(val_predction_0, val_target_0, val_predction_1, val
     if save:
         plt.savefig(path + 'sorted/mse_sorted_' + name)
 
-def plot_err_sorted(prediction, target, name = '', path = '', save=False):
+def plot_err_curve_mult(prediction_list, target_list, name_list, color_list, line_style, damay_points,name = '', path = '', save=False):
+    plt.rcParams['text.usetex'] = True
     # make one figure containting three subplots with boxplots for each n
     plt.clf()
-    err = np.abs(target - prediction)
-    # axis limit for all subplots to 2
-
-    mse_list_sorted = np.sort(err)
-
-    plt.plot(mse_list_sorted)
-
-    plt.xlim(0,len(mse_list_sorted))
-    
-    plt.title(name)
-
-    plt.ylim(0,max(mse_list_sorted))
-    # plot horizontal line at 0.3
-    plt.axhline(y=0.3, color='r', linestyle='-')
-
-    if save:
-        plt.savefig(path + 'sorted/mse_sorted_' + name)
-
-def plot_err_curve_mult(prediction_list, target_list, name_list, name = '', path = '', save=False):
-    # make one figure that shows the sorted error curve for each model as MSE
-
-    plt.clf()
-    # axis limit for all subplots to 2
-    plt.ylim(0,2)
-    # plot horizontal line at 0.3
-    plt.axhline(y=0.3, color='r', linestyle='-')
-
-    mse_list_sorted = []
-    # calc MSE error
+    err = []
     for i in range(len(prediction_list)):
-        err = [ np.sqrt(np.mean(target - prediction)**2) for prediction, target in zip(prediction_list[i], target_list[i])]
-        mse_list_sorted.append(np.sort(err))
+        err.append(np.abs(target_list[i] - prediction_list[i]))
+    
+    err_sorted = [np.sort(err[i]) for i in range(len(err))]
 
-    # plot error curve for each model
-    for err in mse_list_sorted:
-        plt.plot(err)
+    plt.plot(damay_points[0], damay_points[1], color='darkorange', linestyle='--', marker='*', label='\emph{Damay et al. 2021}')
+    
+    for i in range(len(err_sorted)):
+        plt.plot(err_sorted[i], color=color_list[i], label=name_list[i], linestyle=line_style[i])
 
-    # set title of the figure to name
-    plt.suptitle(name)
-    plt.legend(name_list)
-
+    plt.ylim(0,2)
+    plt.xlim(0,len(err_sorted[0]))
+    plt.legend()
+    plt.xlabel('\# of samples')
+    plt.ylabel(r"$\Delta$ ln $\gamma^\infty$")
+    plt.yticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
+    # plot horizontal line at 0.3
+    plt.axhline(y=0.3, color='lightgrey', linestyle='--')
     if save:
-        plt.savefig(path + 'sorted/mse_sorted_' + name)
-
-
+        plt.savefig(path + 'sorted/err_curve_mult_' + name, dpi=1200)

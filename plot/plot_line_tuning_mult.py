@@ -46,7 +46,7 @@ if __name__ == '__main__':
     #name = 'f_t_220129-105213_220131-075615' # new V2 run with new base model
 
     group = True
-    scatter = False
+    scatter = True 
 
     comp_list_path = '/home/bene/NNGamma/data/data_exp_noH2O_1000/0/comp_list.csv'
     comp_lsit_path = '/home/bene/NNGamma/data/data_exp_onlyH2O_1000_V2/0/comp_list.csv'
@@ -134,11 +134,6 @@ if __name__ == '__main__':
     pr.make_historgam_delta(val_predction_1, val_target_1, 'val_1_fine' , path = plot_path, save=True)
     pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
-    pr.plot_err_sorted(val_predction_0, val_target_0, r'val_0_fine' , path = plot_path, save=True)
-    pr.plot_err_sorted(val_predction_1, val_target_1, r'val_1_fine' , path = plot_path, save=True)
-    pr.plot_err_sorted(val_predction_2, val_target_2, r'val_2_fine' , path = plot_path, save=True)
-
-
     comp_list, systems, df_join = get_comp_list(file_path, vocab_path)
     h2o_index = df_join[(df_join.solvent == 'O') | (df_join.solute == 'O')].i
     
@@ -173,24 +168,24 @@ if __name__ == '__main__':
 
     max = int(2e5)
     if scatter:
-        pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', path = plot_path, save=True)
+        pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', title = '$val_\mathrm{ext}$', path = plot_path, save=True)
         print('val_0_fine done')
-        pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1', path = plot_path, save=True)
+        pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1',  title = '$val_\mathrm{edge}$', path = plot_path, save=True)
         print('val_1_fine done')
-        pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', path = plot_path, save=True)
+        pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', title = '$val_\mathrm{int}$', path = plot_path, save=True)
         print('val_2_fine done')
         if h2o_val_0_target != []:
-            pr.make_scatter(h2o_val_0_pred, h2o_val_0_target, name = 'h2o_val_0', path = plot_path, save=True)
+            pr.make_scatter(h2o_val_0_pred, h2o_val_0_target, name = 'h2o_val_0', title = '$val_\mathrm{ext}$', path = plot_path, save=True)
         print('h2o_val_0_fine done')
-        pr.make_scatter(h2o_val_1_pred[0:max], h2o_val_1_target[:max], name = 'h2o_val_1', path = plot_path, save=True)
+        pr.make_scatter(h2o_val_1_pred[0:max], h2o_val_1_target[:max], name = 'h2o_val_1', title = '$val_\mathrm{edge}$', path = plot_path, save=True)
         print('h2o_val_1_fine done')
-        pr.make_scatter(h2o_val_2_pred[:max], h2o_val_2_target[:max], name = 'h2o_val_2', path = plot_path, save=True)
+        pr.make_scatter(h2o_val_2_pred[:max], h2o_val_2_target[:max], name = 'h2o_val_2', title = '$val_\mathrm{int}$', path = plot_path, save=True)
         print('h2o_val_2_fine done')
-        pr.make_scatter(no_h2o_val_0_pred, no_h2o_val_0_target, name = 'no_h2o_val_0', path = plot_path, save=True)
+        pr.make_scatter(no_h2o_val_0_pred, no_h2o_val_0_target, name = 'no_h2o_val_0', title = '$val_\mathrm{ext}$', path = plot_path, save=True)
         print('no_h2o_val_0_fine done')
-        pr.make_scatter(no_h2o_val_1_pred[0:max], no_h2o_val_1_target[:max], name = 'no_h2o_val_1', path = plot_path, save=True)
+        pr.make_scatter(no_h2o_val_1_pred[0:max], no_h2o_val_1_target[:max], name = 'no_h2o_val_1', title = '$val_\mathrm{edge}$', path = plot_path, save=True)
         print('no_h2o_val_1_fine done')
-        pr.make_scatter(no_h2o_val_2_pred[:max], no_h2o_val_2_target[:max], name = 'no_h2o_val_2', path = plot_path, save=True)
+        pr.make_scatter(no_h2o_val_2_pred[:max], no_h2o_val_2_target[:max], name = 'no_h2o_val_2', title = '$val_\mathrm{int}$', path = plot_path, save=True)
         print('no_h2o_val_2_fine done')
         print('scatter plots made')
   
@@ -207,17 +202,6 @@ if __name__ == '__main__':
 
     UNIFAC_data = pd.read_csv(path_temp + 'UNIFAC_out.csv', sep=';')
     UNIFAC_data = UNIFAC_data.dropna()
-    
-    damay_data = pd.read_csv(path_temp + 'data_Damay_et.al.csv', sep=';')
-    #here we have to fake the Damay data with the same format as the COSMO data
-    damay_data = damay_data.to_numpy()
-    damay_data = damay_data * 1000
-    damay_data_target = np.zeros(1000)
-    damay_data_prediction = np.zeros(1000)
-    for i in range(len(damay_data)):
-        value = 0.2 * i - 1.6
-        damay_data_target[int(np.sum(damay_data[0:i])):int(np.sum(damay_data[0:i+1]))] = value
-    damay_data_target[int(np.sum(damay_data)):] = 9999
 
     cosmo_data_target = cosmo_data['lnGamma_exp'].to_numpy(dtype=np.float64)
     cosmo_data_prediction = cosmo_data['lnGamma'].to_numpy(dtype=np.float64)
@@ -232,6 +216,25 @@ if __name__ == '__main__':
 
     # find common i's
     i_common = i_UNIFAC.intersection(i_val_0).intersection(i_val_1).intersection(i_val_2).intersection(i_cosmo).intersection(i_cosmo_sac)
+
+    damay_data = pd.read_csv(path_temp + 'data_Damay_et.al.csv', sep=';')
+    #here we have to fake the Damay data with the same format as the COSMO data
+    damay_data = damay_data.to_numpy()
+    damay_data = damay_data * len(i_common)
+    damay_data_target = np.zeros(len(i_common))
+    damay_data_prediction = np.zeros(len(i_common))
+    damay_points = [[0],[0]]
+    for i in range(len(damay_data)):
+        value = 0.2 * i - 1.6
+        damay_data_target[int(np.sum(damay_data[0:i])):int(np.sum(damay_data[0:i+1]))] = np.round(value,1)
+    damay_data_target[int(np.sum(damay_data)):] = 9999
+    
+    damay_temp = np.sort(np.abs(damay_data_target))
+    for i in range(1,len(damay_temp)):
+        if damay_temp[i-1] != damay_temp[i]:
+            damay_points[0].append(i)
+            damay_points[1].append(damay_temp[i]-0.1)
+
 
     # filter data
     cosmo_data_target = cosmo_data[cosmo_data['i'].isin(i_common)]['lnGamma_exp'].to_numpy(dtype=np.float64)
@@ -292,8 +295,17 @@ if __name__ == '__main__':
     target_list = [cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
 
 
-    color_list = ['lightcoral', 'brown', 'lightgreen','lightsteelblue', 'cornflowerblue', 'royalblue']
-    name_list = ['COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
+    color_list = ['lightcoral', 'brown', 'darkorange','lightsteelblue', 'cornflowerblue', 'royalblue']
+    name_list = ['COSMO-RS$_\mathrm{TZVDP-F}$', 'UNIFAC$_\mathrm{Dortmund}$', '\emph{Damay et al. 2021}','SMILE2P$_\mathrm{val_{ext}}$', 'SMILE2P$_{val_{edge}}$', 'SMILE2P$_{val_{int}}$']
+    line_style = ['-', '-', '--', '-', '-', '-']
 
     pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False, color_list = color_list)
-    pr.plot_err_curve_mult(prediction_list, target_list, name_list, name = '', path = plot_path, save=True)
+
+    prediction_list = [cosmo_data_prediction, UNIFAC_data_prediction, val_predction_0, val_predction_1, val_predction_2]
+    target_list = [cosmo_data_target, UNIFAC_data_target,val_target_0, val_target_1, val_target_2]
+
+    color_list = ['lightcoral', 'brown','lightsteelblue', 'cornflowerblue', 'royalblue']
+    name_list = ['COSMO-RS$_\mathrm{TZVDP-F}$', 'UNIFAC$_\mathrm{Dortmund}$','$val_\mathrm{ext}$', '$val_\mathrm{edge}$', '$val_\mathrm{int}$']
+    line_style = ['-', '-', '-', '-', '-', '-']
+
+    pr.plot_err_curve_mult(prediction_list, target_list, name_list, color_list, line_style, damay_points, name = 'paper', path = plot_path, save=True)

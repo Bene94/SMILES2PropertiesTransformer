@@ -19,9 +19,9 @@ from transprop.nn_dataloader import *
 @click.command()
 
 @click.option('--name','-n', default='211220-192228', help='Name of the modle')
-@click.option('--data','-d', default='data_exp', help='Path to the data if empty use datapath from modle config')
+@click.option('--data','-d', default='data', help='Path to the data if empty use datapath from modle config')
 
-@click.option('--calc','-c', default=True, help='Calculate results and eval')
+@click.option('--calc','-c', default=False, help='Calculate results and eval')
 @click.option('--plot','-p', default=True, help='Plot results')
 @click.option('--save','-s', default=True, help='Save results')
 
@@ -90,7 +90,6 @@ def main(name,data,calc,plot,save):
         print("Validation loss: ", val_1_loss)
         print("Validation loss: ", val_2_loss)
 
-
         if save:
             # check if save path exists
             if not os.path.exists(save_path):
@@ -138,10 +137,10 @@ def main(name,data,calc,plot,save):
         make_MSE_x(val_1_out, val_1_target, name = "val_1", save = True, path=plot_path)
         make_MSE_x(val_2_out, val_2_target, name = "val_2", save = True, path=plot_path)
 
-        make_heatmap(train_out, train_target, name = "train", save = True, path=plot_path)
-        make_heatmap(val_0_out, val_0_target, name = "val_0", save = True, path=plot_path)
-        make_heatmap(val_1_out, val_1_target, name = "val_1", save = True, path=plot_path)
-        make_heatmap(val_2_out, val_2_target, name = "val_2", save = True, path=plot_path)
+        make_heatmap(train_out, train_target, name = "train", title='$val_\mathrm{train}$', save = True, path=plot_path)
+        make_heatmap(val_0_out, val_0_target, name = "val_0", title='$val_\mathrm{ext}$', save = True, path=plot_path)
+        make_heatmap(val_1_out, val_1_target, name = "val_1", title='$val_\mathrm{edge}$', save = True, path=plot_path)
+        make_heatmap(val_2_out, val_2_target, name = "val_2", title='$val_\mathrm{int}$', save = True, path=plot_path)
 
         make_historgam_delta(train_out, train_target, name = "train", save = True, path=plot_path)
         make_historgam_delta(val_0_out, val_0_target, name = "val_0", save = True, path=plot_path)
@@ -152,10 +151,10 @@ def main(name,data,calc,plot,save):
             print('-' * 89)
             print('Make Scatter...')
             print('-' * 89)
-            train_out = np.concatenate((train_out, val_1_out, val_2_out), axis=0)
-            train_target = np.concatenate((train_target, val_1_target, val_2_target), axis=0)
+            train_out = np.concatenate((train_out, val_0_out, val_1_out, val_2_out), axis=0)
+            train_target = np.concatenate((train_target, val_0_target, val_1_target, val_2_target), axis=0)
             
-            make_scatter(train_out, train_target, name = "train", save = True, path=plot_path)
+            make_scatter(train_out, train_target, name = "train", title="$pretrained$",save = True, path=plot_path)
 
 if __name__ == '__main__':
     main()
