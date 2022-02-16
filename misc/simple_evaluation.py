@@ -31,7 +31,7 @@ solute = "C=O"
 solute = "CCC"
 T = 298.15
 
-x = np.linspace(0, 1, num=200)
+x = np.linspace(0, 1, num=10000)
 T = np.linspace(T, T, 1)
 
 # %% Load model

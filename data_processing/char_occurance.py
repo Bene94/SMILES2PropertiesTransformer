@@ -33,7 +33,7 @@ def load_data(file_path, val_type):
     return target_list, prediction_list, mse_list, input_list
 
 file_path = ["brouwer_exp_c"]
-#file_path = ["t_cosmo"]
+file_path = ["inf_cosmo"]
 vocab_path = "vocab"
 path_temp = '/home/bene/NNGamma/out_fine_tune/'
 plot_path = '/home/bene/NNGamma/src/plot/'
@@ -73,6 +73,17 @@ plt.bar(np.arange(len(vocab_dict)), solute_count, color='r', label='solute')
 plt.xticks(np.arange(len(vocab_dict)), list(vocab_dict.keys()))
 plt.legend()
 plt.show()
+# print the occurence of each char in the solvents and solutes in a table
+print('\n')
+print('Solvent')
+print(pd.DataFrame(list(vocab_dict.keys()), columns=['char']))
+print(pd.DataFrame(solvent_count, columns=['count']))
+print('\n')
+print('Solute')
+print(pd.DataFrame(list(vocab_dict.keys()), columns=['char']))
+print(pd.DataFrame(solute_count, columns=['count']))
+print('\n')
+
 
 # save the figure
 plt.savefig('char_occurance.png')
@@ -97,8 +108,8 @@ val_predction_2 = np.concatenate(val_predction_2)
 
 # match smiles in systems and input
 results = pd.DataFrame(columns=['solvent', 'solute', 'mse'])
-bar = pb.ProgressBar(max_value=len(val_input_0), widgets=['Gathering Results', pb.Bar('=', '[', ']'), ' ', pb.Percentage(), pb.ETA()])
-
+bar = pb.ProgressBar(maxval=len(val_input_0), widgets=['Gathering Results', pb.Bar('=', '[', ']'), ' ', pb.Percentage(), pb.ETA()])
+bar.start()
 for i, inpt in enumerate(val_input_0):
     bar.update(i)
     solvent = df_join.solvent[df_join.i == inpt].values[0]
@@ -111,13 +122,15 @@ bar.finish()
 
 error = [[] for _ in range(len(vocab_dict))]
 
-bar = pb.ProgressBar(max_value=len(results), widgets=['Gathering Errors', pb.Bar('=', '[', ']'), ' ', pb.Percentage(), pb.ETA()])
+bar = pb.ProgressBar(maxval=len(results), widgets=['Gathering Errors', pb.Bar('=', '[', ']'), ' ', pb.Percentage(), pb.ETA()])
+bar.start()
 for i in range(len(results)):
     for j in range(len(vocab_dict)):
         if list(vocab_dict.keys())[j] in results.solvent[i] or list(vocab_dict.keys())[j] in results.solute[i]: 
             error[j].append(results.mse[i])
 
 mean_error = [np.mean(error[i]) for i in range(len(vocab_dict))]
+
 
 # plot the error for each char 
 
