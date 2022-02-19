@@ -23,7 +23,7 @@ class gamma_dataset(Dataset):
 
     def load_comp_list(self, comp_list_file):
          
-        comp_list = pd.read_csv(self.data_path + 'comp_list.csv')
+        comp_list = pd.read_csv(self.data_path + self.data_type + '_comp_list.csv')
         n_emb = int((comp_list.shape[1]-1) / 2)
         emb_list = np.empty((comp_list.shape[0],n_emb), dtype=object)
 
@@ -45,7 +45,7 @@ class gamma_dataset(Dataset):
         li = []
         for filename in files:
             #bar.update(i)
-            if filename.startswith(self.data_type) and not filename.startswith("comp_list"):
+            if filename.startswith(self.data_type) and not filename.endswith("comp_list.csv"):
                 df = pd.read_csv(os.path.join(self.data_path, filename), index_col=None, header=0)
                 li.append(df)
 
@@ -59,15 +59,15 @@ class gamma_dataset(Dataset):
         if test:
             data = data.iloc[0:500,:]
 
-        # check if collum lnGamma exists
-        if 'lnGamma' in data.columns:
-            target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
-        else: 
-            # concatenate lnGamma_1 and lnGamma_2 with width 2 
-            target = torch.from_numpy(np.stack((data["lnGamma_1"].to_numpy(), data["lnGamma_2"].to_numpy()), axis=1)).float()
+        # if x and T do not exist add them to the dataframe
+        if "x" not in data.columns:
+           data["x"] = np.zeros(data.shape[0])
+        if "T" not in data.columns:
+           data["T"] = np.ones(data.shape[0]) * 298.15
+         
 
-        
-        smile_index = torch.from_numpy(data[["solute_idx","solvent_idx"]].to_numpy()).int()
+        target = torch.from_numpy(data[data.columns[data.columns.str.startswith('y')]].to_numpy()).float()      
+        smile_index = torch.from_numpy(data[data.columns[data.columns.str.startswith('SMILES')]].to_numpy()).int()
         xT = torch.from_numpy(data[["x","T"]].to_numpy()).float()
         index = torch.from_numpy(data["i"].to_numpy()).int()
 
@@ -87,20 +87,22 @@ class gamma_dataset(Dataset):
 
         comp_list = self.comp_list
 
-        SMILE1 = int(self.data["solute_idx"][index])
-        SMILE2 = int(self.data["solvent_idx"][index])
-
-        if self.aug:
-            rand1 = np.random.randint(0,int(self.n_alias[SMILE1]))
-            rand2 = np.random.randint(0,int(self.n_alias[SMILE2]))
-        else :
-            rand1 = 0
-            rand2 = 0
-
-        seq = np.concatenate([sos,comp_list[SMILE1,rand1], mos, comp_list[SMILE2,rand2], eos])
+        smile_list = []
+        for col in self.data.columns:
+            if col.startswith('SMILES'):
+                smile_list.append(self.data[col][index])
         
-        if len(seq) > 128:
-            seq = np.concatenate([sos,comp_list[SMILE1,0], mos, comp_list[SMILE2,0], eos])
+        if self.aug:
+            rand_list = [ np.random.randint(0,int(self.n_alias[i])) for i in smile_list]
+        else :
+            rand_list = np.zeros(int(self.n_alias[index]), dtype=np.int)
+    
+        # midel section 
+        if len(smile_list) > 1:
+            mid = np.concatenate([ np.concatenate(mos , self.comp_list[smile, rand]) for smile, rand in zip(smile_list[1:] , rand_list[1:])])
+        else:
+            mid = []
+        seq = np.concatenate([sos, comp_list[smile_list[0], rand_list[0]], mid, eos])
         seq = seq[:128]
         train_data[0:len(seq)] = seq
 

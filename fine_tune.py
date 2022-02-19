@@ -21,17 +21,17 @@ from plot.plot_results import *
 @click.command()
 
 @click.option('--model_name', default='220127-180116', help='Name of the model')
-@click.option('--data_path', default='exp_D', help='Path to the data')
+@click.option('--data_path', default='deepchem/tox21', help='Path to the data')
 
 @click.option('--batch_size', default=16, help='Batch size')
 @click.option('--epochs', default=10, help='Number of epochs')
 @click.option('--lr', default=1e-4, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
-@click.option('--cuda', default=1, help='Use cuda')
+@click.option('--cuda', default=0, help='Use cuda')
 @click.option('--local', default=True, help='Use local')
 
-@click.option('--one_out', default=True, help='Use leave one out validation')
+@click.option('--one_out', default=False, help='Use leave one out validation')
 
 
 def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local, one_out):
@@ -50,6 +50,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
         path_model = '../Models/'
         path_wandb = '../wandb/'
         xp_name = "local_test"
+        data_path = '../data/' + data_path + '/'
 
     if cuda == 1:
         device = 'cuda'
@@ -57,7 +58,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
         device = 'cpu'
     
     model, config = load_model(path_model,model_name)
-    model = model.to(config.device)
+    model = model.to(device)
 
     # overide old config
     config.data_path = data_path
@@ -69,11 +70,21 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     config.local = local
     config.xp_name = xp_name
 
-    wandb.init(project='GNN_D_FT', entity='bene94', name=name, config=config)
+    wandb.init(project='DeepChem', entity='bene94', name=name, config=config)
     wandb.watch(model)
 
     ## set up scheduler
-    criterion = nn.MSELoss()
+
+    # change the head of the model
+    dataset = 'tox21'
+
+    if dataset == 'tox21':
+        num_classes = 12
+        model.head = nn.Linear(in_features=512, out_features=num_classes, device=device)
+        model.tok_emb = torch.cat((model.tok_emb, torch.zeros(1, 20, device=device)), dim=0)
+         
+
+    criterion = torch.nn.BCEWithLogitsLoss()
 
     optimizer = model.configure_optimizers(config)
 
@@ -98,12 +109,12 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
         val_target_array = np.zeros((outer_loop,config.epoch))
     
     else:
-        training_data = load_data_full(config,local,test=False)
-        val_data = training_data
+        train_dataset = gamma_dataset(data_path, 'train', config)
+        training_data = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
+        val_dataset = gamma_dataset(data_path, 'test', config)
+        val_data = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, num_workers=0)
         val_dataloader_list = [val_data]
         outer_loop = 1
-        
-    
 
     for i in range(0,outer_loop):
         

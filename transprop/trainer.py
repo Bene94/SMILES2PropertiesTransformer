@@ -62,7 +62,6 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
             xt[:,0] = xt[:,0] - 0.5
             xt[:,1] = xt[:,1] / 298.5 -1.
 
-
             smile = smile.type(torch.IntTensor)
 
             target = target.to(wandb.config.device)
@@ -71,25 +70,27 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 
             src_padding_mask = (smile != wandb.config.padding_idx).transpose(0, 1)
 
-            with autocast(True):
+            with autocast(False):
                 #xt = xt.type(torch.half)
-                output = model(smile, xt) 
+                output = model(smile, xt)
                 loss = criterion(output.squeeze(), target.squeeze())
                 loss = loss / len(target_chunks)
 
-            scaler.scale(loss).backward()  
-            log_scale = torch.log2(scaler._scale)      
+            loss.backward()
+            #scaler.scale(loss).backward()  
+            #log_scale = torch.log2(scaler._scale)      
             log_loss += loss.item()
         
-        scaler.unscale_(optimizer)
+        #scaler.unscale_(optimizer)
         if wandb.config.mode == 'NRTL' or wandb.config.mode == 'NRTL-T':
             #torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
             grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
         else:
             grad_norm = 0
 
-        scaler.step(optimizer)
-        scaler.update()
+        optimizer.step()
+        #scaler.step(optimizer)
+        #scaler.update()
         scheduler.step()
 
         ##Loss logging and display
@@ -105,7 +106,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         wandb.log({"epoch": epoch})
         wandb.log({"n_tokens": total_tokens})
         wandb.log({"compute": total_compute})
-        wandb.log({"loss scale": log_scale})
+        #wandb.log({"loss scale": log_scale})
       
         if i % log_interval == 0 and i > 0:
             cur_loss = total_loss / log_interval

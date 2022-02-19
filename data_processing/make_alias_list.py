@@ -13,11 +13,11 @@ import data_processing as dp
 
 def main():
     file_path = '../raw_data/'
-    folder_names = ['t_cosmo', 'brouwer_exp_c', 'brouwer_exp'] 
-    df, complete_list, solvent_indx, solute_indx = dp.load_exp_data(file_path, folder_names)
+    folder_names = ['deepchem/tox21/train', 'deepchem/tox21/valid', 'deepchem/tox21/test'] 
+    df, complete_list, __ = dp.load_exp_data(file_path, folder_names)
 
     alias_dict = augment_smile(complete_list.SMILE0.to_list())
-    np.save('../raw_data/alias/alias_dict_brouwer.npy', alias_dict)
+    np.save('../raw_data/alias/alias_dict_tox21.npy', alias_dict)
 
 
 
