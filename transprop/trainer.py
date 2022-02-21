@@ -52,6 +52,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         xt_chunks = torch.split(xt,chunk_size)
 
         log_loss = 0.
+        loss = 0.
 
         for j in range(len(target_chunks)):
             
@@ -73,13 +74,16 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
             with autocast(False):
                 #xt = xt.type(torch.half)
                 output = model(smile, xt)
-                loss = criterion(output.squeeze(), target.squeeze())
-                loss = loss / len(target_chunks)
+                # prepare loss for the tox 21 benchmark
+                target = torch.cat([target,torch.ones(target.shape, device=config.device) - target],dim=1)
+                for cat in range(12):
+                    temp_target = target[:,(cat, cat + 12)]
+                    temp = criterion(output[:,cat*2:cat*2+2].squeeze(), temp_target)
+                    loss += temp / len(target_chunks) / 12
 
-            loss.backward()
-            #scaler.scale(loss).backward()  
-            #log_scale = torch.log2(scaler._scale)      
-            log_loss += loss.item()
+        scaler.scale(loss).backward()  
+        log_scale = torch.log2(scaler._scale)      
+        log_loss += loss.item()
         
         #scaler.unscale_(optimizer)
         if wandb.config.mode == 'NRTL' or wandb.config.mode == 'NRTL-T':
@@ -88,10 +92,8 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         else:
             grad_norm = 0
 
-        optimizer.step()
-        #scaler.step(optimizer)
-        #scaler.update()
-        scheduler.step()
+        scaler.step(optimizer)
+        scaler.update()
 
         ##Loss logging and display
 
@@ -106,7 +108,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         wandb.log({"epoch": epoch})
         wandb.log({"n_tokens": total_tokens})
         wandb.log({"compute": total_compute})
-        #wandb.log({"loss scale": log_scale})
+        wandb.log({"loss scale": log_scale})
       
         if i % log_interval == 0 and i > 0:
             cur_loss = total_loss / log_interval
@@ -152,8 +154,13 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
                         xt = xt.to(wandb.config.device)
                         
                         output = model(smile, xt)
-
-                        val_loss += criterion(output.squeeze(), target.squeeze()).item()/len(target_chunks)
+                        target = torch.cat([target,torch.ones(target.shape, device=config.device) - target],dim=1)
+                        for cat in range(12):
+                            temp_target = target[:,(cat, cat + 12)]
+                            temp_loss = criterion(output[:,cat*2:cat*2+2].squeeze(), temp_target)
+                            temp_loss = temp_loss / len(target_chunks) / 12
+                            
+                            val_loss += temp_loss
                     
                     val_log_name = 'val_' + str(h) + '_loss'
                     wandb.log({val_log_name : val_loss})
@@ -169,57 +176,53 @@ def evaluate(eval_model, val_dataloader, criterion, config):
     total_index = np.empty((0))
 
     with torch.no_grad():
-
             # incude progress bar
+        for i, batch in enumerate(val_dataloader):
 
-            for i, batch in enumerate(val_dataloader):
+            target_batch, data_batch = batch[0], batch[1]
+            smile = data_batch[0]
+            xt = data_batch[1]
+            smile_indx = data_batch[2]
+            index = data_batch[3]
 
-                target_batch, data_batch = batch[0], batch[1]
-                smile = data_batch[0]
-                xt = data_batch[1]
-                smile_indx = data_batch[2]
-                index = data_batch[3]
+            
+            target_chunks = torch.split(target_batch,chunk_size)
+            smile_chunks = torch.split(smile,chunk_size)
+            xt_chunks = torch.split(xt,chunk_size)
+
+            smile_indx_chunks = torch.split(smile_indx,chunk_size)
+            idx_chunks = torch.split(index,chunk_size)
 
                 
-                target_chunks = torch.split(target_batch,chunk_size)
-                smile_chunks = torch.split(smile,chunk_size)
-                xt_chunks = torch.split(xt,chunk_size)
+            for j in range(len(target_chunks)):
+        
+                target = target_chunks[j]
+                smile = smile_chunks[j]
+                xt = xt_chunks[j]
 
-                smile_indx_chunks = torch.split(smile_indx,chunk_size)
-                idx_chunks = torch.split(index,chunk_size)
+                xt[:,0] = xt[:,0] - 0.5
+                xt[:,1] = xt[:,1] / 298.5 -1.
 
-                    
-                for j in range(len(target_chunks)):
-            
-                    target = target_chunks[j]
-                    smile = smile_chunks[j]
-                    xt = xt_chunks[j]
+                smile = smile.type(torch.IntTensor)
 
-                    xt[:,0] = xt[:,0] - 0.5
-                    xt[:,1] = xt[:,1] / 298.5 -1.
-
-                    smile = smile.type(torch.IntTensor)
-
-                    target = target.to(config.device)
-                    smile = smile.to(config.device)
-                    xt = xt.to(config.device)
-                    
-                    if config.mode == 'reg':
-                        target = target.view((target.shape[0],1,1))
-                    else:
-                        target = target.type(torch.LongTensor).to(config.device)
-
-                    output = eval_model(smile, xt)
-
-
-
-                    total_loss += criterion(output.squeeze(), target.squeeze()).item()/len(target_chunks)
-                    
-                    total_output = np.append(total_output, output.cpu().numpy())
-                    total_target = np.append(total_target, target.cpu().numpy())
-                    total_xT = np.append(total_xT, xt.cpu().numpy(),axis=0)
-                    total_smile_idx = np.append(total_smile_idx, smile_indx_chunks[j].cpu().numpy(),axis=0)
-                    total_index = np.append(total_index, idx_chunks[j].cpu().numpy(),axis=0)
+                target = target.to(config.device)
+                smile = smile.to(config.device)
+                xt = xt.to(config.device)
+                
+                output = eval_model(smile, xt)
+                target = torch.cat([target,torch.ones(target.shape, device=config.device) - target],dim=1)
+                for cat in range(12):
+                    temp_target = target[:,(cat, cat + 12)]
+                    loss = criterion(output[:,cat*2:cat*2+2].squeeze(), temp_target)
+                    loss = loss / len(target_chunks) / 12
+                        
+                total_loss += loss
+                
+                total_output = np.append(total_output, output.cpu().numpy())
+                total_target = np.append(total_target, target.cpu().numpy())
+                total_xT = np.append(total_xT, xt.cpu().numpy(),axis=0)
+                #total_smile_idx = np.append(total_smile_idx, smile_indx_chunks[j].cpu().numpy(),axis=0)
+                total_index = np.append(total_index, idx_chunks[j].cpu().numpy(),axis=0)
 
     if len(total_output) == 0:
         return [], [], [], [[],[],[]]
