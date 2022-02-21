@@ -135,11 +135,12 @@ for i in range(0, len(input_list_f_aug_1)):
 
 # plot the mean mse for each n in a log log plot
 fig, ax = plt.subplots(1, 1)
+# use latex font
+plt.rc('text', usetex=True)
 ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_xlabel('n')
-ax.set_ylabel('loss')
-ax.set_title('Mean loss as funciton of training data')
+ax.set_ylabel('Average MSE')
 #mean_mse = [np.median(mse) for mse in mse_list_0]
 #mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0
 mse_ft_aug_0 = []
@@ -163,22 +164,28 @@ mean_mse_ft_aug_0 = [np.nanmean(mse) for mse in mse_ft_aug_0]
 mean_mse_ft_aug_1 = [np.nanmean(mse) for mse in mse_ft_aug_1]
 mean_mse_ft_aug_2 = [np.nanmean(mse) for mse in mse_ft_aug_2]
 
-ax.plot(n_list, mean_mse_ft_aug_2, label='ft aug 2', linestyle='', marker='v', color='#1f77b4')
-ax.plot(n_list[0:cutoff_val_1], mean_mse_ft_aug_1[0:cutoff_val_1], label='ft aug 1', linestyle='', marker='*', color='#ff7f0e')
-ax.plot(n_list[0:cutoff_val_0], mean_mse_ft_aug_0[0:cutoff_val_0], label='ft aug 0', linestyle='', marker='o',  color='#2ca02c')
+ax.plot(n_list, mean_mse_ft_aug_2, label='$val_\mathrm{int}$', linestyle='', marker='v', color='#1f77b4')
+ax.plot(n_list[0:cutoff_val_1], mean_mse_ft_aug_1[0:cutoff_val_1], label='$val_\mathrm{edge}$', linestyle='', marker='*', color='#ff7f0e')
+ax.plot(n_list[0:cutoff_val_0], mean_mse_ft_aug_0[0:cutoff_val_0], label='$val_\mathrm{ext}$', linestyle='', marker='o',  color='#2ca02c')
 
 # calculate the upper and lower 95% confident intervall of the mean mse
 mse_ft_aug_0_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_aug_0])
 mse_ft_aug_1_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_aug_1])
 mse_ft_aug_2_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_aug_2])
 
-ax.fill_between(n_list, mse_ft_aug_2_ci[:,0], mse_ft_aug_2_ci[:,1], color='#1f77b4', alpha=0.2)
-ax.fill_between(n_list[0:cutoff_val_1], mse_ft_aug_1_ci[0:cutoff_val_1,0], mse_ft_aug_1_ci[0:cutoff_val_1,1], color='#ff7f0e', alpha=0.2)
-ax.fill_between(n_list[0:cutoff_val_0], mse_ft_aug_0_ci[0:cutoff_val_0,0], mse_ft_aug_0_ci[0:cutoff_val_0,1], color='#2ca02c', alpha=0.2)
+#ax.fill_between(n_list, mse_ft_aug_2_ci[:,0], mse_ft_aug_2_ci[:,1], color='#1f77b4', alpha=0.2)
+#ax.fill_between(n_list[0:cutoff_val_1], mse_ft_aug_1_ci[0:cutoff_val_1,0], mse_ft_aug_1_ci[0:cutoff_val_1,1], color='#ff7f0e', alpha=0.2)
+#ax.fill_between(n_list[0:cutoff_val_0], mse_ft_aug_0_ci[0:cutoff_val_0,0], mse_ft_aug_0_ci[0:cutoff_val_0,1], color='#2ca02c', alpha=0.2)
 
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=5)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=5)
 fig.tight_layout()
 plt.show()
+
+# add horizontal line at 0.35
+ax.axhline(y=0.35, color='k', linestyle='--', label='pre finetune')
+ax.axhline(y=0.04, color='#1f77b4', linestyle=':', label='limit $val_\mathrm{int}$', alpha=0.2)
+ax.axhline(y=0.08, color='#ff7f0e', linestyle=':', label='limit $val_\mathrm{edge}$', alpha=0.2)
+ax.axhline(y=0.13, color='#2ca02c', linestyle=':', label='limit $val_\mathrm{ext}$',  alpha=0.2)
 
 # fit a exponential regression into the data and plot it
 exp_fuc = lambda x, a, b: a * x**b
@@ -187,29 +194,24 @@ y = np.array(mean_mse_ft_aug_0)
 p0 = [1, -0.0001]
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
 x_fit = np.linspace(min(x), max(x), 200)
-ax.plot(x_fit, exp_fuc(x_fit, *popt), label='fit', linestyle='--',  color='#2ca02c')
+ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#2ca02c')
 # write the fit parameters into the plot next to the line
-ax.text(0.1, 0.35, 'val 0\na = %.4f\nb = %.4f' % tuple(popt), transform=ax.transAxes)
+ax.text(0.1, 0.35, '$val_\mathrm{ext}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 y = np.array(mean_mse_ft_aug_1)
 p0 = [1, -0.0001]
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
 x_fit = np.linspace(min(x), max(x), 200)
-ax.plot(x_fit, exp_fuc(x_fit, *popt), label='fit', linestyle='--',  color='#ff7f0e')
+ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#ff7f0e')
 # write the fit parameters into the plot
-ax.text(0.1, 0.2, 'val 1 \na = %.4f\nb = %.4f' % tuple(popt), transform=ax.transAxes)
+ax.text(0.1, 0.25, '$val_\mathrm{edge}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 y = np.array(mean_mse_ft_aug_2)
 p0 = [1, -0.0001] 
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
 x_fit = np.linspace(min(x), max(x), 200)
-ax.plot(x_fit, exp_fuc(x_fit, *popt), label='fit', linestyle='--',  color='#1f77b4')
+ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#1f77b4')
 # write the fit parameters into the plot
-ax.text(0.1, 0.05, 'val 2 \na = %.4f\nb = %.4f' % tuple(popt), transform=ax.transAxes)
+ax.text(0.1, 0.15, '$val_\mathrm{int}$ \na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 
-# add horizontal line at 0.35
-ax.axhline(y=0.35, color='k', linestyle='--', label='before fine tune')
-ax.axhline(y=0.13, color='k', linestyle='dashdot', label='after fine tune Val 0', c='0.85')
-ax.axhline(y=0.08, color='k', linestyle='dashdot', label='after fine tune Val 1', c='0.85')
-ax.axhline(y=0.04, color='k', linestyle='dashdot', label='after fine tune Val 2', c='0.85')
 
 # make y axis limit between 0.05 and 0.4 and make labeling not scientific
 ax.set_ylim(0.03, 0.4)
@@ -221,6 +223,6 @@ ax.legend(loc='upper right')
 # decrease ledgend size
 ax.legend(loc='upper right', prop={'size': 6})
 plt.show
-plt.savefig('plot/boxplot/mean_mse_val_0.png')
+plt.savefig('plot/boxplot/mean_mse_val_0.png', dpi=900)
 
 
