@@ -295,6 +295,7 @@ def plot_err_curve_mult(prediction_list, target_list, name_list, color_list, lin
     plt.xlabel('\# of samples')
     plt.ylabel(r"$\Delta$ ln $\gamma^\infty$")
     plt.yticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
+    plt.tight_layout()
     # plot horizontal line at 0.3
     plt.axhline(y=0.3, color='lightgrey', linestyle='--')
     if save:

@@ -309,3 +309,14 @@ if __name__ == '__main__':
     line_style = ['-', '-', '-', '-', '-', '-']
 
     pr.plot_err_curve_mult(prediction_list, target_list, name_list, color_list, line_style, damay_points, name = 'paper', path = plot_path, save=True)
+    
+
+    prediction_list = [cosmo_sac_data_prediction1, cosmo_sac_data_prediction3, cosmo_data_prediction, UNIFAC_data_prediction, val_predction_0, val_predction_1, val_predction_2]
+    target_list = [cosmo_sac_data_target, cosmo_sac_data_target, cosmo_data_target, UNIFAC_data_target, val_target_0, val_target_1, val_target_2]
+
+
+    color_list = ['lightcoral', 'indianred', 'brown', 'red', 'lightsteelblue', 'cornflowerblue', 'royalblue']
+    name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$','COSMO-RS$_\mathrm{TZVDP-F}$', 'UNIFAC$_\mathrm{Dortmund}$','$val_\mathrm{ext}$', '$val_\mathrm{edge}$', '$val_\mathrm{int}$']
+    line_style = ['-', '-', '-', '-', '-', '-', '-', '-']
+
+    pr.plot_err_curve_mult(prediction_list, target_list, name_list, color_list, line_style, damay_points, name = 'si', path = plot_path, save=True)
