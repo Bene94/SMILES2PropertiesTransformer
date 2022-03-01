@@ -7,22 +7,23 @@ now_str = now_str.replace(" ", "_")
 
 model = 'untrained_model'
 model = '211220-192228'
-model = '220129-105213'
+#model = '220129-105213'
 
 aug = 1 # 0: no aug, 1: aug
 lval_int = 0
-lval = 1
+lval = 10
 
-comand_s = 'xp run /home/bene/NNGamma/src/xprun_fine_mult.ron -p 3 --include-dirty' 
+comand_s = 'xp run /home/bene/NNGamma/src/xprun_fine_mult.ron -p 1 --include-dirty' 
 comand_e = ' -- -m ' + model + ' -l 1e-4 -x 200 '
 
 epo = int(50)
 now_str = now.strftime("%Y%m%d-%H%M%S")[2:]
 
 
-n_split = 1000
+n_split = 200
 
 path = 'data_exp_noH2O_' + str(n_split) + '_V2'
+path = 'data_sund' + str(n_split)
 
 save_path = 'f_t_'
 

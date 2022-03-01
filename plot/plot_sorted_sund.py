@@ -35,28 +35,17 @@ def load_data(file_path, val_type):
 
 if __name__ == '__main__':
 
-    name = '211209-214402'
-    name = '211214-125306' # model without aug
-    name = '211223-032657' # modle with aug
-    name = '211231-031659' # modle with leave n out no water 
-    name = 'f_t_211220-192228_220112-105727'
-    name = 'f_t_211220-192228_220114-185541' # V2 run
-    #name = 'f_t_211220-192228_220223-032428' # Sundmacher run
-    #name = 'f_t_220127-180116_220131-015826' # D Run
-    #name = 'f_t_220127-180116_220131-025308' # D Run 
-    #name = 'f_t_220129-105213_220131-075615' # new V2 run with new base model
+    name = 'f_t_211220-192228_220224-010259' # Sundmacher run
 
-    group = True 
+    group = True
     scatter = False 
 
-    comp_list_path = '/home/bene/NNGamma/data/data_exp_noH2O_1000/0/comp_list.csv'
-    comp_lsit_path = '/home/bene/NNGamma/data/data_exp_onlyH2O_1000_V2/0/comp_list.csv'
-    comp_list_path = '/home/bene/NNGamma/data/data_sund200/0/comp_list.csv'
+    comp_list_path = '/home/bene/NNGamma/data/data_sund_sund200/0/comp_list.csv'
     path_temp = '/home/bene/NNGamma/out_fine_tune/'
     plot_path = '/home/bene/NNGamma/src/plot/'
     data_path = path_temp + name + '/'
 
-    file_path = ["brouwer_exp_c"]
+    file_path = ["sund"]
     vocab_path = "vocab"
 
     type_list = ['0', '1', '2']
@@ -191,63 +180,73 @@ if __name__ == '__main__':
         print('no_h2o_val_2_fine done')
         print('scatter plots made')
   
+    
+        # load sundmacher data
+    n_e = 200
 
+    for i in range(n_e):
+        print(i)
+        df_val0 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Val0.csv')
+        df_val1 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Val1.csv')
+        df_val2 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Val2.csv')
 
-    # load cvs with data from COSMO
+        train = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Training.csv')
+        best_epoch_V0 = np.argmin(np.array(train['Valid_0_loss']))
+        best_epoch_V1 = np.argmin(np.array(train['Valid_1_loss']))
+        best_epoch_V2 = np.argmin(np.array(train['Valid_2_loss']))
 
+        best_epoch_V0 = 17
+        best_epoch_V1 = 17
+        best_epoch_V2 = 48
 
-    cosmo_data = pd.read_csv(path_temp + 'BROUWER-COSMO-OUT.csv', sep=';')
+        if i == 0:
+            df_val0_all = df_val0[['i','Literature',str(best_epoch_V0)]]
+            df_val1_all = df_val1[['i','Literature',str(best_epoch_V1)]]
+            df_val2_all = df_val2[['i','Literature',str(best_epoch_V2)]]
+            # rename best epoch to prediction
+            df_val0_all.rename(columns={str(best_epoch_V0):'Prediction'}, inplace=True)
+            df_val1_all.rename(columns={str(best_epoch_V1):'Prediction'}, inplace=True)
+            df_val2_all.rename(columns={str(best_epoch_V2):'Prediction'}, inplace=True)
+        else:
+
+            df_val0.rename(columns={str(best_epoch_V0):'Prediction'}, inplace=True)
+            df_val1.rename(columns={str(best_epoch_V1):'Prediction'}, inplace=True)
+            df_val2.rename(columns={str(best_epoch_V2):'Prediction'}, inplace=True)
+
+            df_val0_all = pd.concat([df_val0_all, df_val0[['i','Literature','Prediction']]], axis=0, ignore_index=True)
+            df_val1_all = pd.concat([df_val1_all, df_val1[['i','Literature','Prediction']]], axis=0, ignore_index=True)
+            df_val2_all = pd.concat([df_val2_all, df_val2[['i','Literature','Prediction']]], axis=0, ignore_index=True)
+            # rename best epoch to prediction
+
+    df_val0_all = df_val0_all.groupby(['i','Literature']).mean().reset_index()
+    df_val1_all = df_val1_all.groupby(['i','Literature']).mean().reset_index()
+    df_val2_all = df_val2_all.groupby(['i','Literature']).mean().reset_index()
+
+    IAC_data = pd.read_csv('~/GNN_IAC/Data/database_IAC_ln_clean.csv')
+
+    cosmo_data = IAC_data[['Literature','COSMO_RS']]
     cosmo_data = cosmo_data.dropna()
 
-    cosmo_sac_data = pd.read_csv(path_temp + 'COSMO-SAC.csv', sep=';')
-    cosmo_sac_data = cosmo_sac_data.dropna()
+    unifac_data = IAC_data[['Literature','mod_UNIFAC_Do']]
+    unifac_data = unifac_data.dropna()
 
-    UNIFAC_data = pd.read_csv(path_temp + 'UNIFAC_out.csv', sep=';')
-    UNIFAC_data = UNIFAC_data.dropna()
+    cosmo_data_target = cosmo_data['Literature'].to_numpy(dtype=np.float64)
+    cosmo_data_prediction = cosmo_data['COSMO_RS'].to_numpy(dtype=np.float64)
 
-    cosmo_data_target = cosmo_data['lnGamma_exp'].to_numpy(dtype=np.float64)
-    cosmo_data_prediction = cosmo_data['lnGamma'].to_numpy(dtype=np.float64)
-    pr.make_scatter(cosmo_data_prediction, cosmo_data_target, name = 'cosmo', path = plot_path, save=True)
+    unifac_data_target = unifac_data['Literature'].to_numpy(dtype=np.float64)
+    unifac_data_prediction = unifac_data['mod_UNIFAC_Do'].to_numpy(dtype=np.float64)
 
     i_val_0 = set(val_0['input'].to_numpy())
     i_val_1 = set(val_1['input'].to_numpy())
     i_val_2 = set(val_2['input'].to_numpy())
-    i_cosmo = set(cosmo_data['i'].to_numpy())
-    i_cosmo_sac = set(cosmo_sac_data['i'].to_numpy())
-    i_UNIFAC = set(UNIFAC_data['i'].to_numpy())
+    i_s_val_0 = set(df_val0_all['i'].to_numpy())
+    i_s_val_1 = set(df_val1_all['i'].to_numpy())
+    i_s_val_2 = set(df_val2_all['i'].to_numpy())
+    i_cosmo = set(cosmo_data.index)
+    i_UNIFAC = set(unifac_data.index)
 
-    # find common i's
-    i_common = i_UNIFAC.intersection(i_val_0).intersection(i_val_1).intersection(i_val_2).intersection(i_cosmo).intersection(i_cosmo_sac)
-
-    damay_data = pd.read_csv(path_temp + 'data_Damay_et.al.csv', sep=';')
-    #here we have to fake the Damay data with the same format as the COSMO data
-    damay_data = damay_data.to_numpy()
-    damay_data = damay_data * len(i_common)
-    damay_data_target = np.zeros(len(i_common))
-    damay_data_prediction = np.zeros(len(i_common))
-    damay_points = [[0],[0]]
-    for i in range(len(damay_data)):
-        value = 0.2 * i - 1.6
-        damay_data_target[int(np.sum(damay_data[0:i])):int(np.sum(damay_data[0:i+1]))] = np.round(value,1)
-    damay_data_target[int(np.sum(damay_data)):] = 9999
-    
-    damay_temp = np.sort(np.abs(damay_data_target))
-    for i in range(1,len(damay_temp)):
-        if damay_temp[i-1] != damay_temp[i]:
-            damay_points[0].append(i)
-            damay_points[1].append(damay_temp[i]-0.1)
-
-
-    # filter data
-    cosmo_data_target = cosmo_data[cosmo_data['i'].isin(i_common)]['lnGamma_exp'].to_numpy(dtype=np.float64)
-    cosmo_data_prediction = cosmo_data[cosmo_data['i'].isin(i_common)]['lnGamma'].to_numpy(dtype=np.float64)
-    
-    UNIFAC_data_target = UNIFAC_data[UNIFAC_data['i'].isin(i_common)]['lnGamma_exp'].to_numpy(dtype=np.float64)
-    UNIFAC_data_prediction = UNIFAC_data[UNIFAC_data['i'].isin(i_common)]['lnGamma_UNIFAC'].to_numpy(dtype=np.float64)
-
-    cosmo_sac_data_target = cosmo_sac_data[cosmo_sac_data['i'].isin(i_common)]['lnGamma_exp'].to_numpy(dtype=np.float64)
-    cosmo_sac_data_prediction1 = cosmo_sac_data[cosmo_sac_data['i'].isin(i_common)]['lnGamma_SAC'].to_numpy(dtype=np.float64)
-    cosmo_sac_data_prediction3 = cosmo_sac_data[cosmo_sac_data['i'].isin(i_common)]['lnGamma_SAC3'].to_numpy(dtype=np.float64)
+    i_common = i_val_0.intersection(i_val_1).intersection(i_val_2).intersection(i_s_val_0).intersection(i_s_val_1).intersection(i_s_val_2).intersection(i_cosmo).intersection(i_UNIFAC)
+    i_common = np.array(list(i_common), dtype=np.int64)
 
     val_predction_0 = val_0[val_0['input'].isin(i_common)]['prediction'].to_numpy(dtype=np.float64)
     val_predction_1 = val_1[val_1['input'].isin(i_common)]['prediction'].to_numpy(dtype=np.float64)
@@ -256,69 +255,55 @@ if __name__ == '__main__':
     val_target_0 = val_0[val_0['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
     val_target_1 = val_1[val_1['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
     val_target_2 = val_2[val_2['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
-    
-    print('data filtered')
-    print('length cosmo_data_prediction: ' + str(len(cosmo_data_prediction)))
-    print('length cosmo_sac_data_prediction1: ' + str(len(cosmo_sac_data_prediction1)))
-    print('length cosmo_sac_data_prediction3: ' + str(len(cosmo_sac_data_prediction3)))
-    print('length val_predction_0: ' + str(len(val_predction_0)))
-    print('length val_predction_1: ' + str(len(val_predction_1)))
-    print('length val_predction_2: ' + str(len(val_predction_2)))
 
-    print('MSE of COSMO SAC2002: ' + str(np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction1)**2)))
-    print('MSE of COSMO SACdsp: ' + str(np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction3)**2)))
-    print('MSE of COSMO: ' + str(np.mean((cosmo_data_target - cosmo_data_prediction)**2)))
-    print('MSE of UNIFAC: ' + str(np.mean((UNIFAC_data_target - UNIFAC_data_prediction)**2)))
-    print('MSE of Damay: ' + str(np.mean((damay_data_target - damay_data_prediction)**2)))
+    sund_pred_0 = df_val0_all[df_val0_all['i'].isin(i_common)]['Prediction'].to_numpy(dtype=np.float64)
+    sund_pred_1 = df_val1_all[df_val1_all['i'].isin(i_common)]['Prediction'].to_numpy(dtype=np.float64)
+    sund_pred_2 = df_val2_all[df_val2_all['i'].isin(i_common)]['Prediction'].to_numpy(dtype=np.float64)
 
-    print('MSE of VAL_0: ' + str(np.mean((val_target_0 - val_predction_0)**2)))
-    print('MSE of VAL_1: ' + str(np.mean((val_target_1 - val_predction_1)**2)))
-    print('MSE of VAL_2: ' + str(np.mean((val_target_2 - val_predction_2)**2)))
-    # calcualte the mean absolute error
-    print('MEA of COSMO SAC2002: ' + str(np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction1))))
-    print('MEA of COSMO SACdsp: ' + str(np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction3))))
-    print('MEA of COSMO: ' + str(np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))))
-    print('MEA of UNIFAC: ' + str(np.mean(np.abs(UNIFAC_data_target - UNIFAC_data_prediction))))
-    print('MEA of Damay: ' + str(np.mean(np.abs(damay_data_target - damay_data_prediction))))
+    sund_target_0 = df_val0_all[df_val0_all['i'].isin(i_common)]['Literature'].to_numpy(dtype=np.float64)
+    sund_target_1 = df_val1_all[df_val1_all['i'].isin(i_common)]['Literature'].to_numpy(dtype=np.float64)
+    sund_target_2 = df_val2_all[df_val2_all['i'].isin(i_common)]['Literature'].to_numpy(dtype=np.float64)
 
-    print('MEA of VAL_0: ' + str(np.mean(np.abs(val_target_0 - val_predction_0))))
-    print('MEA of VAL_1: ' + str(np.mean(np.abs(val_target_1 - val_predction_1))))
-    print('MEA of VAL_2: ' + str(np.mean(np.abs(val_target_2 - val_predction_2))))
-    
+    unifac_data_target = unifac_data.loc[i_common]['Literature'].to_numpy(dtype=np.float64)
+    unifac_data_prediction = unifac_data.loc[i_common]['mod_UNIFAC_Do'].to_numpy(dtype=np.float64)
 
-    
-    #color_list = ['lightcoral', 'indianred', 'brown', 'red', 'coral','lightsteelblue', 'cornflowerblue', 'royalblue']
-    #name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$', 'COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
-    
-#    prediction_list = [cosmo_sac_data_prediction1, cosmo_sac_data_prediction3, cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
-#   target_list = [cosmo_sac_data_target, cosmo_sac_data_target, cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
+    cosmo_data_target = cosmo_data.loc[i_common]['Literature'].to_numpy(dtype=np.float64)
+    cosmo_data_prediction = cosmo_data.loc[i_common]['COSMO_RS'].to_numpy(dtype=np.float64)
 
-    prediction_list = [cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
-    target_list = [cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
+    # print MSE und MEA for sundmacher und val cosmo data
+    print('MSE for sundmacher:')
+    print('Val0:', np.mean((sund_target_0 - sund_pred_0)**2))
+    print('Val1:', np.mean((sund_target_1 - sund_pred_1)**2))
+    print('Val2:', np.mean((sund_target_2 - sund_pred_2)**2))
+    print('MSE for Winter:')
+    print('Val0:', np.mean((val_predction_0 - val_target_0)**2))
+    print('Val1:', np.mean((val_predction_1 - val_target_1)**2))
+    print('Val2:', np.mean((val_predction_2 - val_target_2)**2))
+    print('MSE for cosmo data:')
+    print('Val0:', np.mean((cosmo_data_target - cosmo_data_prediction)**2))
+    print('MSE for unifac data:')
+    print('Val0:', np.mean((unifac_data_target - unifac_data_prediction)**2))
+    print('MEA for sundmacher:')
+    print('Val0:', np.mean(np.abs(sund_target_0 - sund_pred_0)))
+    print('Val1:', np.mean(np.abs(sund_target_1 - sund_pred_1)))
+    print('Val2:', np.mean(np.abs(sund_target_2 - sund_pred_2)))
+    print('MEA for Winter:')
+    print('Val0:', np.mean(np.abs(val_target_0 - val_predction_0)))
+    print('Val1:', np.mean(np.abs(val_target_1 - val_predction_1)))
+    print('Val2:', np.mean(np.abs(val_target_2 - val_predction_2)))
+    print('MEA for cosmo data:')
+    print('Val0:', np.mean(np.abs(cosmo_data_target - cosmo_data_prediction)))
+    print('MEA for unifac data:')
+    print('Val0:', np.mean(np.abs(unifac_data_target - unifac_data_prediction)))
 
-
-    color_list = ['lightcoral', 'brown', 'darkorange','lightsteelblue', 'cornflowerblue', 'royalblue']
-    name_list = ['COSMO-RS', 'UNIFAC$_\mathrm{D}$', '\emph{Damay et al. 2021}','SPT$_\mathrm{ext}$', 'SMILE2P$_{edge}$', 'SMILE2P$_{int}$']
-    line_style = ['-', '-', '--', '-', '-', '-']
-
-    pr.make_historgam_delta_mult(prediction_list, target_list, name_list, path = plot_path, save=False, color_list = color_list)
-
-    prediction_list = [cosmo_data_prediction, UNIFAC_data_prediction, val_predction_0, val_predction_1, val_predction_2]
-    target_list = [cosmo_data_target, UNIFAC_data_target,val_target_0, val_target_1, val_target_2]
-
-    color_list = ['lightcoral', 'brown','lightsteelblue', 'cornflowerblue', 'royalblue']
-    name_list = ['COSMO-RS', 'UNIFAC$_\mathrm{D}$','SPT$_\mathrm{ext}$', 'SPT$_\mathrm{edge}$', 'SPT$_\mathrm{int}$']
-    line_style = ['-', '-', '-', '-', '-', '-']
-
-    pr.plot_err_curve_mult(prediction_list, target_list, name_list, color_list, line_style, damay_points, name = 'paper', path = plot_path, save=True)
-    
-
-    prediction_list = [cosmo_sac_data_prediction1, cosmo_sac_data_prediction3, cosmo_data_prediction, UNIFAC_data_prediction, val_predction_0, val_predction_1, val_predction_2]
-    target_list = [cosmo_sac_data_target, cosmo_sac_data_target, cosmo_data_target, UNIFAC_data_target, val_target_0, val_target_1, val_target_2]
+    # load cvs with data from COSMO
+    prediction_list = [cosmo_data_target, unifac_data_target, sund_pred_0, sund_pred_1, sund_pred_2, val_predction_0, val_predction_1, val_predction_2]
+    target_list = [cosmo_data_prediction, unifac_data_prediction, sund_target_0, sund_target_1, sund_target_2, val_target_0, val_target_1, val_target_2]
 
 
-    color_list = ['lightcoral', 'indianred', 'brown', 'red', 'lightsteelblue', 'cornflowerblue', 'royalblue']
-    name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$','COSMO-RS', 'UNIFAC$_\mathrm{D}$','SPT$_\mathrm{ext}$', 'SPT$_\mathrm{edge}$', 'SPT$_\mathrm{int}$']
-    line_style = ['-', '-', '-', '-', '-', '-', '-', '-']
+    color_list = ['grey', 'lightgrey','green', 'orange', 'blue','green', 'orange', 'blue']
+    color_list = ['tab:purple', 'tab:purple','tab:green', 'tab:orange', 'tab:blue','tab:green', 'tab:orange', 'tab:blue']
+    name_list = ['COSMO-RS', 'UNIFAC','Medina$_\mathrm{ext}$','Medina$_\mathrm{edge}$','Medina$_\mathrm{int}$','SPT$_\mathrm{ext}$', 'SPT$_\mathrm{edge}$', 'SPT$_\mathrm{int}$']
+    line_style = ['dashdot','dashed',':', ':', ':', '-', '-', '-']
 
-    pr.plot_err_curve_mult(prediction_list, target_list, name_list, color_list, line_style, damay_points, name = 'si', path = plot_path, save=True)
+    pr.plot_err_curve_mult_sund(prediction_list, target_list, name_list, color_list, line_style, name = 'sund', path = plot_path, save=True)

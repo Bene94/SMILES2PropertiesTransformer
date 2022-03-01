@@ -14,7 +14,11 @@ import data_processing as dp
 def main():
     file_path = '../raw_data/'
     folder_names = ['t_cosmo', 'brouwer_exp_c', 'brouwer_exp'] 
-    df, complete_list, solvent_indx, solute_indx = dp.load_exp_data(file_path, folder_names)
+    df, complete_list1, solvent_indx, solute_indx = dp.load_exp_data(file_path, folder_names)
+    folder_names = ['sund']
+    df, complete_list2, solvent_indx, solute_indx = dp.load_exp_data(file_path, folder_names)
+
+    complete_list = complete_list1.append(complete_list2, ignore_index=True)
 
     alias_dict = augment_smile(complete_list.SMILE0.to_list())
     np.save('../raw_data/alias/alias_dict_brouwer.npy', alias_dict)

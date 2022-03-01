@@ -293,10 +293,43 @@ def plot_err_curve_mult(prediction_list, target_list, name_list, color_list, lin
     plt.xlim(0,len(err_sorted[0]))
     plt.legend()
     plt.xlabel('\# of samples')
-    plt.ylabel(r"$\Delta$ ln $\gamma^\infty$")
+    plt.ylabel(r"$\|\Delta$ ln $\gamma^\infty\|$")
     plt.yticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
     plt.tight_layout()
     # plot horizontal line at 0.3
     plt.axhline(y=0.3, color='lightgrey', linestyle='--')
     if save:
         plt.savefig(path + 'sorted/err_curve_mult_' + name, dpi=1200)
+
+def plot_err_curve_mult_sund(prediction_list, target_list, name_list, color_list, line_style,name = '', path = '', save=False):
+    plt.rcParams['text.usetex'] = True
+    # change font size
+    plt.rcParams.update({'font.size': 14})
+    # make one figure containting three subplots with boxplots for each n
+    plt.clf()
+    err = []
+    for i in range(len(prediction_list)):
+        err.append(np.abs(target_list[i] - prediction_list[i]))
+    
+    err_sorted = [np.sort(err[i]) for i in range(len(err))]
+    
+    for i in range(len(err_sorted)):
+        plt.plot(err_sorted[i], color=color_list[i], label=name_list[i], linestyle=line_style[i])
+
+    plt.ylim(0,2)
+    plt.xlim(0,len(err_sorted[0]))
+    plt.legend()
+    plt.xlabel('\# of samples')
+    plt.ylabel(r"$\|\Delta$ ln $\gamma^\infty\|$")
+    plt.yticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
+    plt.tight_layout()
+    # plot horizontal line at 0.3
+    plt.axhline(y=0.3, color='lightgrey', linestyle='--')
+    if save:
+        plt.savefig(path + 'sorted/err_curve_mult_' + name, dpi=1200)
+    
+    # calculate the percentage of data with error below 0.3 for all datasets
+    err_below_03 = []
+    for i in range(len(err_sorted)):
+        err_below_03.append(len(err_sorted[i][err_sorted[i]<0.3])/len(err_sorted[i]))
+    print(err_below_03)

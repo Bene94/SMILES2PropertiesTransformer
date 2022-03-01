@@ -127,6 +127,40 @@ def get_comp_list(foler_name, vocab_path):
 
     return comp_list, systems, df_join
 
+def processing_n_out_sund(foler_name, save_path, vocab_path, ow, comp_list, systems, index):
+     
+    file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
+
+
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
+    df_list = split_data_test_val_exp_n_out(df_join, comp_list, systems, index)
+
+    # make input data
+    for i, df in enumerate(df_list):
+        if not df.empty:
+            if i == 0:
+                prefix = 'train'
+            else:
+                prefix = 'val_' + str(i-1)
+            data_batches = prep_save_sund(df, comp_list, batch_size=100000)
+            save_batches(data_batches, file_out, prefix, ow) 
+    # save comp
+    comp_list.to_csv(file_out + 'comp_list.csv', index=False)
+
+def get_comp_list(foler_name, vocab_path):
+
+    file_path, file_out, vocab_path, alias_path  =  get_paths('', vocab_path) 
+
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    
+    df_join, comp_list, __, __  = load_exp_data(file_path, foler_name) 
+    comp_list = aug_data(comp_list, alias_path=alias_path)
+    comp_list = apply_vocab(comp_list, vocab_dict)
+
+    systems = df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+
+    return comp_list, systems, df_join
 def load_exp_data(file_path, foler_names):
     #load the data from the experiment 
     df = pd.DataFrame()
@@ -145,7 +179,7 @@ def load_exp_data(file_path, foler_names):
         bar.finish()
     # remove all nan rows
     if not 'i' in df.columns:
-        df['i'] = 1 
+        df['i'] = np.array(range(len(df))) 
     df.i[df.i.isna()] = 0
 
     df = df.dropna()
@@ -202,6 +236,12 @@ def prep_save(df, comp_list, batch_size):
     df = df.dropna()
 
     # split the dataframe into batches
+    df_list = np.array_split(df, int(np.ceil(len(df)/batch_size)))
+    return df_list
+
+def prep_save_sund(df, comp_list, batch_size):
+    df.rename(columns={'solute':'Solute_SMILES', 'solvent':'Solvent_SMILES', 'lnGamma':'Literature'}, inplace=True)
+    
     df_list = np.array_split(df, int(np.ceil(len(df)/batch_size)))
     return df_list
 

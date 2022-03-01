@@ -26,9 +26,9 @@ model_name = '220127-180116' #reg
 device = 'cuda'
 #device = 'cpu'
 
-solvent = "CCCO"
+solvent = "CCCCCCCC"
 solute = "C=O"
-solute = "CCC"
+solute = "OCCCCO"
 T = 298.15
 
 x = np.linspace(0, 1, num=10000)
