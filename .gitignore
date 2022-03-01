@@ -1,6 +1,12 @@
 # Ignore the data file folders
 wandb/**
 *.png
+data/*
+Models/*
+out/*
+out_fine_tune/*
+raw_data/*
+temp/*
 
 # Standard for python in vs code
 *.png
