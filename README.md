@@ -24,9 +24,11 @@ The function src/make_alias_list.py creates a dictonary that creates these alter
 To process large datasets for pretraining use data_processing.py this function will convert the data and split x% of data for Val_ext. The following flags are important:
 
   -p: path of the input in raw_data can pass multible
+  
   -s: name of the save folder in data
   
   --frac: fraction of data to val_ext
+  
   --h2o: exclude h2o from val_ext
   
 ## Experimental data prepossing
