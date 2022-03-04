@@ -21,7 +21,7 @@ from transprop.config import *
 
 @click.option('--model_name', '-m', default='211220-192228', help='Name of the model')
 @click.option('--data_path', '-p',default='data_D_noH2O_77_V2', help='Path to the data')
-@click.option('--exp_name', '-n',default='', help='Name of the experiment')
+@click.option('--xp_name', '-n',default='', help='Name of the experiment')
 @click.option('--group', '-g', default='none', help='groups for the experiment')
 @click.option('--n_start', '-s', default=-1, help='set to be processed if -1 all')
 @click.option('--wandb_project', '-w', default='GNN_002_FT_mult', help='wandb project name')
@@ -34,12 +34,12 @@ from transprop.config import *
 @click.option('--cuda', default=True, help='Use cuda')
 
 @click.option('--mult', '-x',default=2, help='Uses multibel val/train splits')
-@click.option('--ow', '-ow',default=0, help='if 1, overwrites existing outputs')
+@click.option('--ow', '-ow',default=1, help='if 1, overwrites existing outputs')
 @click.option('--lval', '-lval',default=0, help='if 1, log validation loss every epoch') 
 
 
 
-def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval, group, n_start, wandb_project):
+def main(model_name, data_path, xp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval, group, n_start, wandb_project):
 
     name = model_name
 
@@ -59,16 +59,17 @@ def main(model_name, data_path, exp_name, batch_size, epochs, lr, weight_decay, 
         path_temp = '../out_fine_tuen/'
         path_model = '../Models/'
         path_wandb = '../wandb/'
-        xp_name = "local_test"
+        if xp_name != '':
+            xp_name = xp_name
+        else:
+            xp_name = "local_test"
 
     if cuda:
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
 
-    if exp_name != '':
-        xp_name = exp_name
-    
+   
     model, config = load_model(path_model,model_name)
     model = model.to(config.device)
 

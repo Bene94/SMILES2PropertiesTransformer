@@ -30,7 +30,7 @@ from transprop.config import *
 @click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
 @click.option('--aug', default=0, help='Determines if the data is augmented')
 
-@click.option('--lr', default= 0.0005, help='Learning rate')
+@click.option('--lr', default= 0.001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
 @click.option('--max_btch', default=256, help='Maximum batch size')
@@ -107,7 +107,7 @@ def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, 
     print('Loading Data...')
     print('-' * 89)
   
-    if noval==0:
+    if noval==1:
         training_data = load_data_full(config,local,test=test)
         val_data_list = []
     else:

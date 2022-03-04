@@ -19,19 +19,15 @@ from pandas.core.frame import DataFrame
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 @click.option('--source', default='COSMO', help='see if to select COSMO or EXP')
 
-@click.option('--ul', default=np.inf, help='upper limit of gamma')
-@click.option('--ll', default=-np.inf, help='lower limit of gamma')
 @click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
 
-@click.option('--aug', default=False, help='augment the smile data')
-@click.option('--max_aug', default=0, help='maximum number of augmentations')
 @click.option('--h2o', default=False, help='allows H2O in the validation set')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
 
-def main(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug,seed, ow, h2o, source):
-    processing(file_path, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source)
+def main(file_path, save_path, vocab_path, frac, seed, ow, h2o, source):
+    processing(file_path, save_path, vocab_path, frac, seed, ow, h2o, source)
 
-def processing(folder_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, source):
+def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source):
     
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 

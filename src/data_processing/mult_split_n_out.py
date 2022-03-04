@@ -24,7 +24,6 @@ if exclude_H2O:
     index_list = np.setdiff1d(index_list, h2o_index)
     num_splits = 1000
     save_path = "data_exp_noH2O_" + str(num_splits)  + '_V2'
-    save_path = "data_sund" + str(num_splits)
 elif only_H2O:
     index_list = systems[systems.solvent == 'O'].index
     index_list = np.array(index_list)

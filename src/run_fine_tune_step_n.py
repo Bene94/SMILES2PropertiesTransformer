@@ -6,18 +6,15 @@ now_str = now.strftime("%Y-%m-%d%H:%M:%S")
 now_str = now_str.replace(" ", "_")
 
 model = '211220-192228'
-model = 'untrained_model'
-model = '211220-192228'
 
 aug = 1 # 0: no aug, 1: aug
-lval_int = 0
+lval_int = 0 # sets the interval of runs that validate during training validating often will increase training time, large issue for small n in this function!!!!!!!
 lval = 0
 
 comand_s = 'xp run /home/bene/NNGamma/src/xprun_fine_mult.ron -p 3 --include-dirty' 
 comand_e = ' -- -m ' + model + ' -l 1e-4 -x 200 '
 
-n_list = [20, 30, 40, 50 , 100, 200, 300, 400, 500, 600, 700, 800, 1000] # , 2000, 3000, 4000, 5000]
-#n_list = [2000, 3000, 4000, 5000]
+n_list = [20, 30, 40, 50 , 100, 200, 300, 400, 500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]
 
 
 n_list = [20, 200]
