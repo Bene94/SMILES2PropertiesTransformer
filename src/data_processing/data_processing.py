@@ -39,20 +39,22 @@ def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source):
     ## apply the vocab to the smiles
     comp_list = apply_vocab(comp_list, vocab_dict)
     
-    val_solvent_indx, val_solute_indx = get_idx_test_val(solvent_indx, solute_indx, frac, seed)
+    if source == 'COSMO' or source == 'EXP':
+        val_solvent_indx, val_solute_indx = get_idx_test_val(index_list[0], index_list[1], frac, seed)
 
-    # removes water from the validation set
-    water_index = comp_list.index[comp_list["SMILE0"]=="O"][0]    
-    if (val_solute_indx == water_index).any() and not h2o:
-        val_solute_indx = val_solute_indx[val_solute_indx != water_index]
-    if (val_solvent_indx == water_index).any() and not h2o:
-        val_solvent_indx = val_solvent_indx[val_solvent_indx != water_index]
+        # removes water from the validation set
+        water_index = comp_list.index[comp_list["SMILE0"]=="O"][0]    
+        if (val_solute_indx == water_index).any() and not h2o:
+            val_solute_indx = val_solute_indx[val_solute_indx != water_index]
+        if (val_solvent_indx == water_index).any() and not h2o:
+            val_solvent_indx = val_solvent_indx[val_solvent_indx != water_index]
 
     if source == 'COSMO':    
         df_list = split_data_test_val(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
     elif source == 'EXP':
         df_list = split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
-    
+    elif source == 'noSplit':
+        df_list = [df_join]
 
     # make input data
     for i, df in enumerate(df_list):
@@ -61,11 +63,13 @@ def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source):
                 prefix = 'train'
             else:
                 prefix = 'val_' + str(i-1)
+            if source == 'noSplit':
+                prefix = pre
             data_batches = prep_save(df, comp_list, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow)
     
     # save comp
-    comp_list.to_csv(file_out + 'comp_list.csv', index=False)
+    comp_list.to_csv(file_out + pre +'comp_list.csv', index=False)
 
 def processing_n_in(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n, comp_list):
     
@@ -86,7 +90,7 @@ def processing_n_in(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_au
             data_batches = prep_save(df, comp_list, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow) 
     # save comp
-    comp_list.to_csv(file_out + 'comp_list.csv', index=False)
+    comp_list.to_csv(file_out + pre + 'comp_list.csv', index=False)
 
 def processing_n_out(foler_name, save_path, vocab_path, ow, comp_list, systems, index):
      
@@ -181,19 +185,24 @@ def load_exp_data(file_path, foler_names):
     df = df.dropna()
     df = df.reset_index(drop=True)
 
-    solvent_list = df['solvent'].drop_duplicates()
-    solute_list = df['solute'].drop_duplicates()
+    comp_list = []
+    for col in df.columns:
+        if col.startswith('SMILES'):
+            comp = df[col].drop_duplicates().to_list()
+            comp_list = comp_list + comp
+    # remove duplicates
+    comp_list = list(dict.fromkeys(comp_list))
 
-    complete_list = pd.concat([solute_list, solvent_list])
-    complete_list = complete_list.drop_duplicates()
-    complete_list.reset_index(drop=True, inplace=True)
-    complete_list = pd.DataFrame({'n_alias':np.ones(complete_list.shape[0]),'SMILE0':complete_list })
+    complete_list = pd.DataFrame({'n_alias':np.ones(len(comp_list)),'SMILE0':comp_list})
 
-    # get the index of the solven_list and solute_list
-    solvent_indx = complete_list.index[complete_list['SMILE0'].isin(solvent_list)]
-    solute_indx = complete_list.index[complete_list['SMILE0'].isin(solute_list)]
+    index_list = []
+    for col in df.columns:
+        if col.startswith('SMILES'):
+            components = df[col].drop_duplicates() 
+            index = complete_list.index[complete_list['SMILE0'].isin(components)]
+            index_list.append(index)
 
-    return df, complete_list, solvent_indx, solute_indx
+    return df, complete_list,index_list 
 
 def load_vocab(file_path,vocab_name):
     
@@ -223,14 +232,10 @@ def aug_data(comp_list,alias_path):
 def prep_save(df, comp_list, batch_size):
     # converts the dataframe in np-arrays for saving and splits its in batches
     smile_dict = pd.Series(comp_list.index.values,index=comp_list.SMILE0.values).to_dict()
-    df['solute_idx'] = df['solute'].map(smile_dict)
-    df['solvent_idx'] = df['solvent'].map(smile_dict)
-    df['solute_idx'] = df['solute_idx'].astype(int)
-    df['solvent_idx'] = df['solvent_idx'].astype(int)
-
-    df = df.drop(['solute','solvent'], axis=1)
+    for col in df.columns:
+        if col.startswith('SMILES'):
+            df[col] = df[col].map(smile_dict).astype(int)
     df = df.dropna()
-
     # split the dataframe into batches
     df_list = np.array_split(df, int(np.ceil(len(df)/batch_size)))
     return df_list
