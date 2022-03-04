@@ -31,30 +31,32 @@ To process large datasets for pretraining use data_processing.py this function w
   
   --h2o: exclude h2o from val_ext
   
-## Experimental data prepossing
+## Experimental data preprossing
 
 For limited experimental data n-fold corss validation should be used. To create the datasets the function mult_split_n_out.py can be used. The data gets split acording to our methodology discussed in the paper.
 
 ## Other data processing
 
-The function mult_split_n.py splits the data in x datasets containing n unique mixtures in the training set. This function is used to created datasets to look at scaling. 
+The function mult_split_n.py splits the data in x datasets containing n unique mixtures in the training set. This function creates datasets to examin scaling. 
   
   
 # Training the model
 
-The training on the model was conducted on a server running xprun for sceduling GPUs using the provided .ron files. However, this program is not yet avaialbe. However training can b conducted by siply calling the python functions called by xprun directly. Runs are loged in wandb.ai to run the code create a wandb.ai account and follow instruction to set account details in python. 
+The training on the model was conducted on a server running xprun for sceduling GPUs using the provided .ron files. However, xprun is not yet avaialbe. However training can be conducted by calling the python functions called by xprun directly. Runs are loged in wandb.ai to run the code create a wandb.ai account and follow instruction to set account details in python. 
 
 ## Pretraining
 
 To create a new model and pretrain it use the function mai_script.py. The function takes multible flags to set hyperparameters for training and model architecutre. The trained model is saved in Models 
 
-## Fine Tuning
+## Fine-Tuning
 
-For fine tuning using n-fold cross validation use fine_tune_mult_n_fold.py set the folder path the the top folder containing the splits. Output of the evaluation is saved to out_fine_tune
+For fine-tuning using n-fold cross validation use fine_tune_mult_n_fold.py set the folder path the the top folder containing the splits. Output of the evaluation is saved to out_fine_tune
 
 ## Scaling
 
 To evaluate the scaling of the model us the function run_fine_tune_step_n.py 
+
+
 
 
 
