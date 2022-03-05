@@ -20,7 +20,7 @@ index_list = np.arange(0,n_unique)
 
 # find systems with water as solvent
 if exclude_H2O:
-    h2o_index = systems[(systems.solvent == 'O') | (systems.solute == 'O')].index
+    h2o_index = systems[(systems.SMILES0 == 'O') | (systems.SMILES1 == 'O')].index
     index_list = np.setdiff1d(index_list, h2o_index)
     num_splits = 1000
     save_path = "data_exp_noH2O_" + str(num_splits)  + '_V2'

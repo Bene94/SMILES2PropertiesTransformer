@@ -37,9 +37,10 @@ from transprop.config import *
 @click.option('--ow', '-ow',default=1, help='if 1, overwrites existing outputs')
 @click.option('--lval', '-lval',default=0, help='if 1, log validation loss every epoch') 
 
-
-
 def main(model_name, data_path, xp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval, group, n_start, wandb_project):
+    fine_tune(model_name, data_path, xp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval, group, n_start, wandb_project)
+
+def fine_tune(model_name, data_path, xp_name, batch_size, epochs, lr, weight_decay, cuda, mult, ow, lval, group, n_start, wandb_project):
 
     name = model_name
 
@@ -212,6 +213,6 @@ def main(model_name, data_path, xp_name, batch_size, epochs, lr, weight_decay, c
         np.save(path_temp + xp_name + '/val_target_2_'+ str(i) +'.npy', val_target_2)
 
     np.save(path_temp + xp_name + '/epo_val_loss', epo_val_loss)
-        
+
 if __name__ == '__main__':
     main()

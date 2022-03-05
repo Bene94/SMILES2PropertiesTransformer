@@ -95,11 +95,11 @@ class gamma_dataset(Dataset):
         if self.aug:
             rand_list = [ np.random.randint(0,int(self.n_alias[i])) for i in smile_list]
         else :
-            rand_list = np.zeros(int(self.n_alias[index]), dtype=np.int)
+            rand_list = np.zeros(len(smile_list), dtype=np.int)
     
         # midel section 
         if len(smile_list) > 1:
-            mid = np.concatenate([ np.concatenate(mos , self.comp_list[smile, rand]) for smile, rand in zip(smile_list[1:] , rand_list[1:])])
+            mid = np.concatenate([ np.concatenate((mos , self.comp_list[smile, rand])) for smile, rand in zip(smile_list[1:] , rand_list[1:])])
         else:
             mid = []
         seq = np.concatenate([sos, comp_list[smile_list[0], rand_list[0]], mid, eos])
@@ -118,7 +118,7 @@ class gamma_dataset(Dataset):
 def load_data(config,local = False,test = False):
 
     if local:
-        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
+        data_path = os.path.join('/home/bene/SPT/data/' + config.data_path + '/')
     else:
         data_path = os.path.join('/mnt/xprun/data/' + config.data_path + '/')
 

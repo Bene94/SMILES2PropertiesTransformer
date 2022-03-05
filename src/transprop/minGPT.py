@@ -212,7 +212,7 @@ class GPT(nn.Module):
         self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size + config.xT, config.embed_size))
         self.drop = nn.Dropout(config.dropout)
         # xT linear
-        self.xT_lin = nn.Linear(2, config.embed_size, device=config.device)
+        self.xT_lin = nn.Linear(2, config.embed_size)
         # transformer
         self.blocks = nn.Sequential(*[Block(config) for _ in range(config.num_layers)])
         # decoder head

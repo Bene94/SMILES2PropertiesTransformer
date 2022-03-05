@@ -18,21 +18,22 @@ from pandas.core.frame import DataFrame
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 @click.option('--source', default='COSMO', help='see if to select COSMO or EXP')
+@click.option('--pre', default='', help='prefix for the output files')
 
 @click.option('--frac', default=0.05, help='fraction of data to be used for testing and validation')
 
 @click.option('--h2o', default=False, help='allows H2O in the validation set')
 @click.option('--seed', default=42, help='seed of the smile sampling for validation')
 
-def main(file_path, save_path, vocab_path, frac, seed, ow, h2o, source):
-    processing(file_path, save_path, vocab_path, frac, seed, ow, h2o, source)
+def main(file_path, save_path, vocab_path, frac, seed, ow, h2o, source, pre):
+    processing(file_path, save_path, vocab_path, frac, seed, ow, h2o, source, pre)
 
-def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source):
+def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source, pre):
     
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    df_join, comp_list, solvent_indx, solute_indx  = load_exp_data(file_path, folder_name)
+    df_join, comp_list, index_list  = load_exp_data(file_path, folder_name)
         
     comp_list = aug_data(comp_list, alias_path=alias_path)
     
@@ -71,13 +72,13 @@ def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source):
     # save comp
     comp_list.to_csv(file_out + pre +'comp_list.csv', index=False)
 
-def processing_n_in(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_aug, seed, ow, h2o, n, comp_list):
+def processing_n_in(foler_name, save_path, vocab_path, seed, ow, n, comp_list):
     
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
+    df_join, __, ___  = load_exp_data(file_path, foler_name)
     df_list = split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n)
 
     # make input data
@@ -90,15 +91,14 @@ def processing_n_in(foler_name, save_path, vocab_path, ul, ll, frac, aug, max_au
             data_batches = prep_save(df, comp_list, batch_size=100000)
             save_batches(data_batches, file_out, prefix, ow) 
     # save comp
-    comp_list.to_csv(file_out + pre + 'comp_list.csv', index=False)
+    comp_list.to_csv(file_out + 'comp_list.csv', index=False)
 
 def processing_n_out(foler_name, save_path, vocab_path, ow, comp_list, systems, index):
      
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
-
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
+    df_join, __, __  = load_exp_data(file_path, foler_name)
     df_list = split_data_test_val_exp_n_out(df_join, comp_list, systems, index)
 
     # make input data
@@ -119,11 +119,11 @@ def get_comp_list(foler_name, vocab_path):
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
     
-    df_join, comp_list, __, __  = load_exp_data(file_path, foler_name) 
+    df_join, comp_list, __  = load_exp_data(file_path, foler_name) 
     comp_list = aug_data(comp_list, alias_path=alias_path)
     comp_list = apply_vocab(comp_list, vocab_dict)
 
-    systems = df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+    systems = df_join.groupby(['SMILES0','SMILES1']).size().reset_index().rename(columns={0:'count'})
 
     return comp_list, systems, df_join
 
@@ -148,19 +148,6 @@ def processing_n_out_sund(foler_name, save_path, vocab_path, ow, comp_list, syst
     # save comp
     comp_list.to_csv(file_out + 'comp_list.csv', index=False)
 
-def get_comp_list(foler_name, vocab_path):
-
-    file_path, file_out, vocab_path, alias_path  =  get_paths('', vocab_path) 
-
-    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    
-    df_join, comp_list, __, __  = load_exp_data(file_path, foler_name) 
-    comp_list = aug_data(comp_list, alias_path=alias_path)
-    comp_list = apply_vocab(comp_list, vocab_dict)
-
-    systems = df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
-
-    return comp_list, systems, df_join
 def load_exp_data(file_path, foler_names):
     #load the data from the experiment 
     df = pd.DataFrame()
@@ -241,97 +228,10 @@ def prep_save(df, comp_list, batch_size):
     return df_list
 
 def prep_save_sund(df, comp_list, batch_size):
-    df.rename(columns={'solute':'Solute_SMILES', 'solvent':'Solvent_SMILES', 'lnGamma':'Literature'}, inplace=True)
+    df.rename(columns={'SMILES0':'Solute_SMILES', 'SMILES1':'Solvent_SMILES', 'y0':'Literature'}, inplace=True)
     
     df_list = np.array_split(df, int(np.ceil(len(df)/batch_size)))
     return df_list
-
-def aug_df(df, comp_list, aug, batch_size):
-    # add the alias to the new collumn alias to comp_list
-
-    df_temp = df.copy()
-    df_temp['emb'] = np.nan
-    df_temp['emb'] = df_temp['emb'].astype(object)
-    bar = pb.ProgressBar(maxval=len(df_temp), widgets=[pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
-    bar.start()
-
-    sos = np.array((1,))
-    mos = np.array((2,))
-    eos = np.array((3,))
-
-    temp_data = np.zeros((batch_size,134)) 
-    data_list = []
-    # find the index of the smiles in df in comp_list
-    index_solute = np.zeros((len(df_temp),))
-    index_solvent = np.zeros((len(df_temp),))
-    solute_n_alias = np.zeros((len(df_temp),))
-    solvent_n_alias = np.zeros((len(df_temp),))
-
-    comp_list_dic= {}
-
-    for i, smile in enumerate(comp_list['SMILE0']):
-        comp_list_dic[smile] = [i, comp_list.loc[i,'n_alias']]
-
-
-    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Indexing data: ',pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
-    bar.start()
-
-    for i in range(len(df_temp)):
-        bar.update(i)
-        [index_solute[i], solute_n_alias[i]] = comp_list_dic[df_temp['solute'].values[i]]
-        [index_solvent[i], solvent_n_alias[i]] = comp_list_dic[df_temp['solvent'].values[i]]
-
-    index_solute = index_solute.astype(int)
-    index_solvent = index_solvent.astype(int)
-
-    if aug == True:
-        solute_n_alias = solute_n_alias.astype(int)
-        solvent_n_alias = solvent_n_alias.astype(int)
-    else:
-        solute_n_alias = np.ones((len(df_temp),), dtype=int)
-        solvent_n_alias = np.ones((len(df_temp),), dtype=int)
-    
-    bar.finish()
-
-    bar = pb.ProgressBar(maxval=len(df_temp), widgets=['Processing data: ',pb.Timer(), pb.Bar('=', '[', ']'), pb.ETA()])
-    bar.start()
-    count = 0
-
-    if not 'x' in df.columns:
-        df['x'] = np.zeros((len(df),))
-    if not 'T' in df.columns:
-        df['T'] = np.ones((len(df),)) *298.15
-
-
-    for i in range(len(df)):
-        bar.update(i)
-
-        gamma = df.loc[i,'lnGamma']
-        x = df.loc[i,'x']
-        T = df.loc[i,'T']
-        idx = df.loc[i,'i']
-
-        for j in range(solute_n_alias[i]):
-            for k in range(solvent_n_alias[i]):
-                emb = np.concatenate((sos,comp_list.loc[index_solute[i], 'emb' + str(j)], mos, comp_list.loc[index_solvent[i], 'emb' + str(k)], eos))
-                if len(emb) <= 128:
-                    emb = np.pad(emb, (0, 128 - len(emb)), 'constant', constant_values=(0, 0))
-                    temp_data[count,0] = gamma
-                    temp_data[count,1:129] = emb
-                    temp_data[count,129] = x
-                    temp_data[count,130] = T
-                    temp_data[count,131] = index_solute[i]
-                    temp_data[count,132] = index_solvent[i]
-                    temp_data[count,133] = idx
-                    count += 1
-                    if count == batch_size:
-                        data_list.append(temp_data)
-                        temp_data = np.zeros((batch_size,134))
-                        count = 0
-    if count != 0:
-        data_list.append(temp_data[:count,:])
-    bar.finish()
-    return data_list
 
 def apply_vocab(comp_list, vocab_dict):
     
@@ -410,17 +310,17 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
         bar.update(count)
         count += 1	
 
-        temp = systems_val_2.loc[i,['solvent','solute']] == df_temp_train.loc[:,['solvent','solute']]
-        temp = temp[temp['solute']]
-        temp = temp[temp['solvent']]
+        temp = systems_val_2.loc[i,['SMILES0','SMILES1']] == df_temp_train.loc[:,['SMILES0','SMILES1']]
+        temp = temp[temp['SMILES0']]
+        temp = temp[temp['SMILES1']]
 
         temp_2 = df_temp_train.drop(temp.index)
 
-        if len(temp_2[temp_2['solvent'] == systems_val_2.loc[i,'solvent']]) == 0 and len(temp_2[temp_2['solute'] == systems_val_2.loc[i,'solute']]) == 0:
+        if len(temp_2[temp_2['SMILES1'] == systems_val_2.loc[i,'SMILES1']]) == 0 and len(temp_2[temp_2['SMILES0'] == systems_val_2.loc[i,'SMILES0']]) == 0:
             df_temp_val_0 = df_temp_val_0.append(df_temp_train.loc[temp.index,:])
             df_temp_train = df_temp_train.drop(temp.index)
 
-        elif len(temp_2[temp_2['solvent'] == systems_val_2.loc[i,'solvent']]) == 0 or len(temp_2[temp_2['solute'] == systems_val_2.loc[i,'solute']]) == 0:
+        elif len(temp_2[temp_2['SMILES1'] == systems_val_2.loc[i,'SMILES1']]) == 0 or len(temp_2[temp_2['SMILES0'] == systems_val_2.loc[i,'SMILES0']]) == 0:
             df_temp_val_1 = df_temp_val_1.append(df_temp_train.loc[temp.index,:])
             df_temp_train = df_temp_train.drop(temp.index)
         else:
@@ -452,7 +352,7 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
 
 def split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n):
     
-    df_join = df_join[(df_join['solvent'] != 'O') & (df_join['solute'] != 'O')]
+    df_join = df_join[(df_join['SMILES1'] != 'O') & (df_join['solute'] != 'O')]
 
     systems =  df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
     systems_train = systems.sample(n=n, random_state=seed)
@@ -513,22 +413,22 @@ def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
     idx_solvent = []
 
     for i in systems_val_0.index:
-        to_val_0 = df_join[(df_join['solvent'] == systems_val_0.loc[i,'solvent']) & (df_join['solute'] == systems_val_0.loc[i,'solute'])]
+        to_val_0 = df_join[(df_join['SMILES1'] == systems_val_0.loc[i,'SMILES1']) & (df_join['SMILES0'] == systems_val_0.loc[i,'SMILES0'])]
         df_temp_val_0 = pd.concat([df_temp_val_0, to_val_0])
     
-        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['solvent'] == systems_val_0.loc[i,'solvent']].index)
-        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['solute'] == systems_val_0.loc[i,'solute']].index)
+        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['SMILES1'] == systems_val_0.loc[i,'SMILES1']].index)
+        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['SMILES0'] == systems_val_0.loc[i,'SMILES0']].index)
 
     for i in systems_val_0.index:
-        idx_solvent += df_join[df_join['solvent'] == systems_val_0.loc[i,'solvent']].index.tolist()
-        idx_solute += df_join[df_join['solute'] == systems_val_0.loc[i,'solute']].index.tolist()
+        idx_solvent += df_join[df_join['SMILES1'] == systems_val_0.loc[i,'SMILES1']].index.tolist()
+        idx_solute += df_join[df_join['SMILES0'] == systems_val_0.loc[i,'SMILES0']].index.tolist()
 
     idx_val_0 = set(df_temp_val_0.index)
     # find the elements that are either in idx_solvent and idx_solute but not in idx_val_0
     idx_solvent = list((set(idx_solvent) | set(idx_solute)) - idx_val_0)
     df_temp_val_1 = df_join.loc[idx_solvent,:]
 
-    train_systems = df_temp_train.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+    train_systems = df_temp_train.groupby(['SMILES1','SMILES0']).size().reset_index().rename(columns={0:'count'})
     
     val_2_systems = train_systems.sample(frac=0.05, random_state= index[0])
 
@@ -536,15 +436,15 @@ def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
     to_val = pd.DataFrame(columns=df_join.columns)
 
     for i in val_2_systems.index:
-        temp_to_val = df_join[(df_join['solvent'] == val_2_systems.loc[i,'solvent']) & (df_join['solute'] == val_2_systems.loc[i,'solute'])]
+        temp_to_val = df_join[(df_join['SMILES1'] == val_2_systems.loc[i,'SMILES1']) & (df_join['SMILES0'] == val_2_systems.loc[i,'SMILES0'])]
         df_temp_train = df_temp_train.drop(temp_to_val.index)
         to_val = pd.concat([to_val, temp_to_val])
     
-    train_solvents = set(df_temp_train['solvent'].unique().tolist())
-    train_solutes = set(df_temp_train['solute'].unique().tolist())
+    train_solvents = set(df_temp_train['SMILES1'].unique().tolist())
+    train_solutes = set(df_temp_train['SMILES0'].unique().tolist())
 
-    to_val_solvents = set(to_val['solvent'].unique().tolist())
-    to_val_solutes = set(to_val['solute'].unique().tolist())
+    to_val_solvents = set(to_val['SMILES1'].unique().tolist())
+    to_val_solutes = set(to_val['SMILES0'].unique().tolist())
 
     not_train_solvents = to_val_solvents - train_solvents
     not_train_solutes = to_val_solutes - train_solutes
@@ -552,11 +452,11 @@ def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
     to_val.reset_index(inplace=True, drop=True)
 
     
-    temp = to_val[to_val['solute'].isin(list(not_train_solutes)) & to_val['solvent'].isin(list(not_train_solvents))]
+    temp = to_val[to_val['SMILES0'].isin(list(not_train_solutes)) & to_val['SMILES1'].isin(list(not_train_solvents))]
     df_temp_val_0 = pd.concat([df_temp_val_0, temp])
     to_val = to_val.drop(temp.index)
 
-    temp = to_val[to_val['solute'].isin(list(not_train_solutes)) | to_val['solvent'].isin(list(not_train_solvents))]
+    temp = to_val[to_val['SMILES0'].isin(list(not_train_solutes)) | to_val['SMILES1'].isin(list(not_train_solvents))]
     df_temp_val_1 = pd.concat([df_temp_val_1, temp])
     to_val = to_val.drop(temp.index)
 
@@ -581,13 +481,13 @@ def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
 
 def make_input_data(df, comp_list,batch_size):
 
-    target = np.array(df.ioc[:,"lnGamma"])
+    target = np.array(df.ioc[:,"y0"])
 
     emb  = np.array(df.emb[:])
     T = np.array(df['T'])
     x = np.array(df['x'])
-    solute_index = np.array(df['solute_index'])
-    solvent_index = np.array(df['solvent_index'])
+    solute_index = np.array(df['SMILES0'])
+    solvent_index = np.array(df['SMILES1'])
 
     target = target.reshape(target.shape[0],1)
     T = T.reshape(T.shape[0],1)
