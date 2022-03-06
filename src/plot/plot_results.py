@@ -94,8 +94,8 @@ def make_heatmap(prediciton, target, name = '', title='', path = '', save=False)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # extend the bottom margin to make the labels fit
     plt.imshow(heatmap.T, extent=extent, origin='lower')
-    plt.xlim(-15,15)
-    plt.ylim(-15,15)
+    plt.xlim(0,5)
+    plt.ylim(0,5)
     plt.colorbar()
 
     MSE = np.around(np.mean( (target - prediciton)**2 ),2)
@@ -105,12 +105,11 @@ def make_heatmap(prediciton, target, name = '', title='', path = '', save=False)
     plt.text(0.05, 0.8, 'MAE: ' + str(MAE), transform=plt.gca().transAxes, color='white')
 
     plt.title(title)
-    
     plt.ylabel(r'$\ln\gamma^\infty_{\mathrm{prd.}}$')
     plt.xlabel(r'$\ln\gamma^\infty_{\mathrm{truth}}$')
+    plt.tight_layout()
     plt.savefig(path + 'heat/heat_' + name, dpi=600)
 
-    plt.tight_layout()
     plt.show()
 
     plt.rcParams['text.usetex'] = False
@@ -127,7 +126,7 @@ def make_scatter(prediciton, target, name = '', title = '',path = '', save=False
     colors = makeColours(vals)
 
     # use smaller dots for the points
-    plt.scatter(target, prediciton, c=colors, s=1)
+    plt.scatter(target, prediciton, c=colors, s=0.5)
     plt.ylabel(r'$\ln\gamma^\infty_\mathrm{prd.}$')
     plt.xlabel(r'$\ln\gamma^\infty_\mathrm{exp.}$')
 

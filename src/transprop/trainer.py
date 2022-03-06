@@ -71,7 +71,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 
             src_padding_mask = (smile != wandb.config.padding_idx).transpose(0, 1)
 
-            with autocast(True):
+            with autocast(False):
                 #xt = xt.type(torch.half)
                 output = model(smile, xt) 
                 loss = criterion(output.squeeze(), target.squeeze())
@@ -160,11 +160,15 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 def evaluate(eval_model, val_dataloader, criterion, config):
     eval_model.eval() # Turn on the evaluation mode
     total_loss = 0.
+    if val_dataloader != []:
+        n_comp = next(iter(val_dataloader))[1][2].shape[1]
+    else:
+        n_comp = 0
     chunk_size = config.max_btch
     total_output = np.array([])
     total_target = np.array([])
     total_xT = np.empty((0,2))
-    total_smile_idx = np.empty((0,2))
+    total_smile_idx = np.empty((0,n_comp))
     total_index = np.empty((0))
 
     with torch.no_grad():

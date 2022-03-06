@@ -53,11 +53,12 @@ def fine_tune(model_name, data_path, xp_name, batch_size, epochs, lr, weight_dec
         path_temp = "/mnt/xprun/temp/"
         path_model = "/mnt/xprun/out/"
         path_wandb = "/mnt/xprun/wandb/"
-        xp_name = os.environ['XPRUN_NAME']
+        if xp_name == '':
+            xp_name = os.environ['XPRUN_NAME']
     else:
         print("Run on local machine")
         local = True
-        path_temp = '../out_fine_tuen/'
+        path_temp = '../out_fine_tune/'
         path_model = '../Models/'
         path_wandb = '../wandb/'
         if xp_name != '':

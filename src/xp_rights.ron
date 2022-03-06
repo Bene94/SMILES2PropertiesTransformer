@@ -2,7 +2,7 @@ XpV0(
     project: "Get Up Stand Up",
     containers: {
         "main": (
-            command: ["python", "-u", "change_rights.py"],
+            command: ["python", "-u", "src/change_rights.py"],
             
             build: [
                 From("nvcr.io/nvidia/pytorch:21.03-py3"),

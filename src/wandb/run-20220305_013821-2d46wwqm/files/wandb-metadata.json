@@ -1,0 +1,24 @@
+{
+    "os": "Linux-5.4.0-99-generic-x86_64-with-glibc2.31",
+    "python": "3.9.5",
+    "heartbeatAt": "2022-03-05T09:38:25.557918",
+    "startedAt": "2022-03-05T09:38:21.898634",
+    "docker": null,
+    "gpu": "NVIDIA GeForce RTX 2080 Ti",
+    "gpu_count": 3,
+    "cpu_count": 64,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/bene/SPT/src/run_fine_tune_n_fold_elect.py",
+    "codePath": "src/run_fine_tune_n_fold_elect.py",
+    "git": {
+        "remote": "git@github.com:Bene94/SPT.git",
+        "commit": "750bc1a257d333dbb64dd752f44e505885ddcbc0"
+    },
+    "email": "benedikt.winterq@rwth-aachen.de",
+    "root": "/home/bene/SPT",
+    "host": "Nexus",
+    "username": "bene",
+    "executable": "/home/bene/miniconda3/bin/python"
+}

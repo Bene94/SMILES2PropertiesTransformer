@@ -32,7 +32,7 @@ def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source, 
     
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
-    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_tox21')
     df_join, comp_list, index_list  = load_exp_data(file_path, folder_name)
         
     comp_list = aug_data(comp_list, alias_path=alias_path)
@@ -54,6 +54,8 @@ def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source, 
         df_list = split_data_test_val(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
     elif source == 'EXP':
         df_list = split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_list, seed)
+    elif source == 'single':
+        df_list = split_data_test_val_single(df_join, comp_list, seed, frac)
     elif source == 'noSplit':
         df_list = [df_join]
 
@@ -349,6 +351,21 @@ def split_data_test_val_exp(df_join, val_solvent_indx, val_solute_indx, comp_lis
     df_temp_val_2 = df_temp_val_2.reset_index(drop=True)
 
     return [df_temp_train, df_temp_val_0, df_temp_val_1, df_temp_val_2]
+
+def split_data_test_val_single(df_join, comp_list, seed, frac):
+    # function has only val_0 and train
+    df_temp = df_join.copy()
+    mixtures = df_temp.groupby(['SMILES0']).size().reset_index().rename(columns={0:'count'})
+    mixtures_val_0 = mixtures.sample(frac=frac, random_state=seed)
+    mixtures_val_0 = mixtures_val_0.reset_index(drop=True)
+    
+    df_temp_val_0 = df_temp.loc[df_temp.iloc[:,0].isin(mixtures_val_0.SMILES0)]
+    df_temp_train = df_temp.loc[~df_temp.index.isin(df_temp_val_0.index)]
+
+    df_temp_val_0 = df_temp_val_0.reset_index(drop=True)
+    df_temp_train = df_temp_train.reset_index(drop=True)
+
+    return [df_temp_train, df_temp_val_0]
 
 def split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n):
     

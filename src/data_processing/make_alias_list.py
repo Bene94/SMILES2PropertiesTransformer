@@ -13,10 +13,10 @@ import data_processing as dp
 
 def main():
     file_path = '../raw_data/'
-    folder_names = ['t_cosmo', 'brouwer_exp_c', 'brouwer_exp'] 
-    df, complete_list1, solvent_indx, solute_indx = dp.load_exp_data(file_path, folder_names)
-    folder_names = ['sund']
-    df, complete_list2, solvent_indx, solute_indx = dp.load_exp_data(file_path, folder_names)
+    folder_names = ['t_cosmo', 'brouwer_exp_c'] 
+    df, complete_list1, __ = dp.load_exp_data(file_path, folder_names)
+    folder_names = ['elect']
+    df, complete_list2, __ = dp.load_exp_data(file_path, folder_names)
 
     complete_list = complete_list1.append(complete_list2, ignore_index=True)
 

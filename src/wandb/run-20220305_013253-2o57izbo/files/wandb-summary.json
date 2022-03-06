@@ -1,0 +1,1 @@
+{"Group": "200_220305-013248", "_runtime": 7, "_timestamp": 1646472780, "_step": 36, "outer_loop": 0, "train_loss": 805.0745239257812, "grad_norm": 0, "lr": 1.746606334841629e-06, "epoch": 0, "n_tokens": 0.16383999999999999, "compute": 51204.595199999996, "loss scale": 9.0}

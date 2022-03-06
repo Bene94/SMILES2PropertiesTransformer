@@ -41,6 +41,7 @@ if __name__ == '__main__':
     name = '211231-031659' # modle with leave n out no water 
     name = 'f_t_211220-192228_220112-105727'
     name = 'f_t_211220-192228_220114-185541' # V2 run
+    name = 'f_t_211220-192228_220305-085733' # electro
     #name = 'f_t_211220-192228_220223-032428' # Sundmacher run
     #name = 'f_t_220127-180116_220131-015826' # D Run
     #name = 'f_t_220127-180116_220131-025308' # D Run 
@@ -49,11 +50,11 @@ if __name__ == '__main__':
     group = True 
     scatter = False 
 
-    comp_list_path = '/home/bene/NNGamma/data/data_exp_noH2O_1000/0/comp_list.csv'
-    comp_lsit_path = '/home/bene/NNGamma/data/data_exp_onlyH2O_1000_V2/0/comp_list.csv'
-    comp_list_path = '/home/bene/NNGamma/data/data_sund200/0/comp_list.csv'
-    path_temp = '/home/bene/NNGamma/out_fine_tune/'
-    plot_path = '/home/bene/NNGamma/src/plot/'
+    comp_list_path = '/home/bene/SPT/data/data_exp_noH2O_1000/0/comp_list.csv'
+    comp_lsit_path = '/home/bene/SPT/data/data_exp_onlyH2O_1000_V2/0/comp_list.csv'
+    comp_list_path = '/home/bene/SPT/data/data_sund200/0/comp_list.csv'
+    path_temp = '/home/bene/SPT/out_fine_tune/'
+    plot_path = '/home/bene/SPT/src/plot/'
     data_path = path_temp + name + '/'
 
     file_path = ["brouwer_exp_c"]
@@ -126,18 +127,21 @@ if __name__ == '__main__':
     print('length val1: ' + str(len(val_predction_1)))
     print('length val2: ' + str(len(val_predction_2)))
 
-    pr.make_heatmap(val_predction_0, val_target_0, r'val0' , path = plot_path, save=True)
-    pr.make_heatmap(val_predction_1, val_target_1, r'val1' , path = plot_path, save=True)
-    pr.make_heatmap(val_predction_2, val_target_2, r'val2' , path = plot_path, save=True)
+    if len(val_predction_0) > 0:
+        pr.make_heatmap(val_predction_0, val_target_0, r'val0' , path = plot_path, save=True)
+        pr.make_historgam_delta(val_predction_0, val_target_0, 'val_0_fine' , path = plot_path, save=True)
+    if len(val_predction_1) > 0:
+        pr.make_heatmap(val_predction_1, val_target_1, r'val1' , path = plot_path, save=True)
+        pr.make_historgam_delta(val_predction_1, val_target_1, 'val_1_fine' , path = plot_path, save=True)
+    if len(val_predction_2) > 0:
+        pr.make_heatmap(val_predction_2, val_target_2, r'val2' , path = plot_path, save=True)
+        pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
     print('heatmaps plotted')
 
-    pr.make_historgam_delta(val_predction_0, val_target_0, 'val_0_fine' , path = plot_path, save=True)
-    pr.make_historgam_delta(val_predction_1, val_target_1, 'val_1_fine' , path = plot_path, save=True)
-    pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
     comp_list, systems, df_join = get_comp_list(file_path, vocab_path)
-    h2o_index = df_join[(df_join.solvent == 'O') | (df_join.solute == 'O')].i
+    h2o_index = df_join[(df_join.SMILES0 == 'O') | (df_join.SMILES1 == 'O')].i
     
     ## seperate prediction and target data
     # chekc if val_input_0 continas h2o_index
@@ -191,6 +195,7 @@ if __name__ == '__main__':
         print('no_h2o_val_2_fine done')
         print('scatter plots made')
   
+    
 
 
     # load cvs with data from COSMO

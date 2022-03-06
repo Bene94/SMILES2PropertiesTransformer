@@ -39,10 +39,11 @@ name = '211229-043706' # modle with leave n out
 name = '211231-031659' # modle with leave n out no water
 name = 'f_t_211220-192228_220112-105727'
 name = 'f_t_211220-192228_220114-185541' # V2 run
+name = 'f_t_211220-192228_220305-085733' # electro
 
-path_temp = '/home/bene/NNGamma/out_fine_tune/'
-plot_path = '/home/bene/NNGamma/src/'
-save_path = '/home/bene/NNGamma/out_fine_tune/' 
+path_temp = '/home/bene/SPT/out_fine_tune/'
+plot_path = '/home/bene/SPT/src/'
+save_path = '/home/bene/SPT/out_fine_tune/' 
 data_path = path_temp + name + '/'
 
 
