@@ -13,7 +13,7 @@ model = '211220-192228'
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 aug = 1 # 0: no aug, 1: aug
-lval_int = 0 # sets the interval of runs that validate during training validating often will increase training time, however not a large issue for small val datasets
+lval_int = 1 # sets the interval of runs that validate during training validating often will increase training time, however not a large issue for small val datasets
 lval = 10
 xprun = True 
 n_split = 200
