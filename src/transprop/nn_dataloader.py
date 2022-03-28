@@ -118,7 +118,7 @@ class gamma_dataset(Dataset):
 def load_data(config,local = False,test = False):
 
     if local:
-        data_path = os.path.join('/home/bene/SPT/data/' + config.data_path + '/')
+        data_path = os.path.join('../data/' + config.data_path + '/')
     else:
         data_path = os.path.join('/mnt/xprun/data/' + config.data_path + '/')
 

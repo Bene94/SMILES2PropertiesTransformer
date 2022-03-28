@@ -1,0 +1,31 @@
+-----------------------------------------------------------------------------------------
+Training...
+-----------------------------------------------------------------------------------------
+| epoch   0 |  1000/ 4956 batches | lr 0.00 | ms/batch 447.28 | loss  2.59
+| epoch   0 |  2000/ 4956 batches | lr 0.00 | ms/batch 449.09 | loss  2.08
+| epoch   0 |  3000/ 4956 batches | lr 0.00 | ms/batch 449.47 | loss  1.82
+| epoch   0 |  4000/ 4956 batches | lr 0.00 | ms/batch 449.49 | loss  1.63
+Traceback (most recent call last):
+  File "/local/home/bewinter/SPT/src/main_script.py", line 285, in <module>
+    main()
+  File "/local/home/bewinter/miniconda3/lib/python3.9/site-packages/click/core.py", line 1128, in __call__
+    return self.main(*args, **kwargs)
+  File "/local/home/bewinter/miniconda3/lib/python3.9/site-packages/click/core.py", line 1053, in main
+    rv = self.invoke(ctx)
+  File "/local/home/bewinter/miniconda3/lib/python3.9/site-packages/click/core.py", line 1395, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/local/home/bewinter/miniconda3/lib/python3.9/site-packages/click/core.py", line 754, in invoke
+    return __callback(*args, **kwargs)
+  File "/local/home/bewinter/SPT/src/main_script.py", line 174, in main
+    save_checkpoint(model, config, epoch, optimizer, scheduler)
+  File "/local/home/bewinter/SPT/src/main_script.py", line 218, in save_checkpoint
+    pickle.dump(optimizer.state_dict(), f)
+  File "/local/home/bewinter/miniconda3/lib/python3.9/site-packages/torch/storage.py", line 509, in __reduce__
+    torch.save(self, b, _use_new_zipfile_serialization=False)
+  File "/local/home/bewinter/miniconda3/lib/python3.9/site-packages/torch/serialization.py", line 382, in save
+    _legacy_save(obj, opened_file, pickle_module, pickle_protocol)
+  File "/local/home/bewinter/miniconda3/lib/python3.9/site-packages/torch/serialization.py", line 523, in _legacy_save
+    storage._write_file(f, _should_read_directly(f), True, torch._utils._element_size(dtype))
+RuntimeError: CUDA error: initialization error
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
