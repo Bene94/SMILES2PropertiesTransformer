@@ -169,7 +169,7 @@ def load_exp_data(file_path, foler_names):
     # remove all nan rows
     if not 'i' in df.columns:
         df['i'] = np.array(range(len(df))) 
-    df.i[df.i.isna()] = 0
+    df[df.i.isna()]['i'] = 0
 
     df = df.dropna()
     df = df.reset_index(drop=True)

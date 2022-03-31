@@ -12,8 +12,8 @@ XpV0(
             ],
 
             gpu: 1,
-            gpu_mem: "11GB",
-            cpu_mem: "32GB",
+            gpu_mem: "12GB",
+            cpu_mem: "16GB",
             
             env_secrets: {
                 "WANDB_API_KEY": "wandb-api-key",

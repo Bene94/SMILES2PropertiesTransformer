@@ -27,7 +27,6 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
     total_tokens = epoch * len(train_dataloader) * train_dataloader.batch_size * 128 * 1e-6
     total_compute = 6 * wandb.config.params * epoch * len(train_dataloader) * train_dataloader.batch_size * 1e-6
 
-    start_time = time.time()
 
     n_steps = len(train_dataloader)
 
@@ -41,6 +40,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 
     for i, batch in enumerate(train_dataloader):
         
+        start_time = time.time()
         optimizer.zero_grad()
 
         target_batch, data_batch = batch[0], batch[1]
@@ -71,7 +71,7 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
 
             src_padding_mask = (smile != wandb.config.padding_idx).transpose(0, 1)
 
-            with autocast(False):
+            with autocast(True):
                 #xt = xt.type(torch.half)
                 output = model(smile, xt) 
                 loss = criterion(output.squeeze(), target.squeeze())
@@ -98,7 +98,10 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
         log_interval = 1000
         total_tokens += train_dataloader.batch_size * 128 * 1e-6
         total_compute += 6 * wandb.config.params * train_dataloader.batch_size * 1e-6
-      
+     
+        elapsed = time.time() - start_time
+        wandb.log({"batch_time":  elapsed})
+
         wandb.log({"train_loss": log_loss})
         wandb.log({"grad_norm": grad_norm})
         wandb.log({"lr": optimizer.param_groups[0]['lr']})
@@ -109,14 +112,12 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
       
         if i % log_interval == 0 and i > 0:
             cur_loss = total_loss / log_interval
-            elapsed = time.time() - start_time
-            wandb.log({"batch_time":  elapsed / log_interval})
             print('| epoch {:3d} | {:5d}/{:5d} batches | '
-                  'lr {:02.2f} | ms/batch {:5.2f} | '
-                  'loss {:5.2f}'.format(
-                    epoch, i, len(train_dataloader), optimizer.param_groups[0]['lr'],
-                    elapsed * 1000 / log_interval,
-                    cur_loss))
+            'lr {:02.2f} | ms/batch {:5.2f} | '
+            'loss {:5.2f}'.format(
+                epoch, i, len(train_dataloader), optimizer.param_groups[0]['lr'],
+                elapsed * 1000 / log_interval,
+                cur_loss))
             total_loss = 0
             start_time = time.time()
 

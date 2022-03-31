@@ -21,11 +21,13 @@ class Config:
 
 ## function to compare the data from experimental and simulation data
 
-path_data = os.path.join('/home/bene/NNGamma/data/data_exp/')
+path_data = os.path.join('/local/home/bewinter/SPT/data/x_t_cosmo/')
 
 config = Config(data_path=path_data, shift=0)
 
 data = gamma_dataset(path_data, '', config)
+
+print("Length of data: " +  str(len(data)))
 
 target = data.train_target
 xT = data.xT

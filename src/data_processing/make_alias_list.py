@@ -13,7 +13,7 @@ import data_processing as dp
 
 def main():
     file_path = '../raw_data/'
-    folder_names = ['t_cosmo']
+    folder_names = ['t_cosmo', 'brouwer']
     #folder_names = ['t_cosmo', 'brouwer_exp_c'] 
     df, complete_list1, __ = dp.load_exp_data(file_path, folder_names)
     #folder_names = ['elect']

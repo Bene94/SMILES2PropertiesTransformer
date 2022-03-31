@@ -4,7 +4,7 @@ import os
 from numpy.random import default_rng
 ## function to create multiple splits of the data
 
-file_path = ["brouwer_exp_c"]
+file_path = ["brouwer"]
 vocab_path = "vocab"
 ow = True
 
