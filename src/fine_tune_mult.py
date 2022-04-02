@@ -170,48 +170,48 @@ def fine_tune(model_name, data_path, xp_name, batch_size, epochs, lr, weight_dec
             torch.cuda.empty_cache()
 
             if lval == 1:
-                epo_val_loss_0, __ , __ , __ = evaluate(model, val_0_data, criterion, config) 
-                epo_val_loss_1, __ , __ , __ = evaluate(model, val_1_data, criterion, config)
-                epo_val_loss_2, __ , __ , __ = evaluate(model, val_2_data, criterion, config)
+                if len(val_0_data) > 0:
+                    epo_val_loss_0, __ , __ , __ = evaluate(model, val_0_data, criterion, config)
+                    epo_val_loss[i,epoch,0] = epo_val_loss_0
+                    wandb.log({'val_0_loss': epo_val_loss_0})
+                if len(val_1_data) > 0:
+                    epo_val_loss_1, __ , __ , __ = evaluate(model, val_1_data, criterion, config)
+                    epo_val_loss[i,epoch,1] = epo_val_loss_1
+                    wandb.log({'val_1_loss': epo_val_loss_1})
+                if len(val_2_data) > 0:
+                    epo_val_loss_2, __ , __ , __ = evaluate(model, val_2_data, criterion, config)
+                    epo_val_loss[i,epoch,2] = epo_val_loss_2
+                    wandb.log({'val_2_loss': epo_val_loss_2})
 
-                epo_val_loss[i,epoch,0] = epo_val_loss_0
-                epo_val_loss[i,epoch,1] = epo_val_loss_1
-                epo_val_loss[i,epoch,2] = epo_val_loss_2
-
-                wandb.log({'epoch_val_loss_0': epo_val_loss_0, 'epoch_val_loss_1': epo_val_loss_1, 'epoch_val_loss_2': epo_val_loss_2})
                 wandb.log({'epoch': epoch})
 
             # evaluate the 3 validation sets
 
-        
-        temp_val_loss, val_predction_0, val_target_0, val_input_0 = evaluate(model, val_0_data, criterion, config)
-        
-        wandb.log({"val_0_ft": temp_val_loss})
-
-        temp_val_loss, val_predction_1, val_target_1, val_input_1  = evaluate(model, val_1_data, criterion, config)
-
-        wandb.log({"val_1_ft": temp_val_loss})
-
-        temp_val_loss, val_predction_2, val_target_2, val_input_2  = evaluate(model, val_2_data, criterion, config)
-    
-        wandb.log({"val_2_ft": temp_val_loss})
+        if len(val_0_data) > 0:
+            temp_val_loss, val_predction_0, val_target_0, val_input_0 = evaluate(model, val_0_data, criterion, config)
+            wandb.log({"val_0_ft": temp_val_loss})
+            np.save(path_temp + xp_name + '/val_predction_0_'+ str(i) +'.npy', val_predction_0)
+            np.save(path_temp + xp_name + '/val_input_0_'+ str(i) +'.npy', val_input_0[2])
+            np.save(path_temp + xp_name + '/val_target_0_'+ str(i) +'.npy', val_target_0)
+       
+        if len(val_1_data) > 0:
+            temp_val_loss, val_predction_1, val_target_1, val_input_1  = evaluate(model, val_1_data, criterion, config)
+            wandb.log({"val_1_ft": temp_val_loss})
+            np.save(path_temp + xp_name + '/val_predction_1_'+ str(i) +'.npy', val_predction_1)
+            np.save(path_temp + xp_name + '/val_input_1_'+ str(i) +'.npy', val_input_1[2])
+            np.save(path_temp + xp_name + '/val_target_1_'+ str(i) +'.npy', val_target_1)
+            
+        if len(val_2_data) > 0:
+            temp_val_loss, val_predction_2, val_target_2, val_input_2  = evaluate(model, val_2_data, criterion, config)
+            wandb.log({"val_2_ft": temp_val_loss})
+            np.save(path_temp + xp_name + '/val_predction_2_'+ str(i) +'.npy', val_predction_2)
+            np.save(path_temp + xp_name + '/val_input_2_'+ str(i) +'.npy', val_input_2[2])
+            np.save(path_temp + xp_name + '/val_target_2_'+ str(i) +'.npy', val_target_2)
     
         if not os.path.exists(path_temp + xp_name):
             os.makedirs(path_temp + xp_name)
 
         np.save(path_temp + xp_name + '/i.npy', i)
-        
-        np.save(path_temp + xp_name + '/val_predction_0_'+ str(i) +'.npy', val_predction_0)
-        np.save(path_temp + xp_name + '/val_predction_1_'+ str(i) +'.npy', val_predction_1)
-        np.save(path_temp + xp_name + '/val_predction_2_'+ str(i) +'.npy', val_predction_2)
-
-        np.save(path_temp + xp_name + '/val_input_0_'+ str(i) +'.npy', val_input_0[2])
-        np.save(path_temp + xp_name + '/val_input_1_'+ str(i) +'.npy', val_input_1[2])
-        np.save(path_temp + xp_name + '/val_input_2_'+ str(i) +'.npy', val_input_2[2])
-
-        np.save(path_temp + xp_name + '/val_target_0_'+ str(i) +'.npy', val_target_0)
-        np.save(path_temp + xp_name + '/val_target_1_'+ str(i) +'.npy', val_target_1)
-        np.save(path_temp + xp_name + '/val_target_2_'+ str(i) +'.npy', val_target_2)
 
     np.save(path_temp + xp_name + '/epo_val_loss', epo_val_loss)
 

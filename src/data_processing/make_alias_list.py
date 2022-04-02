@@ -16,12 +16,12 @@ def main():
     folder_names = ['t_cosmo', 'brouwer']
     #folder_names = ['t_cosmo', 'brouwer_exp_c'] 
     df, complete_list1, __ = dp.load_exp_data(file_path, folder_names)
-    #folder_names = ['elect']
-    #df, complete_list2, __ = dp.load_exp_data(file_path, folder_names)
+    folder_names = ['elect']
+    df, complete_list2, __ = dp.load_exp_data(file_path, folder_names)
 
-    #complete_list = complete_list1.append(complete_list2, ignore_index=True)
+    complete_list = complete_list1.append(complete_list2, ignore_index=True)
 
-    complete_list = complete_list1
+    #complete_list = complete_list1
 
     alias_dict = augment_smile(complete_list.SMILE0.to_list())
     np.save('../raw_data/alias/alias_dict_brouwer.npy', alias_dict)

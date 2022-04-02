@@ -37,7 +37,7 @@ T = xT[:,1]
 target = torch.squeeze(target)
 target = target.numpy()
 # plot target over x, x is in range 0,1
-plt.rcParams['text.usetex'] = True
+#plt.rcParams['text.usetex'] = True
 
 fig, ax = plt.subplots()
 ax.plot(x, target, '*b', label='target')

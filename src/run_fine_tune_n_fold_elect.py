@@ -11,13 +11,13 @@ now_str = now.strftime("%Y%m%d-%H%M%S")[2:]
 
 #### USER Changable ####
 
-model = '211220-192228'
+model = '220331-141542'
 
 aug = 1 # 0: no aug, 1: aug
 lval_int = 1 # sets the interval of runs that validate during training validating often will increase training time, however not a large issue for small val datasets
 lval = 10
 xprun = True 
-n_split = 200
+n_split = 4 
 epo = int(50)
 wandb_proj = 'ENN_FT'
 
@@ -29,7 +29,7 @@ save_path = 'f_t_'
 save_path = save_path + model + '_' + now_str
 group = str(n_split) + '_' + now_str 
 
-comand_s = 'xp run /home/bene/SPT/src/xprun_fine_mult.ron -p 2 --include-dirty' 
+comand_s = 'xp run /local/home/bewinter/SPT/src/xprun_fine_mult.ron -p 2 --include-dirty' 
 comand_e = ' -- -m ' + model + ' -l 1e-4 -x 200 '     
 
 for i in range(0,n_split):

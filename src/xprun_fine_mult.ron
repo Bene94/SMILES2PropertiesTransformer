@@ -19,10 +19,10 @@ XpV0(
                 "WANDB_API_KEY": "wandb-api-key",
             },
             volumes: 
-                {"/home/bene/SPT/data": "/mnt/xprun/data", 
-                "/home/bene/SPT/Models": "/mnt/xprun/out",
-                "/home/bene/SPT/Plot": "/mnt/xprun/plot",
-                "/home/bene/SPT/out_fine_tune": "/mnt/xprun/temp",
+                {"/local/home/bewinter/SPT/data": "/mnt/xprun/data", 
+                "/local/home/bewinter/SPT/Models": "/mnt/xprun/out",
+                "/local/home/bewinter/SPT/Plot": "/mnt/xprun/plot",
+                "/local/home/bewinter/SPT/out_fine_tune": "/mnt/xprun/temp",
             },
         ),
     }
