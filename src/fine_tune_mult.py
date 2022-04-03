@@ -185,7 +185,10 @@ def fine_tune(model_name, data_path, xp_name, batch_size, epochs, lr, weight_dec
 
                 wandb.log({'epoch': epoch})
 
-            # evaluate the 3 validation sets
+
+        # check if path exists and create if not
+        if not os.path.exists(path_temp + xp_name):
+            os.makedirs(path_temp + xp_name)
 
         if len(val_0_data) > 0:
             temp_val_loss, val_predction_0, val_target_0, val_input_0 = evaluate(model, val_0_data, criterion, config)

@@ -18,7 +18,7 @@ lval_int = 1 # sets the interval of runs that validate during training validatin
 lval = 10
 xprun = True 
 n_split = 4 
-epo = int(50)
+epo = int(6)
 wandb_proj = 'ENN_FT'
 
 path = 'data_elect'
