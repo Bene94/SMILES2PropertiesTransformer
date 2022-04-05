@@ -28,9 +28,10 @@ class gamma_dataset(Dataset):
             target = torch.from_numpy(data["lnGamma"].to_numpy()).float()
         else: 
             # concatenate lnGamma_1 and lnGamma_2 with width 2 
-            target = torch.from_numpy(np.stack((data["lnGamma_1"].to_numpy(), data["lnGamma_2"].to_numpy()), axis=1)).float()
+            target = torch.from_numpy(np.stack((data["y0"].to_numpy(), data["y1"].to_numpy()), axis=1)).float()
             
-        smile_index = torch.from_numpy(data[["solute_idx","solvent_idx"]].to_numpy()).int()
+        smile_index = data[['SMILES0','SMILES1']].to_numpy()
+        
         xT = torch.from_numpy(data[["x","T"]].to_numpy()).float()
         index = torch.from_numpy(data["i"].to_numpy()).int()
 
@@ -50,8 +51,8 @@ class gamma_dataset(Dataset):
 
         comp_list = self.comp_list
 
-        SMILE1 = int(self.data["solute_idx"][index])
-        SMILE2 = int(self.data["solvent_idx"][index])
+        SMILE1 = int(self.data["SMILES0"][index])
+        SMILE2 = int(self.data["SMILES1"][index])
 
         if self.aug:
             rand1 = np.random.randint(0,int(self.n_alias[SMILE1]))
@@ -82,21 +83,31 @@ def smile2input_NRTL(solvent,solute,x,T):
     vocab_path = '../vocab/'
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
 
-    df = pd.DataFrame(columns=['solvent','solute','lnGamma_1', 'lnGamma_2','x','T'])
+    df = pd.DataFrame(columns=['SMILES0','SMILES1','y0', 'y1','x','T','i'])
 
     for x_i in x:
         for T_j in T:
-            df = df.append({'solvent':solvent, 'solute':solute, 'lnGamma_1':0, 'lnGamma_2':0, 'x':x_i, 'T':T_j, 'i': 0}, ignore_index=True)
-    
-    df.reset_index(drop=False, inplace=True)
-    df.lnGamma_1 = df.lnGamma_1.astype(float)
-    df.lnGamma_2 = df.lnGamma_2.astype(float)
-    df.x = df.x.astype(float)
-    df.T = df['T'].astype(float)
-    df.i = df['i'].astype(int)
+            new_df = pd.DataFrame(columns=['SMILES0','SMILES1','y0', 'y1','x','T'])
+            new_df['SMILES0'] = [solute]
+            new_df['SMILES1'] = [solvent]
+            new_df['y0'] = [0]
+            new_df['y1'] = [0]
+            new_df['x'] = [x_i]
+            new_df['T'] = [T_j]
+            new_df['i'] = [0]
 
-    solvent_list = df['solvent'].drop_duplicates()
-    solute_list = df['solute'].drop_duplicates()
+            df = pd.concat([df,new_df])
+            
+    df.reset_index(drop=False, inplace=True)
+    df.x = df.x.astype(float)
+    df['T'] = df['T'].astype(float)
+    df['i'] = df['i'].astype(int)
+    df['y0'] = df['y0'].astype(float)
+    df['y1'] = df['y1'].astype(float)
+
+
+    solvent_list = df['SMILES0'].drop_duplicates()
+    solute_list = df['SMILES1'].drop_duplicates()
 
     complete_list = pd.concat([solute_list, solvent_list])
     complete_list = complete_list.drop_duplicates()
@@ -122,11 +133,11 @@ def smile2input(solvent,solute,x,T):
     vocab_path = '../vocab/'
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
 
-    df = pd.DataFrame(columns=['solvent','solute','lnGamma','x','T'])
+    df = pd.DataFrame(columns=['SMILES0','SMILES1','y0','x','T'])
 
     for x_i in x:
         for T_j in T:
-            df = df.append({'solvent':solvent, 'solute':solute, 'lnGamma':0, 'x':x_i, 'T':T_j, 'i': 0}, ignore_index=True)
+            df = df.append({'SMILES0':solvent, 'SMILES1':solute, 'y0':0, 'x':x_i, 'T':T_j, 'i': 0}, ignore_index=True)
     
     df.reset_index(drop=False, inplace=True)
     df.lnGamma = df.lnGamma.astype(float)

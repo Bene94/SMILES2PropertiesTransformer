@@ -32,7 +32,7 @@ def processing(folder_name, save_path, vocab_path, frac, seed, ow, h2o, source, 
     
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
-    vocab_dict = load_vocab(vocab_path,'vocab_dict_tox21')
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_ddb')
     df_join, comp_list, index_list  = load_exp_data(file_path, folder_name)
         
     comp_list = aug_data(comp_list, alias_path=alias_path)
@@ -168,8 +168,8 @@ def load_exp_data(file_path, foler_names):
         bar.finish()
     # remove all nan rows
     if not 'i' in df.columns:
-        df['i'] = np.array(range(len(df))) 
-    df[df.i.isna()]['i'] = 0
+        df.loc[:,'i'] = np.array(range(len(df))) 
+    df[df.i.isna()].loc[:,'i'] = 0
 
     df = df.dropna()
     df = df.reset_index(drop=True)

@@ -4,7 +4,7 @@ import os
 from numpy.random import default_rng
 ## function to create multiple splits of the data
 
-file_path = ["brouwer"]
+file_path = ["brouwer_split"]
 vocab_path = "vocab"
 ow = True
 
@@ -23,7 +23,8 @@ if exclude_H2O:
     h2o_index = systems[(systems.SMILES0 == 'O') | (systems.SMILES1 == 'O')].index
     index_list = np.setdiff1d(index_list, h2o_index)
     num_splits = 1000
-    save_path = "data_exp_noH2O_" + str(num_splits)  + '_V2'
+    save_path = "data_exp_noH2O_" + str(num_splits)
+    save_path = "exp_b_split" + str(num_splits)
 elif only_H2O:
     index_list = systems[systems.solvent == 'O'].index
     index_list = np.array(index_list)

@@ -9,4 +9,4 @@ def recursive_chown(path, owner, group):
         for filename in filenames:
             shutil.chown(os.path.join(dirpath, filename), owner, group)
 
-recursive_chown(path, 1001, 1001)
+recursive_chown(path, 527563, 527563)

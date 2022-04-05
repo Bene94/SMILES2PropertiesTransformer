@@ -18,20 +18,21 @@ from transprop.load_model import *
 from simple_evaluation_utils import *
 
 # %% Parameters
-model_path = '/home/bene/NNGamma/temp/'
-model_path = '/home/bene/NNGamma/Models/'
+model_path = '/local/home/bewinter/SPT/temp/'
+model_path = '/local/home/bewinter/SPT/Models/'
 model_name = 'local_test_fine'
-model_name = '220118-040417' # NRTL
-model_name = '220127-180116' #reg
+model_name = '220331-141545' # NRTL-T
+model_name = '220331-141603' # NRTL
+#model_name = '220127-180116' #reg
 device = 'cuda'
 #device = 'cpu'
 
-solvent = "CCCCCCCC"
+solvent = "N=CCCCO"
 solute = "C=O"
-solute = "OCCCCO"
+#solute = "CCCCCCCC"
 T = 298.15
 
-x = np.linspace(0, 1, num=10000)
+x = np.linspace(0, 1, num=100)
 T = np.linspace(T, T, 1)
 
 # %% Load model
@@ -39,7 +40,7 @@ T = np.linspace(T, T, 1)
 model, config = load_model(model_path,model_name)
 config.device = device
 
-if config.mode == 'NRTL':
+if config.mode == 'NRTL' or config.mode == 'NRTL-T':
     data_loader_solute = smile2input_NRTL(solute, solvent, x ,T)
 else:   
     data_loader_solute = smile2input(solute, solvent, x ,T)
@@ -50,12 +51,12 @@ criterion = nn.MSELoss()
 # time evaluation
 start = time.time()
 __, gamma_solute, __, __ = evaluate(model, data_loader_solute, criterion, config)
-if config.mode != 'NRTL':
+if config.mode != 'NRTL' and config.mode != 'NRTL-T':
     __, gamma_solvent, __, __ = evaluate(model, data_loder_solvent, criterion, config)
 end = time.time()
 
 print("Evaluation time: ", end - start)
-if config.mode == 'NRTL':
+if config.mode == 'NRTL' or config.mode == 'NRTL-T':
     gamma_solute = np.reshape(gamma_solute, (int(len(gamma_solute)/2),2))
 else:
     gamma_solvent = np.flip(gamma_solvent, axis=0)
