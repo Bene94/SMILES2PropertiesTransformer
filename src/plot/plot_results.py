@@ -1,6 +1,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from matplotlib.colors import Normalize, LogNorm
 from matplotlib import cm, markers
@@ -18,6 +19,9 @@ def make_histogram(prediciton, target, name, path=''):
     plt.ylabel('count')
     plt.xlim(-10,10)
     plt.title(name)
+    # create path if it does not exist
+    if not os.path.exists(path + 'hist/'):
+        os.makedirs(path + 'hist/')
     plt.savefig(path + 'hist/hist_' + name)
 
 def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
@@ -36,6 +40,10 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     plt.xlim(-2,2)
     plt.title(r'{}'.format( '\n MSE: ' + str(MSE) + '\n MAE: ' + str(MAE) + '\n $\Delta$ ln $\gamma_\infty < 0.3$: ' + str(perc_data) + '\%'))
     #plt.title('MSE: ' + str(MSE) + ' MAE: ' + str(MAE) + ' perc_data: ' + str(perc_data))
+    # create path if it does not exist
+    if not os.path.exists(path + 'hist/'):
+        os.makedirs(path + 'hist/')
+
     plt.savefig(path + 'hist/hist_delta_' + name)
     plt.rcParams['text.usetex'] = False
 
@@ -80,6 +88,9 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
     plt.xlabel(r"$\Delta$ ln $\gamma_\infty$")
     plt.xlim(-1,1)
     plt.x_tick_labels = [-1, -0.5, -0.3, 0, 0.3, 0.5, 1]
+    # create path if it does not exist
+    if not os.path.exists(path + 'hist/'):
+        os.makedirs(path + 'hist/')
     # save high res image
     plt.savefig(path + 'hist/hist_delta_mult', dpi=900)
     plt.rcParams['text.usetex'] = False
@@ -108,6 +119,9 @@ def make_heatmap(prediciton, target, name = '', title='', path = '', save=False)
     plt.ylabel(r'$\ln\gamma^\infty_{\mathrm{prd.}}$')
     plt.xlabel(r'$\ln\gamma^\infty_{\mathrm{truth}}$')
     plt.tight_layout()
+    # create path if it does not exist
+    if not os.path.exists(path + 'heat/'):
+        os.makedirs(path + 'heat/')
     plt.savefig(path + 'heat/heat_' + name, dpi=600)
 
     plt.show()
@@ -148,6 +162,9 @@ def make_scatter(prediciton, target, name = '', title = '',path = '', save=False
     plt.yticks([-5, 0, 5, 10, 15])
     # increase fond size
     plt.tight_layout()
+    # create path if it does not exist
+    if not os.path.exists(path + 'scatter/'):
+        os.makedirs(path + 'scatter/')
     if save:
         plt.savefig(path + 'scatter/scatter_' + name)
     else:
@@ -232,6 +249,8 @@ def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '
     ax[2].set_xticklabels(n_list)
     # set the title of the figure to name
     fig.suptitle(name)
+    # increase font size
+    
     if save:
         plt.savefig(path + 'boxplot/boxplot_' + name)
 
