@@ -19,8 +19,8 @@ from transprop.config import *
 
 @click.command()
 
-@click.option('--model_name', '-m', default='211220-192228', help='Name of the model')
-@click.option('--data_path', '-p',default='data_D_noH2O_77_V2', help='Path to the data')
+@click.option('--model_name', '-m', default='220331-141542', help='Name of the model')
+@click.option('--data_path', '-p',default='x_t_cosmo', help='Path to the data')
 @click.option('--xp_name', '-n',default='', help='Name of the experiment')
 @click.option('--group', '-g', default='none', help='groups for the experiment')
 @click.option('--n_start', '-s', default=-1, help='set to be processed if -1 all')

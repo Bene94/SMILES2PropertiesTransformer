@@ -1,0 +1,24 @@
+{
+    "os": "Linux-5.13.0-37-generic-x86_64-with-glibc2.31",
+    "python": "3.9.7",
+    "heartbeatAt": "2022-04-08T11:37:41.714414",
+    "startedAt": "2022-04-08T11:37:40.421376",
+    "docker": null,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "gpu_count": 3,
+    "cpu_count": 64,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/local/home/bewinter/SPT/src/fine_tune_mult.py",
+    "codePath": "src/fine_tune_mult.py",
+    "git": {
+        "remote": "git@github.com:Bene94/SPT.git",
+        "commit": "efbf8875c5f8befa2d827ff8a719c9c7c2de0697"
+    },
+    "email": null,
+    "root": "/local/home/bewinter/SPT",
+    "host": "mavt-epse-s103l.d.ethz.ch",
+    "username": "bewinter",
+    "executable": "/local/home/bewinter/miniconda3/bin/python"
+}

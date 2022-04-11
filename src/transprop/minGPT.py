@@ -97,7 +97,19 @@ class NRTL_head(nn.Module):
 
     def forward(self, x, X):
 
+        limits = torch.zeros(3, 2, device=self.device)
+        
+        limits[0,0] = -1.0
+        limits[1,0] = -1000
+        limits[2,0] = -1000
+
+        limits[0,1] = 1.6
+        limits[1,1] = 1040
+        limits[2,1] = 1040
+
         x = self.linear(x)
+        x = x / 10
+        x = (torch.sigmoid(x) * (limits[:,1] - limits[:,0])) + limits[:,0]
 
         #x = x.type(torch.float64)
         x_out = torch.zeros(x.shape[0] , 2, device=self.device)

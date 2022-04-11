@@ -12,7 +12,7 @@ XpV0(
             ],
 
             gpu: 1,
-            gpu_mem: "11GB",
+            gpu_mem: "24GB",
             cpu_mem: "8GB",
             
             env_secrets: {

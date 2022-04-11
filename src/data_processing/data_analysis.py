@@ -40,15 +40,19 @@ target = target.numpy()
 #plt.rcParams['text.usetex'] = True
 
 fig, ax = plt.subplots()
-ax.plot(x, target, '*b', label='target')
+ax.plot(x, target[:,0], '*b', label='target')
+ax.plot(1-x, target[:,1], '*r', label='target')
 ax.set_xlabel('x')
 ax.set_ylabel('ln $\gamma_\infty$')
 ax.set_title('Target over x')
 ax.legend()
 plt.show()
 
+
 #save in the plot/ folder
 plt.savefig('plot/analysis/target_over_x.png')
+
+print('Plotted target over x')
 # plot target over T
 
 
@@ -87,3 +91,13 @@ ax.set_title('T distribution')
 plt.show()
 
 plt.savefig('plot/analysis/T_distribution.png')
+
+plt.clf()
+fig, ax = plt.subplots()
+ax.hist(x, bins=51)
+ax.set_xlabel('x')
+ax.set_ylabel('counts')
+ax.set_title('x distribution')
+plt.show()
+
+plt.savefig('plot/analysis/x_distribution.png')
