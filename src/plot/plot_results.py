@@ -147,6 +147,7 @@ def make_scatter(prediciton, target, name = '', title = '',path = '', save=False
     plt.xticks([-5, 0, 5, 10, 15])
     plt.yticks([-5, 0, 5, 10, 15])
     # increase fond size
+    plt.tight_layout()
     if save:
         plt.savefig(path + 'scatter/scatter_' + name)
     else:

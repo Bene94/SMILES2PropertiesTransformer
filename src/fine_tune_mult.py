@@ -19,8 +19,8 @@ from transprop.config import *
 
 @click.command()
 
-@click.option('--model_name', '-m', default='220331-141542', help='Name of the model')
-@click.option('--data_path', '-p',default='x_t_cosmo', help='Path to the data')
+@click.option('--model_name', '-m', default='211220-192228', help='Name of the model')
+@click.option('--data_path', '-p',default='data_D_noH2O_77_V2', help='Path to the data')
 @click.option('--xp_name', '-n',default='', help='Name of the experiment')
 @click.option('--group', '-g', default='none', help='groups for the experiment')
 @click.option('--n_start', '-s', default=-1, help='set to be processed if -1 all')
@@ -196,7 +196,7 @@ def fine_tune(model_name, data_path, xp_name, batch_size, epochs, lr, weight_dec
             np.save(path_temp + xp_name + '/val_predction_0_'+ str(i) +'.npy', val_predction_0)
             np.save(path_temp + xp_name + '/val_input_0_'+ str(i) +'.npy', val_input_0[2])
             np.save(path_temp + xp_name + '/val_target_0_'+ str(i) +'.npy', val_target_0)
-       
+     
         if len(val_1_data) > 0:
             temp_val_loss, val_predction_1, val_target_1, val_input_1  = evaluate(model, val_1_data, criterion, config)
             wandb.log({"val_1_ft": temp_val_loss})

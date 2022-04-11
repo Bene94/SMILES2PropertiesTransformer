@@ -2,7 +2,7 @@ import numpy as np
 
 import data_processing as dp
 
-n_splits = 200
+n_splits = 20
 file_path = ["elect"]
 save_path = "data_elect"
 vocab_path = "vocab"

@@ -17,9 +17,9 @@ aug = 1 # 0: no aug, 1: aug
 lval_int = 1 # sets the interval of runs that validate during training validating often will increase training time, however not a large issue for small val datasets
 lval = 10
 xprun = True 
-n_split = 4 
+n_split = 20 
 epo = int(6)
-wandb_proj = 'ENN_FT'
+wandb_proj = 'temp_test'
 
 path = 'data_elect'
 xp_run_path = '/local/home/bewinter/SPT/src/xprun_fine_mult.ron'
@@ -29,7 +29,7 @@ save_path = 'f_t_'
 save_path = save_path + model + '_' + now_str
 group = str(n_split) + '_' + now_str 
 
-comand_s = 'xp run' + xp_run_path + '-p 2 --include-dirty' 
+comand_s = 'xp run ' + xp_run_path + ' -p 2 --include-dirty' 
 comand_e = ' -- -m ' + model + ' -l 1e-4 -x 200 '     
 
 for i in range(0,n_split):
