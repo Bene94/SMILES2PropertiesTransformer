@@ -35,13 +35,13 @@ def load_data(file_path, val_type):
 
 if __name__ == '__main__':
 
-    name = 'f_t_220331-141542_220411-104649'
+    name = 'f_t_512_T_base_220412-152241'
 
     group = True 
     scatter = True 
 
-    path_temp = '/local/home/bewinter/SPT/out_fine_tune/'
-    plot_path = '/local/home/bewinter/SPT/src/plot/'
+    path_temp = '/local/home/bewinter/temp_demo/SPT/out_fine_tune/'
+    plot_path = '/local/home/bewinter/temp_demo/SPT/src/plot/'
     data_path = path_temp + name + '/'
 
     type_list = ['0', '1', '2']
