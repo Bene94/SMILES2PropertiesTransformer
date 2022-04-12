@@ -1,6 +1,7 @@
 from progressbar.widgets import ETA
 import rdkit as rd  
 import numpy as np
+import os
 
 import progressbar as pb
 
@@ -23,11 +24,11 @@ def main():
     complete_list = complete_list1.append(complete_list2.append(complete_list3, ignore_index=True), ignore_index=True)
 
     #complete_list = complete_list1
-
+    # check if the directory exists
+    if not os.path.exists('../raw_data/alias/'):
+        os.makedirs('../raw_data/alias/')
     alias_dict = augment_smile(complete_list.SMILE0.to_list())
     np.save('../raw_data/alias/alias_dict_brouwer.npy', alias_dict)
-
-
 
 def augment_smile(solvent_list):
     # creates alternitive representations of smiles

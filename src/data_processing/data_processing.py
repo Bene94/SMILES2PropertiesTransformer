@@ -79,7 +79,7 @@ def processing_n_in(foler_name, save_path, vocab_path, seed, ow, n, comp_list):
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
 
-    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_ddb')
     df_join, __, ___  = load_exp_data(file_path, foler_name)
     df_list = split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n)
 
@@ -99,7 +99,7 @@ def processing_n_out(foler_name, save_path, vocab_path, ow, comp_list, systems, 
      
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
-    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_ddb')
     df_join, __, __  = load_exp_data(file_path, foler_name)
     df_list = split_data_test_val_exp_n_out(df_join, comp_list, systems, index)
 
@@ -119,7 +119,7 @@ def get_comp_list(foler_name, vocab_path):
 
     file_path, file_out, vocab_path, alias_path  =  get_paths('', vocab_path) 
 
-    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_ddb')
     
     df_join, comp_list, __  = load_exp_data(file_path, foler_name) 
     comp_list = aug_data(comp_list, alias_path=alias_path)
@@ -134,7 +134,7 @@ def processing_n_out_sund(foler_name, save_path, vocab_path, ow, comp_list, syst
     file_path, file_out, vocab_path, alias_path  =  get_paths(save_path, vocab_path) 
 
 
-    vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
+    vocab_dict = load_vocab(vocab_path,'vocab_dict_ddb')
     df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
     df_list = split_data_test_val_exp_n_out(df_join, comp_list, systems, index)
 

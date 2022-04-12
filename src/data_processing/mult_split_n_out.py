@@ -25,6 +25,7 @@ if exclude_H2O:
     num_splits = 1000
     save_path = "data_exp_noH2O_" + str(num_splits)
     save_path = "exp_b_split" + str(num_splits)
+    save_path = 'ddb_split_' + str(num_splits)
 elif only_H2O:
     index_list = systems[systems.solvent == 'O'].index
     index_list = np.array(index_list)
