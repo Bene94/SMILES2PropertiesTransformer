@@ -240,7 +240,7 @@ def load_checkpoint(config):
         optimizer.load_state_dict(pickle.load(f))
     with open(path + config.xp_name + '_scheduler.pkl', 'rb') as f:
         scheduler_dict = pickle.load(f)
-        scheduler = CosineAnnealingWarmupRestarts(optimizer,optimizer, first_cycle_steps=scheduler_dict[], cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
+        scheduler = CosineAnnealingWarmupRestarts(optimizer)
         scheduler.load_state_dict(scheduler_dict)
     with open(path + config.xp_name + '_epoch.pkl', 'rb') as f:
         epoch = pickle.load(f)
