@@ -26,14 +26,14 @@ from transprop.config import *
 @click.option('--wdecay', default=0.0, help='Weight decay')
 @click.option('--drp', default=0.0, help='Dropout rate')
 
-@click.option('--mode', default="reg", help='Determines the mode: reg: does a regresstion; NRTL: use NRTL model as head, NRLT-T: use NRTL-T model as head')
+@click.option('--mode', default="reg", help='Determines the mode: reg: does a regresstion; class: does a classification - deprecated')
 @click.option('--bins', default=2000, help='Determins the number of bins in the clasifcation mode')
 @click.option('--aug', default=0, help='Determines if the data is augmented')
 
 @click.option('--lr', default= 0.001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
-@click.option('--max_btch', default=512, help='Maximum batch size')
+@click.option('--max_btch', default=512, help='Maximum batch size for the GPU, will use gradient accumulation')
 
 @click.option('--warmup_epo', default=5, help='Number of warmup epochs')
 @click.option('--warmup_lr', default=100, help='Reduciton of LR in the warmup')
@@ -50,7 +50,7 @@ from transprop.config import *
 
 @click.option('--shift', default=0, help='Shift the data')
 @click.option('--xt', default=1, help='If xT should be used')
-@click.option('--noval', default=0, help='All data is used for training')
+@click.option('--noval', default=0, help='All data is used for training, no validation takes place')
 
 
 def main(emb, hid_fac, nlay, nhead, drp, lr, epo, btch, data, wdecay, max_btch, cuda, log_name, warmup_epo, warmup_lr, warmup_cycle, warmup_gamma, test, mode, bins, aug, shift, xt, stop_epo, noval, project):

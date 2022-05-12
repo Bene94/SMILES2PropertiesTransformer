@@ -87,34 +87,34 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
         for param_group, lr in zip(self.optimizer.param_groups, self.get_lr()):
             param_group['lr'] = lr
 
-def dump_state_dict(self):
-    return {
-        'cycle': self.cycle,
-        'step_in_cycle': self.step_in_cycle,
-        'cur_cycle_steps': self.cur_cycle_steps,
-        'max_lr': self.max_lr,
-        'warmup_steps': self.warmup_steps,
-        'gamma': self.gamma,
-        'last_epoch': self.last_epoch,
-        'base_max_lr': self.base_max_lr,
-        'base_lrs': self.base_lrs,
-        'min_lr': self.min_lr,
-        'cycle_mult': self.cycle_mult,
-        'first_cycle_steps': self.first_cycle_steps
-    }
+    def dump_state_dict(self):
+        return {
+            'cycle': self.cycle,
+            'step_in_cycle': self.step_in_cycle,
+            'cur_cycle_steps': self.cur_cycle_steps,
+            'max_lr': self.max_lr,
+            'warmup_steps': self.warmup_steps,
+            'gamma': self.gamma,
+            'last_epoch': self.last_epoch,
+            'base_max_lr': self.base_max_lr,
+            'base_lrs': self.base_lrs,
+            'min_lr': self.min_lr,
+            'cycle_mult': self.cycle_mult,
+            'first_cycle_steps': self.first_cycle_steps
+        }
 
-def load_state_dict(self, state_dict):
-    self.cycle = state_dict['cycle']
-    self.step_in_cycle = state_dict['step_in_cycle']
-    self.cur_cycle_steps = state_dict['cur_cycle_steps']
-    self.max_lr = state_dict['max_lr']
-    self.warmup_steps = state_dict['warmup_steps']
-    self.gamma = state_dict['gamma']
-    self.last_epoch = state_dict['last_epoch']
-    self.base_max_lr = state_dict['base_max_lr']
-    self.base_lrs = state_dict['base_lrs']
-    self.min_lr = state_dict['min_lr']
-    self.cycle_mult = state_dict['cycle_mult']
-    self.first_cycle_steps = state_dict['first_cycle_steps']
+    def load_state_dict(self, state_dict):
+        self.cycle = state_dict['cycle']
+        self.step_in_cycle = state_dict['step_in_cycle']
+        self.cur_cycle_steps = state_dict['cur_cycle_steps']
+        self.max_lr = state_dict['max_lr']
+        self.warmup_steps = state_dict['warmup_steps']
+        self.gamma = state_dict['gamma']
+        self.last_epoch = state_dict['last_epoch']
+        self.base_max_lr = state_dict['base_max_lr']
+        self.base_lrs = state_dict['base_lrs']
+        self.min_lr = state_dict['min_lr']
+        self.cycle_mult = state_dict['cycle_mult']
+        self.first_cycle_steps = state_dict['first_cycle_steps']
 
-    self.init_lr()
+        self.init_lr()
