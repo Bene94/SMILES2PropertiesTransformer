@@ -82,11 +82,8 @@ def train(model, criterion, optimizer, train_dataloader, val_dataloader_list, sc
             log_loss += loss.item()
         
         scaler.unscale_(optimizer)
-        if wandb.config.mode == 'NRTL' or wandb.config.mode == 'NRTL-T':
-            #torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
-            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 100)
-        else:
-            grad_norm = 0
+
+        grad_norm = 0
 
         scaler.step(optimizer)
         scaler.update()

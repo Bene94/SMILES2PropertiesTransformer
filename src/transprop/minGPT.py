@@ -82,110 +82,6 @@ class Block(nn.Module):
         x = x + self.mlp(self.ln2(x))
         return x
 
-class NRTL_head(nn.Module):
-    """
-    An Head using the NRTL modle takes 3 parameters:
-        x[0] = alpha
-        x[1] = tau_12
-        x[2] = tau_21
-    """
-    def __init__(self, config):
-        super().__init__()
-        self.device = config.device
-        self.linear = nn.Linear(config.embed_size, 3)
-
-
-    def forward(self, x, X):
-
-        limits = torch.zeros(3, 2, device=self.device)
-        
-        limits[0,0] = -1.0
-        limits[1,0] = -1000
-        limits[2,0] = -1000
-
-        limits[0,1] = 1.6
-        limits[1,1] = 1040
-        limits[2,1] = 1040
-
-        x = self.linear(x)
-        x = x / 10
-        x = (torch.sigmoid(x) * (limits[:,1] - limits[:,0])) + limits[:,0]
-
-        #x = x.type(torch.float64)
-        x_out = torch.zeros(x.shape[0] , 2, device=self.device)
-
-        G_12 = torch.exp(-x[:,0] * x[:,1])
-        G_21 = torch.exp(-x[:,0] * x[:,2])
-
-        x_out[:,0] = (1-X) ** 2 * (x[:,2] * (G_21 / (X + (1-X) * G_21)) **2 + (x[:,1] * G_12)/ ((1-X) + X * G_12)**2)
-        x_out[:,1] = (X)**2 * (x[:,1] * (G_12 / ((1-X) + X * G_12))**2 + (x[:,2] * G_21)/((X) + (1-X) * G_21)**2)
-
-        return x_out
-
-class NRTL_T_head(nn.Module):
-    """
-    An Head using the NRTL modle takes 3 parameters:
-        alpha = x[0] + x[1] * T 
-        tau_12 = x[2] + x[3] / T + x[4] * lnT + x[5] * T
-        tau_21 = x[6] + x[7] / T + x[8] * lnT + x[9] * T
-    """
-    def __init__(self, config):
-        super().__init__()
-        self.device = config.device
-        self.linear = nn.Linear(config.embed_size, 10) # reduce the embedding to number of NRTL-T parameters
-        self.layer_norm = nn.LayerNorm(10)
-        
-    def forward(self, x, X, T):
-        
-
-        limits = torch.zeros(10, 2, device=self.device)
-
-        limits[0,0] = -0.2
-        limits[1,0] = -0.0005
-        limits[2,0] = -400
-        limits[3,0] = -24000
-        limits[4,0] = -100
-        limits[5,0] = -0.15
-        limits[6,0] = -400
-        limits[7,0] = -24000
-        limits[8,0] = -100
-        limits[9,0] = -0.15
-
-        limits[0,1] = 0.6
-        limits[1,1] = 0.001
-        limits[2,1] = 440
-        limits[3,1] = 24000
-        limits[4,1] = 100
-        limits[5,1] = 0.15
-        limits[6,1] = 440
-        limits[7,1] = 24000
-        limits[8,1] = 100
-        limits[9,1] = 0.15
-
-        x = self.linear(x)
-        x = x / 10
-        x = (torch.sigmoid(x) * (limits[:,1] - limits[:,0])) + limits[:,0]
-
-        with autocast(False): 
-            X = X.type(torch.float64)
-            T = T.type(torch.float64)
-            x = x.type(torch.float64)
-
-            x_out = torch.zeros(x.shape[0] , 2, device=self.device)
-
-            alpha = x[:,0] + x[:,1] * T
-            tau_12 = x[:,2] + x[:,3] / T + x[:,4] * torch.log(T) + x[:,5] * T
-            tau_21 = x[:,6] + x[:,7] / T + x[:,8] * torch.log(T) + x[:,9] * T
-
-            G_12 = torch.exp(-alpha * tau_12)
-            G_21 = torch.exp(-alpha * tau_21)
-
-            x_out[:,0] = (1-X) ** 2 * (tau_21 * (G_21 / (X + (1-X) * G_21)) **2 + (tau_12 * G_12)/ ((1-X) + X * G_12)**2)
-            x_out[:,1] = (X)** 2 * (tau_12 * (G_12 / ((1-X) + X * G_12))**2 + (tau_21 * G_21)/((X) + (1-X) * G_21)**2)
-
-        return x_out, x
-
-
 class GPT(nn.Module):
     """  the full GPT language model, with a context size of block_size """
 
@@ -209,11 +105,6 @@ class GPT(nn.Module):
         
         if config.mode == 'reg':
             self.head = nn.Linear(config.embed_size, 1)
-        elif config.mode == 'NRTL':
-            self.head = NRTL_head(config)
-        elif config.mode == 'NRTL-T':
-            self.head = NRTL_T_head(config)
-        
         
         self.block_size = config.block_size
         self.apply(self._init_weights)
@@ -284,15 +175,6 @@ class GPT(nn.Module):
         b, t = idx.size()
         #assert t <= self.block_size, "Cannot forward, model block size is exhausted."
         
-        if self.config.mode == 'NRTL':
-            X = xT[:,0] + 0.5
-            xT[:,0] = 0
-        if self.config.mode == 'NRTL-T':
-            X = xT[:,0] + 0.5
-            T = (xT[:,1] + 1) * 298.5 
-            xT[:,0] = 0
-            xT[:,1] = 0
-        
         xT = torch.unsqueeze(xT,1)
         xT_proj = self.xT_lin(xT)
 
@@ -317,10 +199,6 @@ class GPT(nn.Module):
         x = self.decoder(x)
         x = F.relu(x)
 
-        if self.config.mode == 'NRTL':
-            logits = self.head(x,X)
-        if self.config.mode == 'NRTL-T':
-            logits, x = self.head(x,X,T)
         if self.config.mode == 'reg':
             logits = self.head(x)
 
