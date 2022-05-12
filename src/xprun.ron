@@ -19,11 +19,11 @@ XpV0(
                 "WANDB_API_KEY": "wandb-api-key",
             },
             volumes: 
-                {"/local/home/bewinter/SPT/data": "/mnt/xprun/data", 
-                "/local/home/bewinter/SPT/Models": "/mnt/xprun/out",
-                "/local/home/bewinter/SPT/Plot": "/mnt/xprun/plot",
-                "/local/home/bewinter/SPT/temp": "/mnt/xprun/temp",
-                "/local/home/bewinter/SPT/wandb": "/mnt/xprun/wandb",
+                {"/local/home/bewinter/Paper_SPT/SPT/data": "/mnt/xprun/data", 
+                "/local/home/bewinter/Paper_SPT/SPT/Models": "/mnt/xprun/out",
+                "/local/home/bewinter/Paper_SPT/SPT/Plot": "/mnt/xprun/plot",
+                "/local/home/bewinter/Paper_SPT/SPT/temp": "/mnt/xprun/temp",
+                "/local/home/bewinter/Paper_SPT/SPT/wandb": "/mnt/xprun/wandb",
             },
         ),
     }

@@ -33,7 +33,7 @@ from transprop.config import *
 @click.option('--lr', default= 0.001, help='Learning rate')
 @click.option('--epo', default=50, help='Number of epochs')
 @click.option('--btch', default=1024, help='Batchsize')
-@click.option('--max_btch', default=256, help='Maximum batch size')
+@click.option('--max_btch', default=512, help='Maximum batch size')
 
 @click.option('--warmup_epo', default=5, help='Number of warmup epochs')
 @click.option('--warmup_lr', default=100, help='Reduciton of LR in the warmup')
@@ -41,10 +41,10 @@ from transprop.config import *
 @click.option('--warmup_gamma', default=1.0, help='Warmup gamma')
 @click.option('--stop_epo', default=0, help='Number of epochs to stop warmup')
 
-@click.option('--data', default='data_t', help='Location of dataset')
+@click.option('--data', default='inf_t_cosmo', help='Location of dataset')
 
 @click.option('--cuda', default=True, help='Using GPU')
-@click.option('--log_name', default='', help='Using GPU')
+@click.option('--log_name', default='test', help='name in the log')
 @click.option('--test', default=0, help='If true smale dataset is used')
 @click.option('--project', default='test', help='wandb project name')
 
@@ -218,7 +218,8 @@ def save_checkpoint(model, config, epoch, optimizer, scheduler):
         pickle.dump(optimizer.state_dict(), f)
     # save scheduler state dict with pickle
     with open(path + config.xp_name + '_scheduler.pkl', 'wb') as f:
-        pickle.dump(scheduler, f)
+        scheduler_dict = scheduler.dump_state_dict()
+        pickle.dump(scheduler_dict, f)
     with open (path + config.xp_name + '_epoch.pkl', 'wb') as f:
         pickle.dump(epoch, f)
 
@@ -238,7 +239,9 @@ def load_checkpoint(config):
         optimizer = model.configure_optimizers(config)
         optimizer.load_state_dict(pickle.load(f))
     with open(path + config.xp_name + '_scheduler.pkl', 'rb') as f:
-        scheduler = pickle.load(f)
+        scheduler_dict = pickle.load(f)
+        scheduler = CosineAnnealingWarmupRestarts(optimizer,optimizer, first_cycle_steps=scheduler_dict[], cycle_mult=1.0, max_lr=config.lr, min_lr=min_lr, warmup_steps=warumup_steps, gamma=warmup_gamma)
+        scheduler.load_state_dict(scheduler_dict)
     with open(path + config.xp_name + '_epoch.pkl', 'rb') as f:
         epoch = pickle.load(f)
     return model, config, optimizer, scheduler, epoch
