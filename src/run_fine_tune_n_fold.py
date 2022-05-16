@@ -15,7 +15,7 @@ xp_path = '/local/home/bewinter/Paper_SPT/SPT/src/xprun_fine_mult.ron' # path to
 path = 'data_exp_noH2O_1000_V2' # path to the data
 lval = 10
 xprun = True
-n_split = 1000
+n_split = 1
 epo = int(50)
 
 save_path = 'f_t_'
