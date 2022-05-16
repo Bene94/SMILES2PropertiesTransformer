@@ -30,6 +30,7 @@ To process large datasets for pretraining use data_processing.py this function w
   --frac: fraction of data to val_ext
   
   --h2o: exclude h2o from val_ext
+  
 E.g. $ data_processing.py -p t_cosmo -p inf_cosmo -s data
   
 ## Experimental data pre-processing
