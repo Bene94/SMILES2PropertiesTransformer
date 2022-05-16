@@ -8,7 +8,7 @@ now_str = now.strftime("%Y-%m-%d%H:%M:%S")
 now_str = now_str.replace(" ", "_")
 now_str = now.strftime("%Y%m%d-%H%M%S")[2:]
 
-model = 'reg' # name of the pretrained model
+model = '220512-142153' # name of the pretrained model
 lval_int = 1 # sets the interval of runs that validate during training validating often will increase training time, however not a large issue for small val datasets
 wandb_project = 'FT_Paper' # name of the wandb project
 xp_path = '/local/home/bewinter/Paper_SPT/SPT/src/xprun_fine_mult.ron' # path to the xprun file
