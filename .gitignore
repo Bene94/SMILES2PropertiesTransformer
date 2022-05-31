@@ -8,7 +8,7 @@ out/*
 out_fine_tune/*
 raw_data/*
 temp/*
-
+*.pdf
 # Standard for python in vs code
 *.png
 .DS_Store
