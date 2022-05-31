@@ -58,9 +58,9 @@ def load_data(file_path, val_type):
 
 
 
-n_list = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 600, 700, 800, 1000] #, 2000] # , 100, 500, 1000]
+n_list = [20, 30, 40, 50, 100, 200, 300, 400, 500, 600, 700, 800] #, 2000] # , 100, 500, 1000]
 
-n_list = [10, 20, 50, 100, 200, 500, 1000, 2000, 3000, 4000, 5000]
+#n_list = [20, 50, 100, 200, 500, 1000]
 type_list = ['0', '1','2']
 
 if False:
@@ -75,7 +75,7 @@ if False:
     target_list_ut_1, prediction_list_ut_1, mse_list_ut_1 = load_data(n_list, data_path, type_list[1])
     target_list_ut_2, prediction_list_ut_2, mse_list_ut_2 = load_data(n_list, data_path, type_list[2])
 if True:
-    data_path = "/home/bene/NNGamma/out_fine_tune/n_f_aug_"
+    data_path = "/local/home/bewinter/Paper_SPT/SPT/out_fine_tune/n_f_aug_"
     target_list_f_aug_0, prediction_list_f_aug_0, mse_list_f_aug_0, input_list_f_aug_0 = load_data_n(n_list, data_path, type_list[0])
     target_list_f_aug_1, prediction_list_f_aug_1, mse_list_f_aug_1, input_list_f_aug_1 = load_data_n(n_list, data_path, type_list[1])
     target_list_f_aug_2, prediction_list_f_aug_2, mse_list_f_aug_2, input_list_f_aug_2 = load_data_n(n_list, data_path, type_list[2])
@@ -104,33 +104,41 @@ print(tabulate([input_list_f_aug_0_number, input_list_f_aug_1_number, input_list
 
 # reduce the validation set to a consistent seti
 
-cutoff_val_0 = 6
-cutoff_val_1 = 9
-cutoff_val_2 = 9
+cutoff_val_0 = 5
+cutoff_val_1 = 11
+cutoff_val_2 = 11
 
-input_set_aug_0 = np.array([item for sublist in input_list_f_aug_0[cutoff_val_0] for item in sublist])
-input_set_aug_1 = np.array([item for sublist in input_list_f_aug_1[cutoff_val_1] for item in sublist])
+if False:
+    input_set_aug_0 = np.array([item for sublist in input_list_f_aug_0[cutoff_val_0] for item in sublist])
+    input_set_aug_1 = np.array([item for sublist in input_list_f_aug_1[cutoff_val_1] for item in sublist])
 
-# check where input_set_aug_0[i] contains input_set_aug_0
-for i in range(0, len(input_list_f_aug_0)):
-    for j in range(0, len(input_list_f_aug_0[i])):     
-        temp_input = np.array(input_list_f_aug_1[i][j])
-        # check where temp_input does not contain input_set_aug_0
-        remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_0]
-        input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
-        target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
-        prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
+    # check where input_set_aug_0[i] contains input_set_aug_0
+    for i in range(0, len(input_list_f_aug_0)):
+        for j in range(0, len(input_list_f_aug_0[i])):     
+            temp_input = np.array(input_list_f_aug_1[i][j])
+            # check where temp_input does not contain input_set_aug_0
+            remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_0]
+            input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
+            target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
+            prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
 
-for i in range(0, len(input_list_f_aug_1)):
-    for j in range(0, len(input_list_f_aug_1[i])):
-        temp_input = np.array(input_list_f_aug_1[i][j])
-        # check where temp_input does not contain input_set_aug_0
-        remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_1]
-        input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
-        target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
-        prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
-
-
+    for i in range(0, len(input_list_f_aug_1)):
+        for j in range(0, len(input_list_f_aug_1[i])):
+            temp_input = np.array(input_list_f_aug_1[i][j])
+            # check where temp_input does not contain input_set_aug_0
+            remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_1]
+            input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
+            target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
+            prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
+else:
+    prediction_list_f_aug_0 = prediction_list_f_aug_0[0:cutoff_val_0]
+    target_list_f_aug_0 = target_list_f_aug_0[0:cutoff_val_0]
+    input_list_f_aug_0 = input_list_f_aug_0[0:cutoff_val_0]
+    mse_list_f_aug_0 = mse_list_f_aug_0[0:cutoff_val_0]
+    prediction_list_f_aug_1 = prediction_list_f_aug_1[0:cutoff_val_1]
+    target_list_f_aug_1 = target_list_f_aug_1[0:cutoff_val_1]
+    input_list_f_aug_1 = input_list_f_aug_1[0:cutoff_val_1]
+    mse_list_f_aug_1 = mse_list_f_aug_1[0:cutoff_val_1]
 
 
 # plot the mean mse for each n in a log log plot
@@ -149,15 +157,23 @@ mse_ft_aug_2 = []
 
 for i in range(len(target_list_f_aug_0)):
     temp_mse_0 = []
-    temp_mse_1 = []
-    temp_mse_2 = []
     for j in range(len(target_list_f_aug_0[i])):
         temp_mse_0.append(np.nanmean(np.square(target_list_f_aug_0[i][j] - prediction_list_f_aug_0[i][j])))
-        temp_mse_1.append(np.nanmean(np.square(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
-        temp_mse_2.append(np.nanmean(np.square(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
-
+        temp_mse_0.append(np.nanmean(np.abs(target_list_f_aug_0[i][j] - prediction_list_f_aug_0[i][j])))
     mse_ft_aug_0.append(temp_mse_0)
+
+for i in range(len(target_list_f_aug_1)):
+    temp_mse_1 = []
+    for j in range(len(target_list_f_aug_1[i])):
+        temp_mse_1.append(np.nanmean(np.square(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
+        temp_mse_1.append(np.nanmean(np.abs(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
     mse_ft_aug_1.append(temp_mse_1)
+
+for i in range(len(target_list_f_aug_2)):
+    temp_mse_2 = []
+    for j in range(len(target_list_f_aug_2[i])):
+        temp_mse_2.append(np.nanmean(np.square(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
+        temp_mse_2.append(np.nanmean(np.abs(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
     mse_ft_aug_2.append(temp_mse_2)
 
 mean_mse_ft_aug_0 = [np.nanmean(mse) for mse in mse_ft_aug_0]
@@ -183,13 +199,13 @@ plt.show()
 
 # add horizontal line at 0.35
 ax.axhline(y=0.35, color='k', linestyle='--', label='pre finetune')
-ax.axhline(y=0.04, color='#1f77b4', linestyle=':', label='limit $val_\mathrm{int}$', alpha=0.2)
-ax.axhline(y=0.08, color='#ff7f0e', linestyle=':', label='limit $val_\mathrm{edge}$', alpha=0.2)
-ax.axhline(y=0.13, color='#2ca02c', linestyle=':', label='limit $val_\mathrm{ext}$',  alpha=0.2)
+ax.axhline(y=0.11, color='#1f77b4', linestyle=':', label='limit $val_\mathrm{int}$', alpha=0.2)
+ax.axhline(y=0.13, color='#ff7f0e', linestyle=':', label='limit $val_\mathrm{edge}$', alpha=0.2)
+ax.axhline(y=0.17, color='#2ca02c', linestyle=':', label='limit $val_\mathrm{ext}$',  alpha=0.2)
 
 # fit a exponential regression into the data and plot it
 exp_fuc = lambda x, a, b: a * x**b
-x = np.array(n_list)
+x = np.array(n_list[0:cutoff_val_0])
 y = np.array(mean_mse_ft_aug_0)
 p0 = [1, -0.0001]
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
@@ -197,6 +213,7 @@ x_fit = np.linspace(min(x), max(x), 200)
 ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#2ca02c')
 # write the fit parameters into the plot next to the line
 ax.text(0.1, 0.35, '$val_\mathrm{ext}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+x = np.array(n_list[0:cutoff_val_1])
 y = np.array(mean_mse_ft_aug_1)
 p0 = [1, -0.0001]
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
@@ -204,6 +221,7 @@ x_fit = np.linspace(min(x), max(x), 200)
 ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#ff7f0e')
 # write the fit parameters into the plot
 ax.text(0.1, 0.25, '$val_\mathrm{edge}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+x = np.array(n_list)
 y = np.array(mean_mse_ft_aug_2)
 p0 = [1, -0.0001] 
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
@@ -214,7 +232,7 @@ ax.text(0.1, 0.15, '$val_\mathrm{int}$ \na = %.2f b = %.2f' % tuple(popt), trans
 
 
 # make y axis limit between 0.05 and 0.4 and make labeling not scientific
-ax.set_ylim(0.03, 0.4)
+ax.set_ylim(0.08, 0.4)
 ax.set_yticks([0.05, 0.1, 0.2, 0.3, 0.4])
 ax.set_yticklabels(['0.05', '0.1', '0.2', '0.3', '0.4'])
 # add a legend

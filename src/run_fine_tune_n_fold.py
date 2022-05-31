@@ -13,9 +13,10 @@ lval_int = 1 # sets the interval of runs that validate during training validatin
 wandb_project = 'FT_Paper' # name of the wandb project
 xp_path = '/local/home/bewinter/Paper_SPT/SPT/src/xprun_fine_mult.ron' # path to the xprun file
 path = 'data_exp_noH2O_1000' # path to the data
+path = 'data_exp_sund_200' # path to the data
 lval = 10
 xprun = True
-n_split = 1000
+n_split = 200
 epo = int(50)
 
 save_path = 'f_t_'

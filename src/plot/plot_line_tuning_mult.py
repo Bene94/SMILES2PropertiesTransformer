@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import sys
+from tabulate import tabulate
 
 sys.path.append('data_processing/')
 
@@ -35,29 +36,16 @@ def load_data(file_path, val_type):
 
 if __name__ == '__main__':
 
-    name = '211209-214402'
-    name = '211214-125306' # model without aug
-    name = '211223-032657' # modle with aug
-    name = '211231-031659' # modle with leave n out no water 
-    name = 'f_t_211220-192228_220112-105727'
-    name = 'f_t_211220-192228_220114-185541' # V2 run
-    #name = 'f_t_211220-192228_220305-085733' # electro
-    #name = 'f_t_211220-192228_220223-032428' # Sundmacher run
-    #name = 'f_t_220127-180116_220131-015826' # D Run
-    #name = 'f_t_220127-180116_220131-025308' # D Run 
-    #name = 'f_t_220129-105213_220131-075615' # new V2 run with new base model
+    name = 'f_t_220512-142153_220523-095012'
 
     group = True 
-    scatter = False 
+    scatter = True 
 
-    comp_list_path = '/home/bene/SPT/data/data_exp_noH2O_1000/0/comp_list.csv'
-    comp_lsit_path = '/home/bene/SPT/data/data_exp_onlyH2O_1000_V2/0/comp_list.csv'
-    comp_list_path = '/home/bene/SPT/data/data_sund200/0/comp_list.csv'
-    path_temp = '/home/bene/SPT/out_fine_tune/'
-    plot_path = '/home/bene/SPT/src/plot/'
+    path_temp = '../out_fine_tune/'
+    plot_path = '../src/plot/'
     data_path = path_temp + name + '/'
 
-    file_path = ["brouwer_exp_c"]
+    file_path = ["brouwer"]
     vocab_path = "vocab"
 
     type_list = ['0', '1', '2']
@@ -86,8 +74,11 @@ if __name__ == '__main__':
 
     mse_2 = np.mean(mse_list_2)
     mea_2 = np.mean(np.abs(val_target_2-val_predction_2))
-
+    print('-'*89)
+    print('Data Loaded')
+    print('-'*89)
     # print results
+    print('Error of SPT:')
     print('MSE_0:', '{:.2f}'.format(np.mean(mse_0)))
     print('MAE_0:', '{:.2f}'.format(np.mean(mea_0)))
 
@@ -96,6 +87,8 @@ if __name__ == '__main__':
 
     print('MSE_2:', '{:.2f}'.format(np.mean(mse_2)))
     print('MAE_2:', '{:.2f}'.format(np.mean(mea_2)))
+
+    print('-'*89)
 
     if group:
         val_0 = pd.DataFrame({'input':val_input_0.squeeze(),'prediction': val_predction_0.squeeze(),'target': val_target_0.squeeze()})
@@ -122,11 +115,11 @@ if __name__ == '__main__':
         val_input_1 = val_1['input'].to_numpy()
         val_input_2 = val_2['input'].to_numpy()
 
-    print('data loaded')
+    print('Length of validation sets:')
     print('length val0: ' + str(len(val_predction_0)))
     print('length val1: ' + str(len(val_predction_1)))
     print('length val2: ' + str(len(val_predction_2)))
-
+    print('-'*89)
     if len(val_predction_0) > 0:
         pr.make_heatmap(val_predction_0, val_target_0, r'val0' , path = plot_path, save=True)
         pr.make_historgam_delta(val_predction_0, val_target_0, 'val_0_fine' , path = plot_path, save=True)
@@ -137,7 +130,7 @@ if __name__ == '__main__':
         pr.make_heatmap(val_predction_2, val_target_2, r'val2' , path = plot_path, save=True)
         pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
-    print('heatmaps plotted')
+    print('Heatmaps Done')
 
 
     comp_list, systems, df_join = get_comp_list(file_path, vocab_path)
@@ -175,44 +168,69 @@ if __name__ == '__main__':
     max = int(2e5)
     if scatter:
         pr.make_scatter(val_predction_0, val_target_0, name = 'val_0', title = '$val_\mathrm{ext}$', path = plot_path, save=True)
-        print('val_0_fine done')
         pr.make_scatter(val_predction_1[0:max], val_target_1[:max], name = 'val_1',  title = '$val_\mathrm{edge}$', path = plot_path, save=True)
-        print('val_1_fine done')
         pr.make_scatter(val_predction_2[:max], val_target_2[:max], name = 'val_2', title = '$val_\mathrm{int}$', path = plot_path, save=True)
-        print('val_2_fine done')
-        if h2o_val_0_target != []:
+        if h2o_val_0_target.size > 0:
             pr.make_scatter(h2o_val_0_pred, h2o_val_0_target, name = 'h2o_val_0', title = '$val_\mathrm{ext}$', path = plot_path, save=True)
-        print('h2o_val_0_fine done')
         pr.make_scatter(h2o_val_1_pred[0:max], h2o_val_1_target[:max], name = 'h2o_val_1', title = '$val_\mathrm{edge}$', path = plot_path, save=True)
-        print('h2o_val_1_fine done')
         pr.make_scatter(h2o_val_2_pred[:max], h2o_val_2_target[:max], name = 'h2o_val_2', title = '$val_\mathrm{int}$', path = plot_path, save=True)
-        print('h2o_val_2_fine done')
         pr.make_scatter(no_h2o_val_0_pred, no_h2o_val_0_target, name = 'no_h2o_val_0', title = '$val_\mathrm{ext}$', path = plot_path, save=True)
-        print('no_h2o_val_0_fine done')
         pr.make_scatter(no_h2o_val_1_pred[0:max], no_h2o_val_1_target[:max], name = 'no_h2o_val_1', title = '$val_\mathrm{edge}$', path = plot_path, save=True)
-        print('no_h2o_val_1_fine done')
         pr.make_scatter(no_h2o_val_2_pred[:max], no_h2o_val_2_target[:max], name = 'no_h2o_val_2', title = '$val_\mathrm{int}$', path = plot_path, save=True)
-        print('no_h2o_val_2_fine done')
-        print('scatter plots made')
-  
+        print('Scatter Plots Done')
+    print('-'*89 )
     
-
-
     # load cvs with data from COSMO
 
-
-    cosmo_data = pd.read_csv(path_temp + 'BROUWER-COSMO-OUT.csv', sep=';')
+    cosmo_data = pd.read_csv('../out/' + 'COSMO-RS_out.csv', sep=';')
     cosmo_data = cosmo_data.dropna()
 
-    cosmo_sac_data = pd.read_csv(path_temp + 'COSMO-SAC.csv', sep=';')
+    cosmo_sac_data = pd.read_csv('../out/' + 'COSMO-SAC_out.csv', sep=';')
     cosmo_sac_data = cosmo_sac_data.dropna()
 
-    UNIFAC_data = pd.read_csv(path_temp + 'UNIFAC_out.csv', sep=';')
+    UNIFAC_data = pd.read_csv('../out/' + 'UNIFAC_out.csv', sep=';')
     UNIFAC_data = UNIFAC_data.dropna()
 
     cosmo_data_target = cosmo_data['lnGamma_exp'].to_numpy(dtype=np.float64)
     cosmo_data_prediction = cosmo_data['lnGamma'].to_numpy(dtype=np.float64)
     pr.make_scatter(cosmo_data_prediction, cosmo_data_target, name = 'cosmo', path = plot_path, save=True)
+
+    #make dataframe to store MSE and MEA of all models and the percent of predictions with MEA < 0.3
+    mse_df = pd.DataFrame(columns=[ 'MSE', 'MEA','lower 0.3'])
+    mse_df.index.name = 'model'
+
+    #calculate MSE and MEA for all models
+    mse_df.loc['COSMO-RS', 'MSE'] = np.mean((cosmo_data_target - cosmo_data_prediction)**2)
+    mse_df.loc['COSMO-RS', 'MEA'] = np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))
+    mse_df.loc['COSMO-RS', 'lower 0.3'] = np.sum(np.abs(cosmo_data_target - cosmo_data_prediction) < 0.3) / len(cosmo_data_target)
+
+    mse_df.loc['COSMO-SAC-2002', 'MSE'] = np.mean((cosmo_sac_data['lnGamma_exp'] - cosmo_sac_data['lnGamma_SAC'])**2)
+    mse_df.loc['COSMO-SAC-2002', 'MEA'] = np.mean(np.abs(cosmo_sac_data['lnGamma_exp'] - cosmo_sac_data['lnGamma_SAC']))
+    mse_df.loc['COSMO-SAC-2002', 'lower 0.3'] = np.sum(np.abs(cosmo_sac_data['lnGamma_exp'] - cosmo_sac_data['lnGamma_SAC']) < 0.3) / len(cosmo_sac_data['lnGamma_exp'])
+
+    mse_df.loc['COSMO-SAC-dsp', 'MSE'] = np.mean((cosmo_sac_data['lnGamma_exp'] - cosmo_sac_data['lnGamma_SAC3'])**2)
+    mse_df.loc['COSMO-SAC-dsp', 'MEA'] = np.mean(np.abs(cosmo_sac_data['lnGamma_exp'] - cosmo_sac_data['lnGamma_SAC3']))
+    mse_df.loc['COSMO-SAC-dsp', 'lower 0.3'] = np.sum(np.abs(cosmo_sac_data['lnGamma_exp'] - cosmo_sac_data['lnGamma_SAC3']) < 0.3) / len(cosmo_sac_data['lnGamma_exp'])
+
+    mse_df.loc['UNIFAC', 'MSE'] = np.mean((UNIFAC_data['lnGamma_exp'] - UNIFAC_data['lnGamma_UNIFAC'])**2)
+    mse_df.loc['UNIFAC', 'MEA'] = np.mean(np.abs(UNIFAC_data['lnGamma_exp'] - UNIFAC_data['lnGamma_UNIFAC']))
+    mse_df.loc['UNIFAC', 'lower 0.3'] = np.sum(np.abs(UNIFAC_data['lnGamma_exp'] - UNIFAC_data['lnGamma_UNIFAC']) < 0.3) / len(UNIFAC_data['lnGamma_exp'])
+
+    mse_df.loc['SPT 0', 'MSE'] = np.mean((val_target_0 - val_predction_0)**2)
+    mse_df.loc['SPT 0', 'MEA'] = np.mean(np.abs(val_target_0 - val_predction_0))
+    mse_df.loc['SPT 0', 'lower 0.3'] = np.sum(np.abs(val_target_0 - val_predction_0) < 0.3) / len(val_target_0)
+
+    mse_df.loc['SPT 1', 'MSE'] = np.mean((val_target_1 - val_predction_1)**2)
+    mse_df.loc['SPT 1', 'MEA'] = np.mean(np.abs(val_target_1 - val_predction_1))
+    mse_df.loc['SPT 1', 'lower 0.3'] = np.sum(np.abs(val_target_1 - val_predction_1) < 0.3) / len(val_target_1)
+
+    mse_df.loc['SPT 2', 'MSE'] = np.mean((val_target_2 - val_predction_2)**2)
+    mse_df.loc['SPT 2', 'MEA'] = np.mean(np.abs(val_target_2 - val_predction_2))
+    mse_df.loc['SPT 2', 'lower 0.3'] = np.sum(np.abs(val_target_2 - val_predction_2) < 0.3) / len(val_target_2)
+
+    print('MSE and MEA calculated for the complete data set')
+    print(tabulate(mse_df, headers='keys', tablefmt='psql', floatfmt=".3f"))    
+
 
     i_val_0 = set(val_0['input'].to_numpy())
     i_val_1 = set(val_1['input'].to_numpy())
@@ -224,7 +242,7 @@ if __name__ == '__main__':
     # find common i's
     i_common = i_UNIFAC.intersection(i_val_0).intersection(i_val_1).intersection(i_val_2).intersection(i_cosmo).intersection(i_cosmo_sac)
 
-    damay_data = pd.read_csv(path_temp + 'data_Damay_et.al.csv', sep=';')
+    damay_data = pd.read_csv('../out/' + 'data_Damay_et.al.csv', sep=';')
     #here we have to fake the Damay data with the same format as the COSMO data
     damay_data = damay_data.to_numpy()
     damay_data = damay_data * len(i_common)
@@ -263,44 +281,45 @@ if __name__ == '__main__':
     val_target_2 = val_2[val_2['input'].isin(i_common)]['target'].to_numpy(dtype=np.float64)
     
     print('data filtered')
-    print('length cosmo_data_prediction: ' + str(len(cosmo_data_prediction)))
-    print('length cosmo_sac_data_prediction1: ' + str(len(cosmo_sac_data_prediction1)))
-    print('length cosmo_sac_data_prediction3: ' + str(len(cosmo_sac_data_prediction3)))
-    print('length val_predction_0: ' + str(len(val_predction_0)))
-    print('length val_predction_1: ' + str(len(val_predction_1)))
-    print('length val_predction_2: ' + str(len(val_predction_2)))
 
-    print('MSE of COSMO SAC2002: ' + str(np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction1)**2)))
-    print('MSE of COSMO SACdsp: ' + str(np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction3)**2)))
-    print('MSE of COSMO: ' + str(np.mean((cosmo_data_target - cosmo_data_prediction)**2)))
-    print('MSE of UNIFAC: ' + str(np.mean((UNIFAC_data_target - UNIFAC_data_prediction)**2)))
-    print('MSE of Damay: ' + str(np.mean((damay_data_target - damay_data_prediction)**2)))
+    # make dataframe with MSE and MEA for each data set and percetage of points with MSE < 0.3
+    mse_df = pd.DataFrame(columns=['MSE', 'MEA','lower 0.3'])
+    mse_df.index.name = 'model'
 
-    print('MSE of VAL_0: ' + str(np.mean((val_target_0 - val_predction_0)**2)))
-    print('MSE of VAL_1: ' + str(np.mean((val_target_1 - val_predction_1)**2)))
-    print('MSE of VAL_2: ' + str(np.mean((val_target_2 - val_predction_2)**2)))
-    # calcualte the mean absolute error
-    print('MEA of COSMO SAC2002: ' + str(np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction1))))
-    print('MEA of COSMO SACdsp: ' + str(np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction3))))
-    print('MEA of COSMO: ' + str(np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))))
-    print('MEA of UNIFAC: ' + str(np.mean(np.abs(UNIFAC_data_target - UNIFAC_data_prediction))))
-    print('MEA of Damay: ' + str(np.mean(np.abs(damay_data_target - damay_data_prediction))))
+    mse_df.loc['COSMO-RS', 'MSE'] = np.mean((cosmo_data_target - cosmo_data_prediction)**2)
+    mse_df.loc['COSMO-RS', 'MEA'] = np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))
+    mse_df.loc['COSMO-RS', 'lower 0.3'] = np.sum(np.abs(cosmo_data_target - cosmo_data_prediction) < 0.3) / len(cosmo_data_target)
 
-    print('MEA of VAL_0: ' + str(np.mean(np.abs(val_target_0 - val_predction_0))))
-    print('MEA of VAL_1: ' + str(np.mean(np.abs(val_target_1 - val_predction_1))))
-    print('MEA of VAL_2: ' + str(np.mean(np.abs(val_target_2 - val_predction_2))))
-    
+    mse_df.loc['COSMO-SAC-2002', 'MSE'] = np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction1)**2)
+    mse_df.loc['COSMO-SAC-2002', 'MEA'] = np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction1))
+    mse_df.loc['COSMO-SAC-2002', 'lower 0.3'] = np.sum(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction1) < 0.3) / len(cosmo_sac_data_target)
 
-    
-    #color_list = ['lightcoral', 'indianred', 'brown', 'red', 'coral','lightsteelblue', 'cornflowerblue', 'royalblue']
-    #name_list = ['COSMO-SAC$_{2002}$', 'COSMO-SAC$_{dsp}$', 'COSMO-RS$_{TZVDP-F}$', 'UNIFAC$_{Dortmund}$', '\emph{Damay et al. 2021*}','SMILE2P$_{val_0}$', 'SMILE2P$_{val_1}$', 'SMILE2P$_{val_2}$']
-    
-#    prediction_list = [cosmo_sac_data_prediction1, cosmo_sac_data_prediction3, cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
-#   target_list = [cosmo_sac_data_target, cosmo_sac_data_target, cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
+    mse_df.loc['COSMO-SAC-dsp', 'MSE'] = np.mean((cosmo_sac_data_target - cosmo_sac_data_prediction3)**2)
+    mse_df.loc['COSMO-SAC-dsp', 'MEA'] = np.mean(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction3))
+    mse_df.loc['COSMO-SAC-dsp', 'lower 0.3'] = np.sum(np.abs(cosmo_sac_data_target - cosmo_sac_data_prediction3) < 0.3) / len(cosmo_sac_data_target)
+
+    mse_df.loc['UNIFAC', 'MSE'] = np.mean((UNIFAC_data_target - UNIFAC_data_prediction)**2)
+    mse_df.loc['UNIFAC', 'MEA'] = np.mean(np.abs(UNIFAC_data_target - UNIFAC_data_prediction))
+    mse_df.loc['UNIFAC', 'lower 0.3'] = np.sum(np.abs(UNIFAC_data_target - UNIFAC_data_prediction) < 0.3) / len(UNIFAC_data_target)
+
+    mse_df.loc['SPT 0', 'MSE'] = np.mean((val_target_0 - val_predction_0)**2)
+    mse_df.loc['SPT 0', 'MEA'] = np.mean(np.abs(val_target_0 - val_predction_0))
+    mse_df.loc['SPT 0', 'lower 0.3'] = np.sum(np.abs(val_target_0 - val_predction_0) < 0.3) / len(val_target_0)
+
+    mse_df.loc['SPT 1', 'MSE'] = np.mean((val_target_1 - val_predction_1)**2)
+    mse_df.loc['SPT 1', 'MEA'] = np.mean(np.abs(val_target_1 - val_predction_1))
+    mse_df.loc['SPT 1', 'lower 0.3'] = np.sum(np.abs(val_target_1 - val_predction_1) < 0.3) / len(val_target_1)
+
+    mse_df.loc['SPT 2', 'MSE'] = np.mean((val_target_2 - val_predction_2)**2)
+    mse_df.loc['SPT 2', 'MEA'] = np.mean(np.abs(val_target_2 - val_predction_2))
+    mse_df.loc['SPT 2', 'lower 0.3'] = np.sum(np.abs(val_target_2 - val_predction_2) < 0.3) / len(val_target_2)
+
+    #print mse_df
+    print('MSE and MEA calculated for the commen data points')
+    print(tabulate(mse_df, headers='keys', tablefmt='psql', floatfmt=".3f"))    
 
     prediction_list = [cosmo_data_prediction, UNIFAC_data_prediction, damay_data_prediction, val_predction_0, val_predction_1, val_predction_2]
     target_list = [cosmo_data_target, UNIFAC_data_target, damay_data_target,val_target_0, val_target_1, val_target_2]
-
 
     color_list = ['lightcoral', 'brown', 'darkorange','lightsteelblue', 'cornflowerblue', 'royalblue']
     name_list = ['COSMO-RS', 'UNIFAC$_\mathrm{D}$', '\emph{Damay et al. 2021}','SPT$_\mathrm{ext}$', 'SMILE2P$_{edge}$', 'SMILE2P$_{int}$']

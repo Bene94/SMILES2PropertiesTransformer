@@ -13,8 +13,8 @@ from pandas.core.frame import DataFrame
 
 @click.command()
 
-@click.option('--file_path', '-p',default=["x_cosmo"], help='Location of raw data', multiple=True)
-@click.option('--save_path', '-s', default="data_x", help='Location of output data')
+@click.option('--file_path', '-p',default=["inf_cosmo"], help='Location of raw data', multiple=True)
+@click.option('--save_path', '-s', default="data", help='Location of output data')
 @click.option('--vocab_path', default="vocab", help='Location of vocab')
 @click.option('--ow', default=True, help='overwirte exising files in the save folder or add to them ')
 @click.option('--source', default='COSMO', help='see if to select COSMO or EXP')
@@ -135,7 +135,7 @@ def processing_n_out_sund(foler_name, save_path, vocab_path, ow, comp_list, syst
 
 
     vocab_dict = load_vocab(vocab_path,'vocab_dict_aug')
-    df_join, __, solvent_indx, solute_indx  = load_exp_data(file_path, foler_name)
+    df_join, __, __  = load_exp_data(file_path, foler_name)
     df_list = split_data_test_val_exp_n_out(df_join, comp_list, systems, index)
 
     # make input data
@@ -369,9 +369,9 @@ def split_data_test_val_single(df_join, comp_list, seed, frac):
 
 def split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n):
     
-    df_join = df_join[(df_join['SMILES1'] != 'O') & (df_join['solute'] != 'O')]
+    df_join = df_join[(df_join['SMILES1'] != 'O') & (df_join['SMILES0'] != 'O')]
 
-    systems =  df_join.groupby(['solvent','solute']).size().reset_index().rename(columns={0:'count'})
+    systems =  df_join.groupby(['SMILES1','SMILES0']).size().reset_index().rename(columns={0:'count'})
     systems_train = systems.sample(n=n, random_state=seed)
 
     df_temp_train = pd.DataFrame(columns=df_join.columns)
@@ -381,18 +381,20 @@ def split_data_test_val_exp_n_in_noH2O(df_join, comp_list,seed, n):
     idx_solvent = []
 
     for i in systems_train.index:
-        temp = df_join[(df_join['solvent'] == systems_train.loc[i,'solvent']) & (df_join['solute'] == systems_train.loc[i,'solute'])]
+        temp = df_join[(df_join['SMILES1'] == systems_train.loc[i,'SMILES1']) & (df_join['SMILES0'] == systems_train.loc[i,'SMILES0'] )]
         to_train = temp.sample(n=1)
         to_drop = temp.drop(to_train.index)
         df_temp_train = pd.concat([df_temp_train, to_train])
         
         df_join = df_join.drop(temp.index)
-        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['solvent'] == systems_train.loc[i,'solvent']].index)
-        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['solute'] == systems_train.loc[i,'solute']].index)
-
+        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['SMILES1'] == systems_train.loc[i,'SMILES1']].index)
+        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['SMILES0'] == systems_train.loc[i,'SMILES0']].index)
+        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['SMILES1'] == systems_train.loc[i,'SMILES0']].index)
+        df_temp_val_0 = df_temp_val_0.drop(df_temp_val_0[df_temp_val_0['SMILES0'] == systems_train.loc[i,'SMILES1']].index)
+        
     for i in systems_train.index:
-        idx_solvent += df_join[df_join['solvent'] == systems_train.loc[i,'solvent']].index.tolist()
-        idx_solute += df_join[df_join['solute'] == systems_train.loc[i,'solute']].index.tolist()
+        idx_solvent += df_join[df_join['SMILES1'] == systems_train.loc[i,'SMILES1']].index.tolist()
+        idx_solute += df_join[df_join['SMILES0'] == systems_train.loc[i,'SMILES0']].index.tolist()
 
     # find the elements that are both in idx_solvent and idx_solute
     idx_solvent = list(set(idx_solvent) & set(idx_solute))
@@ -435,10 +437,14 @@ def split_data_test_val_exp_n_out(df_join, comp_list, systems, index):
     
         df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['SMILES1'] == systems_val_0.loc[i,'SMILES1']].index)
         df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['SMILES0'] == systems_val_0.loc[i,'SMILES0']].index)
+        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['SMILES1'] == systems_val_0.loc[i,'SMILES0']].index)
+        df_temp_train = df_temp_train.drop(df_temp_train[df_temp_train['SMILES0'] == systems_val_0.loc[i,'SMILES1']].index)
 
     for i in systems_val_0.index:
         idx_solvent += df_join[df_join['SMILES1'] == systems_val_0.loc[i,'SMILES1']].index.tolist()
         idx_solute += df_join[df_join['SMILES0'] == systems_val_0.loc[i,'SMILES0']].index.tolist()
+        idx_solvent += df_join[df_join['SMILES1'] == systems_val_0.loc[i,'SMILES0']].index.tolist()
+        idx_solute += df_join[df_join['SMILES0'] == systems_val_0.loc[i,'SMILES1']].index.tolist()
 
     idx_val_0 = set(df_temp_val_0.index)
     # find the elements that are either in idx_solvent and idx_solute but not in idx_val_0

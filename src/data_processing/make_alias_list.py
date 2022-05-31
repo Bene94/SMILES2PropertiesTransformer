@@ -14,16 +14,8 @@ import data_processing as dp
 
 def main():
     file_path = '../raw_data/'
-    folder_names = ['t_cosmo', 'brouwer', 'inf_cosmo' ]
-    #folder_names = ['t_cosmo', 'brouwer_exp_c'] 
-    df, complete_list1, __ = dp.load_exp_data(file_path, folder_names)
-    folder_names = ['elect']
-    df, complete_list2, __ = dp.load_exp_data(file_path, folder_names)
-    folder_names = ['ddb','x_cosmo','x_t_cosmo']
-    df, complete_list3, __ = dp.load_exp_data(file_path, folder_names)
-    complete_list = complete_list1.append(complete_list2.append(complete_list3, ignore_index=True), ignore_index=True)
-
-    #complete_list = complete_list1
+    folder_names = ['t_cosmo', 'brouwer', 'inf_cosmo', 'sund' ]
+    df, complete_list, __ = dp.load_exp_data(file_path, folder_names)
     # check if the directory exists
     if not os.path.exists('../raw_data/alias/'):
         os.makedirs('../raw_data/alias/')

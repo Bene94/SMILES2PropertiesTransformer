@@ -24,7 +24,7 @@ from transprop.config import *
 @click.option('--xp_name', '-n',default='', help='Name of the experiment')
 @click.option('--group', '-g', default='none', help='groups for the experiment')
 @click.option('--n_start', '-s', default=-1, help='set to be processed if -1 all')
-@click.option('--wandb_project', '-w', default='GNN_002_FT_mult', help='wandb project name')
+@click.option('--wandb_project', '-w', default='GNN_003_FT_mult', help='wandb project name')
 
 @click.option('--batch_size', '-b', default=32, help='Batch size')
 @click.option('--epochs', '-e',default=20, help='Number of epochs')

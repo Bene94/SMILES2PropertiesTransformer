@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import sys
+from tabulate import tabulate
 
 sys.path.append('data_processing/')
 
@@ -35,14 +36,14 @@ def load_data(file_path, val_type):
 
 if __name__ == '__main__':
 
-    name = 'f_t_211220-192228_220224-010259' # Sundmacher run
+    name = 'f_t_220512-142153_220523-103736' # Sundmacher run
 
     group = True
     scatter = False 
 
-    comp_list_path = '/home/bene/NNGamma/data/data_sund_sund200/0/comp_list.csv'
-    path_temp = '/home/bene/NNGamma/out_fine_tune/'
-    plot_path = '/home/bene/NNGamma/src/plot/'
+    comp_list_path = '../data/data_sund_200/0/comp_list.csv'
+    path_temp = '../out_fine_tune/'
+    plot_path = '../src/plot/'
     data_path = path_temp + name + '/'
 
     file_path = ["sund"]
@@ -74,16 +75,6 @@ if __name__ == '__main__':
 
     mse_2 = np.mean(mse_list_2)
     mea_2 = np.mean(np.abs(val_target_2-val_predction_2))
-
-    # print results
-    print('MSE_0:', '{:.2f}'.format(np.mean(mse_0)))
-    print('MAE_0:', '{:.2f}'.format(np.mean(mea_0)))
-
-    print('MSE_1:', '{:.2f}'.format(np.mean(mse_1)))
-    print('MAE_1:', '{:.2f}'.format(np.mean(mea_1)))
-
-    print('MSE_2:', '{:.2f}'.format(np.mean(mse_2)))
-    print('MAE_2:', '{:.2f}'.format(np.mean(mea_2)))
 
     if group:
         val_0 = pd.DataFrame({'input':val_input_0.squeeze(),'prediction': val_predction_0.squeeze(),'target': val_target_0.squeeze()})
@@ -126,7 +117,7 @@ if __name__ == '__main__':
     pr.make_historgam_delta(val_predction_2, val_target_2, 'val_2_fine' , path = plot_path, save=True)
 
     comp_list, systems, df_join = get_comp_list(file_path, vocab_path)
-    h2o_index = df_join[(df_join.solvent == 'O') | (df_join.solute == 'O')].i
+    h2o_index = df_join[(df_join['SMILES0'] == 'O') | (df_join['SMILES0'] == 'O')].i
     
     ## seperate prediction and target data
     # chekc if val_input_0 continas h2o_index
@@ -182,22 +173,22 @@ if __name__ == '__main__':
   
     
         # load sundmacher data
-    n_e = 200
+    n_e = 85
 
     for i in range(n_e):
         print(i)
-        df_val0 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Val0.csv')
-        df_val1 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Val1.csv')
-        df_val2 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Val2.csv')
+        df_val0 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val0.csv')
+        df_val1 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val1.csv')
+        df_val2 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val2.csv')
 
-        train = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'/Training.csv')
+        train = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Training.csv')
         best_epoch_V0 = np.argmin(np.array(train['Valid_0_loss']))
         best_epoch_V1 = np.argmin(np.array(train['Valid_1_loss']))
         best_epoch_V2 = np.argmin(np.array(train['Valid_2_loss']))
 
-        best_epoch_V0 = 17
-        best_epoch_V1 = 17
-        best_epoch_V2 = 48
+        best_epoch_V0 = 21
+        best_epoch_V1 = 12
+        best_epoch_V2 = 191
 
         if i == 0:
             df_val0_all = df_val0[['i','Literature',str(best_epoch_V0)]]
@@ -236,6 +227,44 @@ if __name__ == '__main__':
     unifac_data_target = unifac_data['Literature'].to_numpy(dtype=np.float64)
     unifac_data_prediction = unifac_data['mod_UNIFAC_Do'].to_numpy(dtype=np.float64)
 
+    mse_df = pd.DataFrame(columns=[ 'MSE', 'MEA','lower 0.3'])
+    mse_df.index.name = 'model'
+        #calculate MSE and MEA for all models
+    mse_df.loc['COSMO-RS', 'MSE'] = np.mean((cosmo_data_target - cosmo_data_prediction)**2)
+    mse_df.loc['COSMO-RS', 'MEA'] = np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))
+    mse_df.loc['COSMO-RS', 'lower 0.3'] = np.sum(np.abs(cosmo_data_target - cosmo_data_prediction) < 0.3) / len(cosmo_data_target)
+
+    mse_df.loc['UNIFAC', 'MSE'] = np.mean((unifac_data_target - unifac_data_prediction)**2)
+    mse_df.loc['UNIFAC', 'MEA'] = np.mean(np.abs(unifac_data_target - unifac_data_prediction))
+    mse_df.loc['UNIFAC', 'lower 0.3'] = np.sum(np.abs(unifac_data_target - unifac_data_prediction) < 0.3) / len(unifac_data_target)
+
+    mse_df.loc['Medina 0', 'MSE'] = np.mean((df_val0_all['Prediction'] - df_val0_all['Literature'])**2)
+    mse_df.loc['Medina 0', 'MEA'] = np.mean(np.abs(df_val0_all['Prediction'] - df_val0_all['Literature']))
+    mse_df.loc['Medina 0', 'lower 0.3'] = np.sum(np.abs(df_val0_all['Prediction'] - df_val0_all['Literature']) < 0.3) / len(df_val0_all)
+
+    mse_df.loc['Medina 1', 'MSE'] = np.mean((df_val1_all['Prediction'] - df_val1_all['Literature'])**2)
+    mse_df.loc['Medina 1', 'MEA'] = np.mean(np.abs(df_val1_all['Prediction'] - df_val1_all['Literature']))
+    mse_df.loc['Medina 1', 'lower 0.3'] = np.sum(np.abs(df_val1_all['Prediction'] - df_val1_all['Literature']) < 0.3) / len(df_val1_all)
+
+    mse_df.loc['Medina 2', 'MSE'] = np.mean((df_val2_all['Prediction'] - df_val2_all['Literature'])**2)
+    mse_df.loc['Medina 2', 'MEA'] = np.mean(np.abs(df_val2_all['Prediction'] - df_val2_all['Literature']))
+    mse_df.loc['Medina 2', 'lower 0.3'] = np.sum(np.abs(df_val2_all['Prediction'] - df_val2_all['Literature']) < 0.3) / len(df_val2_all)
+
+    mse_df.loc['SPT 0', 'MSE'] = np.mean((val_target_0 - val_predction_0)**2)
+    mse_df.loc['SPT 0', 'MEA'] = np.mean(np.abs(val_target_0 - val_predction_0))
+    mse_df.loc['SPT 0', 'lower 0.3'] = np.sum(np.abs(val_target_0 - val_predction_0) < 0.3) / len(val_target_0)
+
+    mse_df.loc['SPT 1', 'MSE'] = np.mean((val_target_1 - val_predction_1)**2)
+    mse_df.loc['SPT 1', 'MEA'] = np.mean(np.abs(val_target_1 - val_predction_1))
+    mse_df.loc['SPT 1', 'lower 0.3'] = np.sum(np.abs(val_target_1 - val_predction_1) < 0.3) / len(val_target_1)
+
+    mse_df.loc['SPT 2', 'MSE'] = np.mean((val_target_2 - val_predction_2)**2)
+    mse_df.loc['SPT 2', 'MEA'] = np.mean(np.abs(val_target_2 - val_predction_2))
+    mse_df.loc['SPT 2', 'lower 0.3'] = np.sum(np.abs(val_target_2 - val_predction_2) < 0.3) / len(val_target_2)
+
+    print('MSE and MEA calculated for the complete data set')
+    print(tabulate(mse_df, headers='keys', tablefmt='psql', floatfmt=".3f"))   
+
     i_val_0 = set(val_0['input'].to_numpy())
     i_val_1 = set(val_1['input'].to_numpy())
     i_val_2 = set(val_2['input'].to_numpy())
@@ -270,31 +299,45 @@ if __name__ == '__main__':
     cosmo_data_target = cosmo_data.loc[i_common]['Literature'].to_numpy(dtype=np.float64)
     cosmo_data_prediction = cosmo_data.loc[i_common]['COSMO_RS'].to_numpy(dtype=np.float64)
 
-    # print MSE und MEA for sundmacher und val cosmo data
-    print('MSE for sundmacher:')
-    print('Val0:', np.mean((sund_target_0 - sund_pred_0)**2))
-    print('Val1:', np.mean((sund_target_1 - sund_pred_1)**2))
-    print('Val2:', np.mean((sund_target_2 - sund_pred_2)**2))
-    print('MSE for Winter:')
-    print('Val0:', np.mean((val_predction_0 - val_target_0)**2))
-    print('Val1:', np.mean((val_predction_1 - val_target_1)**2))
-    print('Val2:', np.mean((val_predction_2 - val_target_2)**2))
-    print('MSE for cosmo data:')
-    print('Val0:', np.mean((cosmo_data_target - cosmo_data_prediction)**2))
-    print('MSE for unifac data:')
-    print('Val0:', np.mean((unifac_data_target - unifac_data_prediction)**2))
-    print('MEA for sundmacher:')
-    print('Val0:', np.mean(np.abs(sund_target_0 - sund_pred_0)))
-    print('Val1:', np.mean(np.abs(sund_target_1 - sund_pred_1)))
-    print('Val2:', np.mean(np.abs(sund_target_2 - sund_pred_2)))
-    print('MEA for Winter:')
-    print('Val0:', np.mean(np.abs(val_target_0 - val_predction_0)))
-    print('Val1:', np.mean(np.abs(val_target_1 - val_predction_1)))
-    print('Val2:', np.mean(np.abs(val_target_2 - val_predction_2)))
-    print('MEA for cosmo data:')
-    print('Val0:', np.mean(np.abs(cosmo_data_target - cosmo_data_prediction)))
-    print('MEA for unifac data:')
-    print('Val0:', np.mean(np.abs(unifac_data_target - unifac_data_prediction)))
+    mse_df = pd.DataFrame(index=['SPT 0', 'SPT 1', 'SPT 2', 'Sund 0', 'Sund 1', 'Sund 2', 'Unifac', 'Cosmo'].reverse(), columns=['MSE', 'MEA', 'lower 0.3'])
+
+    mse_df.loc['SPT 0', 'MSE'] = np.mean((val_target_0 - val_predction_0)**2)
+    mse_df.loc['SPT 0', 'MEA'] = np.mean(np.abs(val_target_0 - val_predction_0))
+    mse_df.loc['SPT 0', 'lower 0.3'] = np.sum(np.abs(val_target_0 - val_predction_0) < 0.3) / len(val_target_0)
+
+    mse_df.loc['SPT 1', 'MSE'] = np.mean((val_target_1 - val_predction_1)**2)
+    mse_df.loc['SPT 1', 'MEA'] = np.mean(np.abs(val_target_1 - val_predction_1))
+    mse_df.loc['SPT 1', 'lower 0.3'] = np.sum(np.abs(val_target_1 - val_predction_1) < 0.3) / len(val_target_1)
+
+    mse_df.loc['SPT 2', 'MSE'] = np.mean((val_target_2 - val_predction_2)**2)
+    mse_df.loc['SPT 2', 'MEA'] = np.mean(np.abs(val_target_2 - val_predction_2))
+    mse_df.loc['SPT 2', 'lower 0.3'] = np.sum(np.abs(val_target_2 - val_predction_2) < 0.3) / len(val_target_2)
+
+    mse_df.loc['Sund 0', 'MSE'] = np.mean((sund_target_0 - sund_pred_0)**2)
+    mse_df.loc['Sund 0', 'MEA'] = np.mean(np.abs(sund_target_0 - sund_pred_0))
+    mse_df.loc['Sund 0', 'lower 0.3'] = np.sum(np.abs(sund_target_0 - sund_pred_0) < 0.3) / len(sund_target_0)
+
+    mse_df.loc['Sund 1', 'MSE'] = np.mean((sund_target_1 - sund_pred_1)**2)
+    mse_df.loc['Sund 1', 'MEA'] = np.mean(np.abs(sund_target_1 - sund_pred_1))
+    mse_df.loc['Sund 1', 'lower 0.3'] = np.sum(np.abs(sund_target_1 - sund_pred_1) < 0.3) / len(sund_target_1)
+
+    mse_df.loc['Sund 2', 'MSE'] = np.mean((sund_target_2 - sund_pred_2)**2)
+    mse_df.loc['Sund 2', 'MEA'] = np.mean(np.abs(sund_target_2 - sund_pred_2))
+    mse_df.loc['Sund 2', 'lower 0.3'] = np.sum(np.abs(sund_target_2 - sund_pred_2) < 0.3) / len(sund_target_2)
+
+    mse_df.loc['Unifac', 'MSE'] = np.mean((unifac_data_target - unifac_data_prediction)**2)
+    mse_df.loc['Unifac', 'MEA'] = np.mean(np.abs(unifac_data_target - unifac_data_prediction))
+    mse_df.loc['Unifac', 'lower 0.3'] = np.sum(np.abs(unifac_data_target - unifac_data_prediction) < 0.3) / len(unifac_data_target)
+
+    mse_df.loc['Cosmo', 'MSE'] = np.mean((cosmo_data_target - cosmo_data_prediction)**2)
+    mse_df.loc['Cosmo', 'MEA'] = np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))
+    mse_df.loc['Cosmo', 'lower 0.3'] = np.sum(np.abs(cosmo_data_target - cosmo_data_prediction) < 0.3) / len(cosmo_data_prediction)
+
+    print('MSE and MEA calculated for the complete data set')
+    print(tabulate(mse_df, headers='keys', tablefmt='psql', floatfmt=".3f"))   
+    
+
+
 
     # load cvs with data from COSMO
     prediction_list = [cosmo_data_target, unifac_data_target, sund_pred_0, sund_pred_1, sund_pred_2, val_predction_0, val_predction_1, val_predction_2]

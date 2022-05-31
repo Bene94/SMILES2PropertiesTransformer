@@ -5,6 +5,7 @@ import os
 
 from matplotlib.colors import Normalize, LogNorm
 from matplotlib import cm, markers
+import matplotlib.ticker as mtick
 from scipy.stats import gaussian_kde as kde
 
 
@@ -23,6 +24,8 @@ def make_histogram(prediciton, target, name, path=''):
     if not os.path.exists(path + 'hist/'):
         os.makedirs(path + 'hist/')
     plt.savefig(path + 'hist/hist_' + name)
+    #save as pdf
+    plt.savefig(path + 'hist/hist_' + name + '.pdf')
 
 def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
     plt.rcParams['text.usetex'] = True
@@ -45,6 +48,8 @@ def make_historgam_delta(prediciton, target, name = '', path = '', save=False):
         os.makedirs(path + 'hist/')
 
     plt.savefig(path + 'hist/hist_delta_' + name)
+    #save as pdf
+    plt.savefig(path + 'hist/hist_delta_' + name + '.pdf')
     plt.rcParams['text.usetex'] = False
 
 # funciton that makes a histogram of the diff but for multiple data sets in a singel plot
@@ -93,6 +98,8 @@ def make_historgam_delta_mult(prediction_list, target_list, name_list, path = ''
         os.makedirs(path + 'hist/')
     # save high res image
     plt.savefig(path + 'hist/hist_delta_mult', dpi=900)
+    # save as pdf
+    plt.savefig(path + 'hist/hist_delta_mult.pdf')
     plt.rcParams['text.usetex'] = False
 
 def make_heatmap(prediciton, target, name = '', title='', path = '', save=False):
@@ -123,7 +130,7 @@ def make_heatmap(prediciton, target, name = '', title='', path = '', save=False)
     if not os.path.exists(path + 'heat/'):
         os.makedirs(path + 'heat/')
     plt.savefig(path + 'heat/heat_' + name, dpi=600)
-
+    plt.savefig(path + 'heat/heat_' + name + '.pdf')
     plt.show()
 
     plt.rcParams['text.usetex'] = False
@@ -132,7 +139,7 @@ def make_heatmap(prediciton, target, name = '', title='', path = '', save=False)
 def make_scatter(prediciton, target, name = '', title = '',path = '', save=False): 
     plt.clf()
     plt.rcParams['text.usetex'] = True
-    plt.rcParams.update({'font.size': 14})
+    plt.rcParams.update({'font.size': 20})
     plt.rc
     vals = []
     vals.append(target)
@@ -153,7 +160,7 @@ def make_scatter(prediciton, target, name = '', title = '',path = '', save=False
     plt.plot([-20,20], [-19.7, 20.3], 'k--', lw=1)
     plt.plot([-20,20], [-20.3, 19.7], 'k--', lw=1)
 
-    plt.title(title)
+    #plt.title(title)
 
     plt.ylim(-5, 16)
     plt.xlim(-5, 16)
@@ -167,6 +174,7 @@ def make_scatter(prediciton, target, name = '', title = '',path = '', save=False
         os.makedirs(path + 'scatter/')
     if save:
         plt.savefig(path + 'scatter/scatter_' + name)
+        plt.savefig(path + 'scatter/scatter_' + name + '.pdf')
     else:
         plt.show()
     plt.rcParams['text.usetex'] = False
@@ -205,6 +213,7 @@ def make_MSE_x(prediciton, target, name = '', path = '', save=False):
     
     if save:
         plt.savefig(path + 'hist/MSE_' + name)
+        plt.savefig(path + 'hist/MSE_' + name + '.pdf')
  
 def makeColours( vals ):
 
@@ -253,6 +262,7 @@ def plot_boxplot(n_list, mse_list_0, mse_list_1, mse_list_2, name = '', path = '
     
     if save:
         plt.savefig(path + 'boxplot/boxplot_' + name)
+        plt.savefig(path + 'boxplot/boxplot_' + name + '.pdf')
 
 def plot_err_sorted_combined(val_predction_0, val_target_0, val_predction_1, val_target_1, val_predction_2, val_target_2, name = '', path = '', save=False):
     # make one figure containting three subplots with boxplots for each n
@@ -292,61 +302,74 @@ def plot_err_sorted_combined(val_predction_0, val_target_0, val_predction_1, val
     fig.suptitle(name)
     if save:
         plt.savefig(path + 'sorted/mse_sorted_' + name)
+        plt.savefig(path + 'sorted/mse_sorted_' + name + '.pdf')
 
 def plot_err_curve_mult(prediction_list, target_list, name_list, color_list, line_style, damay_points,name = '', path = '', save=False):
     plt.rcParams['text.usetex'] = True
     # make one figure containting three subplots with boxplots for each n
+    plt.rcParams.update({'font.size': 14})
     plt.clf()
+    fig, ax = plt.subplots(1, 1, sharex=True)
     err = []
     for i in range(len(prediction_list)):
         err.append(np.abs(target_list[i] - prediction_list[i]))
     
     err_sorted = [np.sort(err[i]) for i in range(len(err))]
 
-    plt.plot(damay_points[0], damay_points[1], color='darkorange', linestyle='--', marker='*', label='\emph{Damay et al. 2021}')
+    plt.plot(damay_points[1], np.array(damay_points[0])/len(err[0])*100, color='darkorange', linestyle='--', marker='*', label='\emph{Damay et al. 2021}')
     
-    for i in range(len(err_sorted)):
-        plt.plot(err_sorted[i], color=color_list[i], label=name_list[i], linestyle=line_style[i])
+    percent = np.linspace(0,100,len(err_sorted[0]))
 
-    plt.ylim(0,2)
-    plt.xlim(0,len(err_sorted[0]))
+    for i in range(len(err_sorted)):
+        plt.plot(err_sorted[i], percent, color=color_list[i], label=name_list[i], linestyle=line_style[i])
+
+    plt.ylim(0,100)
+    plt.xlim(0,1.9)
     plt.legend()
-    plt.xlabel('\# of samples')
-    plt.ylabel(r"$\|\Delta$ ln $\gamma^\infty\|$")
-    plt.yticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
+    # set the y axis to percentage
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+    plt.ylabel('percentage of data points')
+    plt.xlabel(r"$|\Delta\ln \gamma^\infty|$")
+    plt.xticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
     plt.tight_layout()
-    # plot horizontal line at 0.3
-    plt.axhline(y=0.3, color='lightgrey', linestyle='--')
+    # plot vertical line at 0.3
+    plt.axvline(x=0.3, color='lightgrey', linestyle='--')
     if save:
         plt.savefig(path + 'sorted/err_curve_mult_' + name, dpi=1200)
+        plt.savefig(path + 'sorted/err_curve_mult_' + name + '.pdf', dpi=1200)
 
 def plot_err_curve_mult_sund(prediction_list, target_list, name_list, color_list, line_style,name = '', path = '', save=False):
     plt.rcParams['text.usetex'] = True
     # change font size
-    plt.rcParams.update({'font.size': 14})
+    plt.rcParams.update({'font.size': 18})
     # make one figure containting three subplots with boxplots for each n
     plt.clf()
+    fig, ax = plt.subplots(1, 1, sharex=True)
     err = []
     for i in range(len(prediction_list)):
         err.append(np.abs(target_list[i] - prediction_list[i]))
     
     err_sorted = [np.sort(err[i]) for i in range(len(err))]
     
-    for i in range(len(err_sorted)):
-        plt.plot(err_sorted[i], color=color_list[i], label=name_list[i], linestyle=line_style[i])
+    percent = np.linspace(0,100,len(err_sorted[0]))
 
-    plt.ylim(0,2)
-    plt.xlim(0,len(err_sorted[0]))
+    for i in range(len(err_sorted)):
+        plt.plot(err_sorted[i], percent, color=color_list[i], label=name_list[i], linestyle=line_style[i])
+
+    plt.ylim(0,100)
+    plt.xlim(0,1.9)
     plt.legend()
-    plt.xlabel('\# of samples')
-    plt.ylabel(r"$\|\Delta$ ln $\gamma^\infty\|$")
-    plt.yticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
+    # set the y axis to percentage
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+    plt.ylabel('percentage of data points')
+    plt.xlabel(r"$|\Delta\ln \gamma^\infty|$")
+    plt.xticks([0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9])
     plt.tight_layout()
-    # plot horizontal line at 0.3
-    plt.axhline(y=0.3, color='lightgrey', linestyle='--')
+    # plot vertical line at 0.3
+    plt.axvline(x=0.3, color='lightgrey', linestyle='--')
     if save:
         plt.savefig(path + 'sorted/err_curve_mult_' + name, dpi=1200)
-    
+        plt.savefig(path + 'sorted/err_curve_mult_' + name + '.pdf', dpi=1200)
     # calculate the percentage of data with error below 0.3 for all datasets
     err_below_03 = []
     for i in range(len(err_sorted)):
