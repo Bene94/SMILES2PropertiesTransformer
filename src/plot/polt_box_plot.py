@@ -59,9 +59,8 @@ def load_data(file_path, val_type):
 
 
 
-n_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 100, 150, 200, 300, 400, 500, 600, 700, 800, 1000, 1500, 2000, 3000, 4000, 5000]
-n_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 100, 200, 300, 400, 500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]
-#n_list = [20, 50, 100, 200, 500, 1000]
+n_list = [2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 100, 150, 200, 300, 400, 500, 600, 700, 800, 1000, 1500, 2000, 3000, 4000, 5000]
+
 type_list = ['0', '1','2']
 
 data_path = "/local/home/bewinter/Paper_SPT/SPT/out_fine_tune/n_f_aug_"
@@ -88,9 +87,9 @@ print(tabulate([input_list_f_aug_0_number, input_list_f_aug_1_number, input_list
 
 # reduce the validation set to a consistent seti
 
-cutoff_val_0 = 7
-cutoff_val_1 = 10
-cutoff_val_2 = 5
+cutoff_val_0 = 15
+cutoff_val_1 = 21
+cutoff_val_2 = 12
 
 if False:
     input_set_aug_0 = np.array([item for sublist in input_list_f_aug_0[cutoff_val_0] for item in sublist])
@@ -196,7 +195,7 @@ ax.axhline(y=0.39, color='k', linestyle='--', label='pre finetune')
 #ax.axhline(y=0.13, color='#ff7f0e', linestyle=':', label='limit $val_\mathrm{edge}$', alpha=0.2)
 #ax.axhline(y=0.17, color='#2ca02c', linestyle=':', label='limit $val_\mathrm{ext}$',  alpha=0.2)
 
-lb = 5
+lb = 2
 ub = 5000
 
 # fit a exponential regression into the data and plot it
@@ -226,20 +225,17 @@ ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#1f77b4', alpha=0.
 # write the fit parameters into the plot
 ax.text(0.1, 0.15, 'Val$_\mathrm{int}$ \na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 
-
 # make y axis limit between 0.05 and 0.4 and make labeling not scientific
 ax.set_ylim(0.08, 0.4)
 ax.set_yticks([0.1, 0.2, 0.3, 0.4])
 ax.set_yticklabels(['0.1', '0.2', '0.3', '0.4'])
 # add a legend
 ax.set_xlim(lb, ub)
-ax.set_xticks([ 10, 100, 1000])
-ax.set_xticklabels(['10', '100', '1000'])
+ax.set_xticks([2, 10, 100, 1000, 5000])
+ax.set_xticklabels(['2','10', '100', '1000', '5000'])
 ax.legend(loc='upper right')
 # decrease ledgend size
 plt.tight_layout()
-ax.legend(loc='upper right', prop={'size': 18})
+ax.legend(loc='upper right', prop={'size': 14})
 plt.show
 plt.savefig('plot/boxplot/mean_mse_val_0.png', dpi=900)
-
-

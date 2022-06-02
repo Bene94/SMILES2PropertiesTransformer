@@ -21,7 +21,7 @@ from transprop.nn_dataloader import *
 @click.option('--name','-n', default='211220-192228', help='Name of the modle')
 @click.option('--data','-d', default='data', help='Path to the data if empty use datapath from modle config')
 
-@click.option('--calc','-c', default=False, help='Calculate results and eval')
+@click.option('--calc','-c', default=True, help='Calculate results and eval')
 @click.option('--plot','-p', default=True, help='Plot results')
 @click.option('--save','-s', default=True, help='Save results')
 
@@ -36,7 +36,7 @@ def main(name,data,calc,plot,save):
         path_model = '../Models/'
         data_path = '../data/' + data + '/'
         save_path = '../out/' + name +  '/'
-        plot_path = '/home/bene/NNGamma/src/plot/'
+        plot_path = 'plot/'
 
     model, config = load_model(path_model,name)
 

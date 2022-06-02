@@ -173,22 +173,29 @@ if __name__ == '__main__':
   
     
         # load sundmacher data
-    n_e = 85
-
-    for i in range(n_e):
+    n_e = 200
+    y = [87,115,149,182]
+    x = [j for j in range(n_e) if j not in y]
+    for i in x:
         print(i)
-        df_val0 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val0.csv')
-        df_val1 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val1.csv')
-        df_val2 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val2.csv')
+        try:
+            df_val0 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val0.csv')
+            df_val1 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val1.csv')
+            df_val2 = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Val2.csv')
+            train = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Training.csv')
 
-        train = pd.read_csv('~/GNN_IAC/Ensemble_'+str(i)+'_V2/Training.csv')
+        except:
+            df_val0 = []
+            df_val1 = []
+            df_val2 = []
+
         best_epoch_V0 = np.argmin(np.array(train['Valid_0_loss']))
         best_epoch_V1 = np.argmin(np.array(train['Valid_1_loss']))
         best_epoch_V2 = np.argmin(np.array(train['Valid_2_loss']))
 
-        best_epoch_V0 = 21
-        best_epoch_V1 = 12
-        best_epoch_V2 = 191
+        best_epoch_V0 = 117
+        best_epoch_V1 = 135
+        best_epoch_V2 = 163
 
         if i == 0:
             df_val0_all = df_val0[['i','Literature',str(best_epoch_V0)]]
