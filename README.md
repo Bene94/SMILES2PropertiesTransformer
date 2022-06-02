@@ -1,29 +1,29 @@
 # SPT
 
-This git contains the code for the paper "A SMILE is all you need"
+This git contains the code for the paper "A SMILE is all you need: Predicting limiting activity coefficients from SMILES with natural language processing"
 
-# How to run
+# How to run the code
 
-In the follwoing how to run the code is discribed. This is seperated into two sections.
+In the following how to run the code is described. This is separated into two sections.
 
   1) Data processing
   2) Training
 
 # Data processing
 
-The folder src/data_processig containts multible function for data processing. These are used to convert .csv input files that contain SMILES of the species into input for the neural network in a memorry efficent form so that even large datasets > 10 milion fits into RAM. Files to be converted should be in a subfolder of raw_data and confrom to the outline of the example files.
+The folder src/data_processig contains multiple function for data processing. These are used to convert .csv input files that contain SMILES of the species into input for the neural network in a memory efficient form so that even large datasets > 10 million fit into RAM. Files to be converted should be in a subfolder of raw_data and conform to the outline of the example files.
 
-## Make alisas list
+## Make alias list
 
-The dataprossing requiers a list that contains all SMILES and their aliases.
+The data processing requires a list that contains all SMILES and their aliases.
 
-The function src/make_alias_list.py creates a dictonary that creates these alternative representations. To update the list add the folder name of your data to the folder name list. If your data has diffrent amounts of collumns they have to be loaded seperated as otherwise all data gets droped due to NaNs. The code currently loads two sets of data seperattly.
+The function src/make_alias_list.py creates a dictionary that creates these alternative representations. To update the list, add the folder name of your data to the folder name list. If your data has different amounts of columns, they have to be loaded separated as otherwise all data gets dropped due to NaNs. The code currently loads two sets of data separately.
 
 ## COSMO data preprocessing
 
 To process large datasets for pretraining use data_processing.py this function will convert the data and split x% of data for Val_ext. The following flags are important:
 
-  -p: path of the input in raw_data can pass multible
+  -p: path of the input in raw_data can pass multiple times
   
   -s: name of the save folder in data
   
@@ -31,22 +31,24 @@ To process large datasets for pretraining use data_processing.py this function w
   
   --h2o: exclude h2o from val_ext
   
-## Experimental data preprossing
+E.g. $ python data_processing/data_processing.py -p t_cosmo -p inf_cosmo -s data
+  
+## Experimental data pre-processing
 
-For limited experimental data n-fold corss validation should be used. To create the datasets the function mult_split_n_out.py can be used. The data gets split acording to our methodology discussed in the paper.
+For limited experimental data n-fold cross validation should be used. To create the datasets the function mult_split_n_out.py can be used. The data gets split according to the methodology discussed in the paper.
 
 ## Other data processing
 
-The function mult_split_n.py splits the data in x datasets containing n unique mixtures in the training set. This function creates datasets to examin scaling. 
+The function mult_split_n.py splits the data in x datasets containing n unique mixtures in the training set. This function creates datasets to examine scaling. 
   
   
 # Training the model
 
-The training on the model was conducted on a server running xprun for sceduling GPUs using the provided .ron files. However, xprun is not yet avaialbe. However training can be conducted by calling the python functions called by xprun directly. Runs are loged in wandb.ai to run the code create a wandb.ai account and follow instruction to set account details in python. 
+The training on the model was conducted on a server running xprun for scheduling GPUs using the provided .ron files. However, xprun is not yet available. However, training can be conducted by calling the python functions called by xprun directly. Runs are logged in wandb.ai to run the code create a wandb.ai account and follow instruction to set account details in python. https://wandb.ai
 
 ## Pretraining
 
-To create a new model and pretrain it use the function mai_script.py. The function takes multible flags to set hyperparameters for training and model architecutre. The trained model is saved in Models 
+To create a new model and pretrain it uses the function mai_script.py. The function takes multiple flags to set hyperparameters for training and model architecture. The trained model is saved in Models 
 
 ## Fine-Tuning
 
