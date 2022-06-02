@@ -41,26 +41,25 @@ For limited experimental data n-fold cross validation should be used. To create 
 
 The function mult_split_n.py splits the data in x datasets containing n unique mixtures in the training set. This function creates datasets to examine scaling. 
   
-  
 # Training the model
 
 The training on the model was conducted on a server running xprun for scheduling GPUs using the provided .ron files. However, xprun is not yet available. However, training can be conducted by calling the python functions called by xprun directly. Runs are logged in wandb.ai to run the code create a wandb.ai account and follow instruction to set account details in python. https://wandb.ai
 
 ## Pretraining
 
-To create a new model and pretrain it uses the function mai_script.py. The function takes multiple flags to set hyperparameters for training and model architecture. The trained model is saved in Models 
+To create a new model and pretrain it uses the function mai_script.py. The function takes multiple flags to set hyperparameters for training and model architecture. The trained model is saved in Models.
 
 ## Fine-Tuning
 
-For fine-tuning using n-fold cross validation use fine_tune_mult_n_fold.py set the folder path the the top folder containing the splits. Output of the evaluation is saved to out_fine_tune
+For fine-tuning using n-fold cross validation use fine_tune_mult_n_fold.py set the folder path the the top folder containing the splits. Output of the evaluation is saved to out_fine_tune.
 
 ## Scaling
 
-To evaluate the scaling of the model us the function run_fine_tune_step_n.py 
+To evaluate the scaling of the model us the function run_fine_tune_step_n.py.
 
 ## Authors note
 
-The very dilexic author apologizes for any inconveniences caused by misspelled variabels. 
+The very dyslexic author apologizes for any inconveniences caused by misspelled variabels. 
 
 
 
