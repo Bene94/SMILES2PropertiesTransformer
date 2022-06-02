@@ -17,7 +17,7 @@ The folder src/data_processig contains multiple function for data processing. Th
 
 The data processing requires a list that contains all SMILES and their aliases.
 
-The function src/make_alias_list.py creates a dictionary that creates these alternative representations. To update the list, add the folder name of your data to the folder name list. If your data has different amounts of columns, they have to be loaded separated as otherwise all data gets dropped due to NaNs. The code currently loads two sets of data separately.
+The function src/make_alias_list.py creates a dictionary that creates these alternative representations. To update the list, add the folder name of your data to the folder name list. If your data has different amounts of columns, they must be loaded separated as otherwise all data gets dropped due to NaNs. The code currently loads two sets of data separately.
 
 ## COSMO data preprocessing
 
@@ -51,7 +51,7 @@ To create a new model and pretrain it uses the function mai_script.py. The funct
 
 ## Fine-Tuning
 
-For fine-tuning using n-fold cross validation use fine_tune_mult_n_fold.py set the folder path the the top folder containing the splits. Output of the evaluation is saved to out_fine_tune.
+For fine-tuning using n-fold cross validation use fine_tune_mult_n_fold.py set the folder path the top folder containing the splits. Output of the evaluation is saved to out_fine_tune.
 
 ## Scaling
 
@@ -59,10 +59,4 @@ To evaluate the scaling of the model us the function run_fine_tune_step_n.py.
 
 ## Authors note
 
-The very dyslexic author apologizes for any inconveniences caused by misspelled variabels. 
-
-
-
-
-
-
+The very dyslexic author apologizes for any inconveniences caused by misspelled variables. 
