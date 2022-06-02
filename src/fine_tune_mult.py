@@ -87,7 +87,7 @@ def fine_tune(model_name, data_path, xp_name, batch_size, epochs, lr, weight_dec
 
     lr_schedule = 'cosine'
 
-    wandb.init(project=wandb_project, entity='bene94', name=name, config=config)
+    wandb.init(project=wandb_project, name=name, config=config)
     wandb.watch(model)
 
     wandb.log({'Group': group})

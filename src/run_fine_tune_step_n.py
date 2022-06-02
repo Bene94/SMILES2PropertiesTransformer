@@ -15,8 +15,7 @@ comand_s = 'xp run /local/home/bewinter/Paper_SPT/SPT/src/xprun_fine_mult.ron -p
 comand_e = ' -- -m ' + model + ' -l 1e-4 -x 200 '
 
 n_list = [10, 20, 30, 40, 50 , 100, 200, 300, 400, 500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]
-
-#n_list = [10, 800, 1000, 2000, 3000, 4000, 5000]
+n_list = [15, 60, 70, 80, 150, 1500]
 for n in n_list:
     epo = int(200)
     path = 'data_exp_n/n_' + str(n)

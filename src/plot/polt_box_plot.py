@@ -6,10 +6,11 @@ from matplotlib import pyplot as plt
 from tabulate import tabulate
 from scipy.optimize import curve_fit
 from torch import std 
-
+import progressbar as pb
 
 import plot_results as pr
 import os
+import pandas as pd
 
 
 def load_data_n(n_list, file_path, val_type):
@@ -58,32 +59,15 @@ def load_data(file_path, val_type):
 
 
 
-n_list = [20, 30, 40, 50, 100, 200, 300, 400, 500, 600, 700, 800] #, 2000] # , 100, 500, 1000]
-
+n_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 100, 150, 200, 300, 400, 500, 600, 700, 800, 1000, 1500, 2000, 3000, 4000, 5000]
+n_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 100, 200, 300, 400, 500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]
 #n_list = [20, 50, 100, 200, 500, 1000]
 type_list = ['0', '1','2']
 
-if False:
-    data_path = "/home/bene/NNGamma/out_fine_tune/n_"
-    target_list_0, prediction_list_0, mse_list_0 = load_data(n_list, data_path, type_list[0])
-    target_list_1, prediction_list_1, mse_list_1 = load_data(n_list, data_path, type_list[1])
-    target_list_2, prediction_list_2, mse_list_2 = load_data(n_list, data_path, type_list[2])
-
-if False:
-    data_path = "/home/bene/NNGamma/out_fine_tune/n_ut_"
-    target_list_ut_0, prediction_list_ut_0, mse_list_ut_0 = load_data(n_list, data_path, type_list[0])
-    target_list_ut_1, prediction_list_ut_1, mse_list_ut_1 = load_data(n_list, data_path, type_list[1])
-    target_list_ut_2, prediction_list_ut_2, mse_list_ut_2 = load_data(n_list, data_path, type_list[2])
-if True:
-    data_path = "/local/home/bewinter/Paper_SPT/SPT/out_fine_tune/n_f_aug_"
-    target_list_f_aug_0, prediction_list_f_aug_0, mse_list_f_aug_0, input_list_f_aug_0 = load_data_n(n_list, data_path, type_list[0])
-    target_list_f_aug_1, prediction_list_f_aug_1, mse_list_f_aug_1, input_list_f_aug_1 = load_data_n(n_list, data_path, type_list[1])
-    target_list_f_aug_2, prediction_list_f_aug_2, mse_list_f_aug_2, input_list_f_aug_2 = load_data_n(n_list, data_path, type_list[2])
-if False:
-    data_path = "/home/bene/NNGamma/out_fine_tune/n_ut_aug_"
-    target_list_ut_aug_0, prediction_list_ut_aug_0, mse_list_ut_aug_0 = load_data(n_list, data_path, type_list[0])
-    target_list_ut_aug_1, prediction_list_ut_aug_1, mse_list_ut_aug_1 = load_data(n_list, data_path, type_list[1])
-    target_list_ut_aug_2, prediction_list_ut_aug_2, mse_list_ut_aug_2 = load_data(n_list, data_path, type_list[2])
+data_path = "/local/home/bewinter/Paper_SPT/SPT/out_fine_tune/n_f_aug_"
+target_list_f_aug_0, prediction_list_f_aug_0, mse_list_f_aug_0, input_list_f_aug_0 = load_data_n(n_list, data_path, type_list[0])
+target_list_f_aug_1, prediction_list_f_aug_1, mse_list_f_aug_1, input_list_f_aug_1 = load_data_n(n_list, data_path, type_list[1])
+target_list_f_aug_2, prediction_list_f_aug_2, mse_list_f_aug_2, input_list_f_aug_2 = load_data_n(n_list, data_path, type_list[2])
 
 # get input_list_f_aug_0[:][3][:] into single array
 input_list_f_aug_0_number = []
@@ -104,32 +88,38 @@ print(tabulate([input_list_f_aug_0_number, input_list_f_aug_1_number, input_list
 
 # reduce the validation set to a consistent seti
 
-cutoff_val_0 = 5
-cutoff_val_1 = 11
-cutoff_val_2 = 11
+cutoff_val_0 = 7
+cutoff_val_1 = 10
+cutoff_val_2 = 5
 
 if False:
     input_set_aug_0 = np.array([item for sublist in input_list_f_aug_0[cutoff_val_0] for item in sublist])
     input_set_aug_1 = np.array([item for sublist in input_list_f_aug_1[cutoff_val_1] for item in sublist])
-
+    bar = pb.ProgressBar(max_value=len(target_list_f_aug_0)*len(target_list_f_aug_0[0]), widgets=[pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
     # check where input_set_aug_0[i] contains input_set_aug_0
     for i in range(0, len(input_list_f_aug_0)):
-        for j in range(0, len(input_list_f_aug_0[i])):     
-            temp_input = np.array(input_list_f_aug_1[i][j])
+        for j in range(0, len(input_list_f_aug_0[i])):  
+            bar.update(i * len(input_list_f_aug_0[i]) + j)
+            temp_input = np.array(input_list_f_aug_0[i][j])
             # check where temp_input does not contain input_set_aug_0
             remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_0]
-            input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
-            target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
-            prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
-
+            input_list_f_aug_0[i][j] = np.delete(input_list_f_aug_0[i][j], remove_index)
+            target_list_f_aug_0[i][j] = np.delete(target_list_f_aug_0[i][j], remove_index)
+            prediction_list_f_aug_0[i][j] = np.delete(prediction_list_f_aug_0[i][j], remove_index)
+    bar.finish()
+    bar = pb.ProgressBar(max_value=len(target_list_f_aug_1)*len(target_list_f_aug_1[0]), widgets=[pb.Timer(), pb.Bar(), pb.ETA()])
+    bar.start()
     for i in range(0, len(input_list_f_aug_1)):
         for j in range(0, len(input_list_f_aug_1[i])):
+            bar.update(i * len(input_list_f_aug_1[i]) + j)
             temp_input = np.array(input_list_f_aug_1[i][j])
             # check where temp_input does not contain input_set_aug_0
             remove_index = [ k for k in range(0, len(temp_input)) if temp_input[k] not in input_set_aug_1]
             input_list_f_aug_1[i][j] = np.delete(input_list_f_aug_1[i][j], remove_index)
             target_list_f_aug_1[i][j] = np.delete(target_list_f_aug_1[i][j], remove_index)
             prediction_list_f_aug_1[i][j] = np.delete(prediction_list_f_aug_1[i][j], remove_index)
+    bar.finish()
 else:
     prediction_list_f_aug_0 = prediction_list_f_aug_0[0:cutoff_val_0]
     target_list_f_aug_0 = target_list_f_aug_0[0:cutoff_val_0]
@@ -139,6 +129,9 @@ else:
     target_list_f_aug_1 = target_list_f_aug_1[0:cutoff_val_1]
     input_list_f_aug_1 = input_list_f_aug_1[0:cutoff_val_1]
     mse_list_f_aug_1 = mse_list_f_aug_1[0:cutoff_val_1]
+    prediction_list_f_aug_2 = prediction_list_f_aug_2[cutoff_val_2:]
+    target_list_f_aug_2 = target_list_f_aug_2[cutoff_val_2:]
+    input_list_f_aug_2 = input_list_f_aug_2[cutoff_val_2:]
 
 
 # plot the mean mse for each n in a log log plot
@@ -147,8 +140,8 @@ fig, ax = plt.subplots(1, 1)
 plt.rc('text', usetex=True)
 ax.set_xscale('log')
 ax.set_yscale('log')
-ax.set_xlabel('n')
-ax.set_ylabel('Average MSE')
+ax.set_xlabel('# of training mixtures')
+ax.set_ylabel('average MSE')
 #mean_mse = [np.median(mse) for mse in mse_list_0]
 #mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0
 mse_ft_aug_0 = []
@@ -180,9 +173,9 @@ mean_mse_ft_aug_0 = [np.nanmean(mse) for mse in mse_ft_aug_0]
 mean_mse_ft_aug_1 = [np.nanmean(mse) for mse in mse_ft_aug_1]
 mean_mse_ft_aug_2 = [np.nanmean(mse) for mse in mse_ft_aug_2]
 
-ax.plot(n_list, mean_mse_ft_aug_2, label='$val_\mathrm{int}$', linestyle='', marker='v', color='#1f77b4')
-ax.plot(n_list[0:cutoff_val_1], mean_mse_ft_aug_1[0:cutoff_val_1], label='$val_\mathrm{edge}$', linestyle='', marker='*', color='#ff7f0e')
-ax.plot(n_list[0:cutoff_val_0], mean_mse_ft_aug_0[0:cutoff_val_0], label='$val_\mathrm{ext}$', linestyle='', marker='o',  color='#2ca02c')
+ax.plot(n_list[cutoff_val_2:] , mean_mse_ft_aug_2, label='Val$_\mathrm{int}$' , linestyle='', marker='v', color='#1f77b4')
+ax.plot(n_list[0:cutoff_val_1], mean_mse_ft_aug_1, label='Val$_\mathrm{edge}$', linestyle='', marker='*', color='#ff7f0e')
+ax.plot(n_list[0:cutoff_val_0], mean_mse_ft_aug_0, label='Val$_\mathrm{ext}$' , linestyle='', marker='o', color='#2ca02c')
 
 # calculate the upper and lower 95% confident intervall of the mean mse
 mse_ft_aug_0_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_aug_0])
@@ -198,48 +191,54 @@ fig.tight_layout()
 plt.show()
 
 # add horizontal line at 0.35
-ax.axhline(y=0.35, color='k', linestyle='--', label='pre finetune')
-ax.axhline(y=0.11, color='#1f77b4', linestyle=':', label='limit $val_\mathrm{int}$', alpha=0.2)
-ax.axhline(y=0.13, color='#ff7f0e', linestyle=':', label='limit $val_\mathrm{edge}$', alpha=0.2)
-ax.axhline(y=0.17, color='#2ca02c', linestyle=':', label='limit $val_\mathrm{ext}$',  alpha=0.2)
+ax.axhline(y=0.39, color='k', linestyle='--', label='pre finetune')
+#ax.axhline(y=0.11, color='#1f77b4', linestyle=':', label='limit $val_\mathrm{int}$', alpha=0.2)
+#ax.axhline(y=0.13, color='#ff7f0e', linestyle=':', label='limit $val_\mathrm{edge}$', alpha=0.2)
+#ax.axhline(y=0.17, color='#2ca02c', linestyle=':', label='limit $val_\mathrm{ext}$',  alpha=0.2)
+
+lb = 5
+ub = 5000
 
 # fit a exponential regression into the data and plot it
 exp_fuc = lambda x, a, b: a * x**b
 x = np.array(n_list[0:cutoff_val_0])
-y = np.array(mean_mse_ft_aug_0)
+y = np.array(mean_mse_ft_aug_0[0:cutoff_val_0])
 p0 = [1, -0.0001]
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
-x_fit = np.linspace(min(x), max(x), 200)
-ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#2ca02c')
+x_fit = np.linspace(lb, ub, 200)
+ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#2ca02c', alpha=0.4)
 # write the fit parameters into the plot next to the line
-ax.text(0.1, 0.35, '$val_\mathrm{ext}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+ax.text(0.1, 0.35, 'Val$_\mathrm{ext}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 x = np.array(n_list[0:cutoff_val_1])
-y = np.array(mean_mse_ft_aug_1)
+y = np.array(mean_mse_ft_aug_1[0:cutoff_val_1])
 p0 = [1, -0.0001]
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
-x_fit = np.linspace(min(x), max(x), 200)
-ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#ff7f0e')
+x_fit = np.linspace(lb, ub, 200)
+ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#ff7f0e', alpha=0.4)
 # write the fit parameters into the plot
-ax.text(0.1, 0.25, '$val_\mathrm{edge}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
-x = np.array(n_list)
+ax.text(0.1, 0.25, 'Val$_\mathrm{edge}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+x = np.array(n_list[cutoff_val_2:])
 y = np.array(mean_mse_ft_aug_2)
 p0 = [1, -0.0001] 
 popt, pcov = curve_fit(exp_fuc, x, y, p0)
-x_fit = np.linspace(min(x), max(x), 200)
-ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#1f77b4')
+x_fit = np.linspace(lb, ub, 200)
+ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#1f77b4', alpha=0.4)
 # write the fit parameters into the plot
-ax.text(0.1, 0.15, '$val_\mathrm{int}$ \na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+ax.text(0.1, 0.15, 'Val$_\mathrm{int}$ \na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 
 
 # make y axis limit between 0.05 and 0.4 and make labeling not scientific
 ax.set_ylim(0.08, 0.4)
-ax.set_yticks([0.05, 0.1, 0.2, 0.3, 0.4])
-ax.set_yticklabels(['0.05', '0.1', '0.2', '0.3', '0.4'])
+ax.set_yticks([0.1, 0.2, 0.3, 0.4])
+ax.set_yticklabels(['0.1', '0.2', '0.3', '0.4'])
 # add a legend
-ax.set_xlim(min(n_list), max(n_list))
+ax.set_xlim(lb, ub)
+ax.set_xticks([ 10, 100, 1000])
+ax.set_xticklabels(['10', '100', '1000'])
 ax.legend(loc='upper right')
 # decrease ledgend size
-ax.legend(loc='upper right', prop={'size': 6})
+plt.tight_layout()
+ax.legend(loc='upper right', prop={'size': 18})
 plt.show
 plt.savefig('plot/boxplot/mean_mse_val_0.png', dpi=900)
 

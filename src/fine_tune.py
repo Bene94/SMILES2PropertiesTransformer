@@ -1,4 +1,5 @@
 import datetime
+from email.policy import default
 import pickle
 import os
 from copy import deepcopy
@@ -20,21 +21,23 @@ from plot.plot_results import *
 
 @click.command()
 
-@click.option('--model_name', default='220127-180116', help='Name of the model')
-@click.option('--data_path', default='exp_D', help='Path to the data')
+@click.option('--model_name', default='220512-142153', help='Name of the model')
+@click.option('--data_path', default='brouwer', help='Path to the data')
 
-@click.option('--batch_size', default=16, help='Batch size')
-@click.option('--epochs', default=10, help='Number of epochs')
+@click.option('--batch_size', default=32, help='Batch size')
+@click.option('--epochs', default=50, help='Number of epochs')
 @click.option('--lr', default=1e-4, help='Learning rate')
 @click.option('--weight_decay', default=0.0, help='Weight decay')
 
 @click.option('--cuda', default=1, help='Use cuda')
 @click.option('--local', default=True, help='Use local')
 
-@click.option('--one_out', default=True, help='Use leave one out validation')
+@click.option('--one_out', default=False, help='Use leave one out validation [DEPRECATED]')
+@click.option('--wandb_project', default='FT_Paper', help='WandB user name')
 
 
-def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local, one_out):
+
+def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, local, one_out, wandb_project):
 
     name = model_name
 
@@ -69,7 +72,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     config.local = local
     config.xp_name = xp_name
 
-    wandb.init(project='GNN_D_FT', entity='bene94', name=name, config=config)
+    wandb.init(project=wandb_project, name=name, config=config)
     wandb.watch(model)
 
     ## set up scheduler
@@ -86,7 +89,7 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
 
     if one_out:
         if local:
-            data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
+            data_path = os.path.join('../data/' + config.data_path + '/')
         else:
             data_path = os.path.join('/mnt/xprun/data/' + config.data_path + '/')
 
@@ -99,9 +102,9 @@ def main(model_name, data_path, batch_size, epochs, lr, weight_decay, cuda, loca
     
     else:
         training_data = load_data_full(config,local,test=False)
-        val_data = training_data
-        val_dataloader_list = [val_data]
+        val_dataloader_list = []
         outer_loop = 1
+
         
     
 

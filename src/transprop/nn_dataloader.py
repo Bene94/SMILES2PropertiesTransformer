@@ -147,7 +147,7 @@ def load_data(config,local = False,test = False):
 def load_data_full(config,local = False,test = False):
 
     if local:
-        data_path = os.path.join('/home/bene/NNGamma/data/' + config.data_path + '/')
+        data_path = os.path.join('../data/' + config.data_path + '/')
     else:
         data_path = os.path.join('/mnt/xprun/data/' + config.data_path + '/')
 

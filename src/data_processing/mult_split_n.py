@@ -18,7 +18,7 @@ h2o = True # if True, H2O can be in the validation set
 num_splits = 200
 
 n_list = [10, 20, 30, 40, 50 , 100, 200, 300, 400, 500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]
-#n_list = [1000, 2000, 3000, 4000, 5000]
+n_list = [15, 60, 70, 80, 150, 1500]
 
 comp_list, __, ___ = dc.get_comp_list(file_path, vocab_path)
 

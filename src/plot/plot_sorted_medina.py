@@ -333,7 +333,7 @@ if __name__ == '__main__':
     mse_df.loc['Cosmo', 'MEA'] = np.mean(np.abs(cosmo_data_target - cosmo_data_prediction))
     mse_df.loc['Cosmo', 'lower 0.3'] = np.sum(np.abs(cosmo_data_target - cosmo_data_prediction) < 0.3) / len(cosmo_data_prediction)
 
-    print('MSE and MEA calculated for the complete data set')
+    print('MSE and MEA calculated for the common data set')
     print(tabulate(mse_df, headers='keys', tablefmt='psql', floatfmt=".3f"))   
     
 
