@@ -63,6 +63,8 @@ To use the model use the function `misc\simple_evaluation.py` and the trained mo
 
 # Data availability 
 
+Training data as well as evaluation results can currently be found here: https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4
+
 # Authors note
 
 The very dyslexic author apologizes for any inconveniences caused by misspelled variables.
