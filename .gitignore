@@ -1,6 +1,6 @@
 # Ignore the data file folders
 wandb/**
-scr/wandb/*
+src/wandb/*
 *.png
 data/*
 Models/*
