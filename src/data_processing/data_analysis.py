@@ -21,7 +21,7 @@ class Config:
 
 ## function to compare the data from experimental and simulation data
 
-path_data = os.path.join('/local/home/bewinter/SPT/data/x_t_cosmo/')
+path_data = os.path.join('../inf_cosmo/')
 
 config = Config(data_path=path_data, shift=0)
 

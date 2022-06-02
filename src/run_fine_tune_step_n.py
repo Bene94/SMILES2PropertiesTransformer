@@ -14,9 +14,8 @@ lval = 0
 comand_s = 'xp run /local/home/bewinter/Paper_SPT/SPT/src/xprun_fine_mult.ron -p 3 --include-dirty' 
 comand_e = ' -- -m ' + model + ' -l 1e-4 -x 200 '
 
-n_list = [10, 20, 30, 40, 50 , 100, 200, 300, 400, 500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]
-n_list = [15, 60, 70, 80, 150, 1500]
-n_list = [1,2,3,4,5,6,7,8,9]
+n_list = [2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 100, 150, 200, 300, 400, 500, 600, 700, 800, 1000, 1500, 2000, 3000, 4000, 5000]
+
 for n in n_list:
     epo = int(200)
     path = 'data_exp_n/n_' + str(n)
@@ -32,7 +31,6 @@ for n in n_list:
 
     save_path = save_path + str(n)
     group = save_path
-            
 
     for i in range(0,200):
         if lval_int != 0:
