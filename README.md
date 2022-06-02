@@ -57,6 +57,6 @@ For fine-tuning using n-fold cross validation use fine_tune_mult_n_fold.py set t
 
 To evaluate the scaling of the model us the function run_fine_tune_step_n.py.
 
-## Authors note
+# Authors note
 
 The very dyslexic author apologizes for any inconveniences caused by misspelled variables. 
