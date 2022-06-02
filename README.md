@@ -2,13 +2,6 @@
 
 This git contains the code for the paper "A SMILE is all you need: Predicting limiting activity coefficients from SMILES with natural language processing"
 
-##### Table of Contents  
-[Headers](#headers)  
-[Emphasis](#emphasis)  
-...snip...    
-<a name="headers"/>
-## Headers
-
 # How to run the code
 
 In the following how to run the code is described. This is separated into two sections.
