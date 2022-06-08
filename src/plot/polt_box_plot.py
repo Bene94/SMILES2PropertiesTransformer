@@ -135,12 +135,8 @@ else:
 
 # plot the mean mse for each n in a log log plot
 fig, ax = plt.subplots(1, 1)
-# use latex font
 plt.rc('text', usetex=True)
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.set_xlabel('# of training mixtures')
-ax.set_ylabel('average MSE')
+
 #mean_mse = [np.median(mse) for mse in mse_list_0]
 #mean_mse_ut = [np.median(mse) for mse in mse_list_ut_0
 mse_ft_aug_0 = []
@@ -150,21 +146,21 @@ mse_ft_aug_2 = []
 for i in range(len(target_list_f_aug_0)):
     temp_mse_0 = []
     for j in range(len(target_list_f_aug_0[i])):
-        temp_mse_0.append(np.nanmean(np.square(target_list_f_aug_0[i][j] - prediction_list_f_aug_0[i][j])))
+        #temp_mse_0.append(np.nanmean(np.square(target_list_f_aug_0[i][j] - prediction_list_f_aug_0[i][j])))
         temp_mse_0.append(np.nanmean(np.abs(target_list_f_aug_0[i][j] - prediction_list_f_aug_0[i][j])))
     mse_ft_aug_0.append(temp_mse_0)
 
 for i in range(len(target_list_f_aug_1)):
     temp_mse_1 = []
     for j in range(len(target_list_f_aug_1[i])):
-        temp_mse_1.append(np.nanmean(np.square(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
+        #temp_mse_1.append(np.nanmean(np.square(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
         temp_mse_1.append(np.nanmean(np.abs(target_list_f_aug_1[i][j] - prediction_list_f_aug_1[i][j])))
     mse_ft_aug_1.append(temp_mse_1)
 
 for i in range(len(target_list_f_aug_2)):
     temp_mse_2 = []
     for j in range(len(target_list_f_aug_2[i])):
-        temp_mse_2.append(np.nanmean(np.square(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
+        #temp_mse_2.append(np.nanmean(np.square(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
         temp_mse_2.append(np.nanmean(np.abs(target_list_f_aug_2[i][j] - prediction_list_f_aug_2[i][j])))
     mse_ft_aug_2.append(temp_mse_2)
 
@@ -185,10 +181,6 @@ mse_ft_aug_2_ci = np.array([np.nanpercentile(mse, [15, 85]) for mse in mse_ft_au
 #ax.fill_between(n_list[0:cutoff_val_1], mse_ft_aug_1_ci[0:cutoff_val_1,0], mse_ft_aug_1_ci[0:cutoff_val_1,1], color='#ff7f0e', alpha=0.2)
 #ax.fill_between(n_list[0:cutoff_val_0], mse_ft_aug_0_ci[0:cutoff_val_0,0], mse_ft_aug_0_ci[0:cutoff_val_0,1], color='#2ca02c', alpha=0.2)
 
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=5)
-fig.tight_layout()
-plt.show()
-
 # add horizontal line at 0.35
 ax.axhline(y=0.39, color='k', linestyle='--', label='pre finetune')
 #ax.axhline(y=0.11, color='#1f77b4', linestyle=':', label='limit $val_\mathrm{int}$', alpha=0.2)
@@ -207,7 +199,7 @@ popt, pcov = curve_fit(exp_fuc, x, y, p0)
 x_fit = np.linspace(lb, ub, 200)
 ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#2ca02c', alpha=0.4)
 # write the fit parameters into the plot next to the line
-ax.text(0.1, 0.35, 'Val$_\mathrm{ext}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+#ax.text(0.75, 0.85, 'Val$_\mathrm{ext}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 x = np.array(n_list[0:cutoff_val_1])
 y = np.array(mean_mse_ft_aug_1[0:cutoff_val_1])
 p0 = [1, -0.0001]
@@ -215,7 +207,7 @@ popt, pcov = curve_fit(exp_fuc, x, y, p0)
 x_fit = np.linspace(lb, ub, 200)
 ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#ff7f0e', alpha=0.4)
 # write the fit parameters into the plot
-ax.text(0.1, 0.25, 'Val$_\mathrm{edge}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+#ax.text(0.75, 0.75, 'Val$_\mathrm{edge}$\na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
 x = np.array(n_list[cutoff_val_2:])
 y = np.array(mean_mse_ft_aug_2)
 p0 = [1, -0.0001] 
@@ -223,19 +215,22 @@ popt, pcov = curve_fit(exp_fuc, x, y, p0)
 x_fit = np.linspace(lb, ub, 200)
 ax.plot(x_fit, exp_fuc(x_fit, *popt), linestyle='--',  color='#1f77b4', alpha=0.4)
 # write the fit parameters into the plot
-ax.text(0.1, 0.15, 'Val$_\mathrm{int}$ \na = %.2f b = %.2f' % tuple(popt), transform=ax.transAxes)
+plt.rcParams.update({'font.size': 16})
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+ax.set_yscale('log')
+ax.set_xscale('log')
 
-# make y axis limit between 0.05 and 0.4 and make labeling not scientific
-ax.set_ylim(0.08, 0.4)
+ax.set_xlabel('# of training mixtures', fontsize=16)
+ax.set_ylabel('average MSE', fontsize=16)
+ax.set_ylim(0.1, 0.4)
 ax.set_yticks([0.1, 0.2, 0.3, 0.4])
 ax.set_yticklabels(['0.1', '0.2', '0.3', '0.4'])
-# add a legend
 ax.set_xlim(lb, ub)
 ax.set_xticks([2, 10, 100, 1000, 5000])
 ax.set_xticklabels(['2','10', '100', '1000', '5000'])
-ax.legend(loc='upper right')
-# decrease ledgend size
+ax.legend(loc='lower left')
 plt.tight_layout()
-ax.legend(loc='upper right', prop={'size': 14})
 plt.show
 plt.savefig('plot/boxplot/mean_mse_val_0.png', dpi=900)
+plt.savefig('plot/boxplot/mean_mse_val_0.pdf')

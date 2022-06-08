@@ -19,7 +19,7 @@ model_path = '../Models/'
 model_name = 'model_512_brouwer'
 file_name = 'test_file.csv'
 
-from_file = True
+from_file = False
 
 if torch.cuda.is_available():
     device = 'cuda'
@@ -36,8 +36,8 @@ print('preparing data...')
 if from_file:
     input_file = pd.read_csv('../data/' + file_name)
 else:
-    solute_list = ["C", "CC", "CCC", "CCC", "CCCC", "CCCCC", "CCCCCC", "CCCCCCC"] *2000
-    solvent_list = ["CCO", "CCO", "CCO", "CCO", "CCO", "CCO", "CCO", "CCO"] * 2000
+    solute_list = ["CCCCC"]
+    solvent_list = ["FC(F)(F)C(F)(F)C(F)(F)C(F)(F)C(F)(F)C(F)(F)F"]
     T = np.linspace(298.15, 298.15, len(solvent_list))
     input_file = pd.DataFrame(columns=['SMILES0','SMILES1','T'])
     input_file = pd.concat([input_file, pd.DataFrame({'SMILES0':solute_list, 'SMILES1':solvent_list, 'T':T})])
