@@ -222,7 +222,7 @@ ax.set_yscale('log')
 ax.set_xscale('log')
 
 ax.set_xlabel('# of training mixtures', fontsize=16)
-ax.set_ylabel('average MSE', fontsize=16)
+ax.set_ylabel('average MAE', fontsize=16)
 ax.set_ylim(0.1, 0.4)
 ax.set_yticks([0.1, 0.2, 0.3, 0.4])
 ax.set_yticklabels(['0.1', '0.2', '0.3', '0.4'])
