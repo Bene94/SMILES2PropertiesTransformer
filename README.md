@@ -8,7 +8,7 @@ This git contains the code for the paper "A SMILE is all you need: Predicting li
 
 `git clone git@github.com:Bene94/SMILES2PropertiesTransformer.git`
 
-`cd SMILES2PropertiesTransformer`
+`cd SMILES2PropertiesTransformer/`
 
 ## Set up Environment
 
