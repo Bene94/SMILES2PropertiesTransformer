@@ -2,12 +2,42 @@
 
 This git contains the code for the paper "A SMILE is all you need: Predicting limiting activity coefficients from SMILES with natural language processing"
 
-# How to run the code
+# Paper reproduction
 
-In the following, we describe how to run the code, separated into two sections:
+In the following it is discribed how to reproduce the training and validation of the model from "A SMILE is all you need":
+
+Generate the alias list of SMILES, warning can be ignored
+
+`python data_processing/make_alias_list.py`
+ 
+Generate the training data
+
+`python data_processing/data_processing.py -p inf_cosmo -p t_cosmo -s inf_t_cosmo`
+
+Run the pretraining
+
+`python main_script.py`
+
+Generate the validation sets
+
+`python data_processing/mult_split_n.py`
+
+Run the validation, set the model name in the script to your pretrained model name, the outputs are saved into out_fine_tune
+
+`python run_fine_tune_n_fold.py`
+
+Run the evaluation script, set 'name' to the output name of the fine_tune 
+
+`python plot/plot_results.py`
+
+# How to run the code more general
+
+The code contains more function than used for the paper that can be used more flexible. In the following, we describe how to run the code, separated into two sections:
 
   1) Data processing
   2) Training
+
+
 
 # Data processing
 
