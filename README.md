@@ -18,7 +18,7 @@ This git contains the code for the paper "A SMILE is all you need: Predicting li
 
 `pip install -r requirements_pip.txt`
 
-Install a suitable torch verstion:
+Install a suitable torch version:
 
 https://pytorch.org/
 
@@ -28,7 +28,7 @@ Get the content of the raw_data folder from https://polybox.ethz.ch/index.php/s/
 
 ## Run training and fine-tuning
 
-In the following it is discribed how to reproduce the training and validation of the model from "A SMILE is all you need":
+In the following it is described how to reproduce the training and validation of the model from "A SMILE is all you need":
 
 `cd src/`
 
@@ -55,6 +55,7 @@ Run the validation, set the model name in the script to your pretrained model na
 Run the evaluation script, set 'name' to the output name of the fine_tune 
 
 `python plot/plot_results.py`
+
 
 # How to run the code more general
 
