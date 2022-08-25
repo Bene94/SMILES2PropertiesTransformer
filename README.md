@@ -72,7 +72,7 @@ Then run the fine-tuning:
 
 `python fine_tune.py --model_name=model_name --data_path=input_data_path`
 
-This function will also use the validation data for training.
+This function uses the validation data for training and will thus not produce a
 
 
 # How to run the code more general
