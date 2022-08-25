@@ -7,12 +7,15 @@ This git contains the code for the paper "A SMILE is all you need: Predicting li
 ## Pull git
 
 `git clone git@github.com:Bene94/SMILES2PropertiesTransformer.git`
+
 `cd SMILES2PropertiesTransformer`
 
 ## Set up Environment
 
 `conda create -n'SPT_env' python=3.9`
+
 `conda activate SPT_env`
+
 `pip install -r requirements_pip.txt`
 
 Install a suitable torch verstion:
