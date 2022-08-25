@@ -22,6 +22,10 @@ Install a suitable torch verstion:
 
 https://pytorch.org/
 
+## Get raw data
+
+Get the content of the raw_data folder from https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4 and put it into the raw_data folder
+
 ## Run training and fine-tuning
 
 In the following it is discribed how to reproduce the training and validation of the model from "A SMILE is all you need":
@@ -58,7 +62,6 @@ The code contains more function than used for the paper that can be used more fl
 
   1) Data processing
   2) Training
-
 
 
 # Data processing
