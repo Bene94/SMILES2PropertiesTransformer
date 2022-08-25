@@ -1,0 +1,29 @@
+XpV0(
+    project: "DUMMMY",
+    containers: {
+        "main": (
+            command: ["python", "-u", "dummy_run.py"],
+            
+            build: [
+                From("nvcr.io/nvidia/pytorch:21.03-py3"),
+                Repo(path: "requirements.txt", cd: true),
+                Run("pip install -r requirements.txt"),
+                Repo(keep: true, cd: true),
+            ],
+
+            gpu: 1,
+            gpu_mem: "11GB",
+            
+            env_secrets: {
+                "WANDB_API_KEY": "wandb-api-key",
+            },
+            volumes: 
+                {"/home/bene/SPT/data": "/mnt/xprun", 
+                "/home/bene/SPT/Models": "/mnt/xprun/out",
+                "/home/bene/SPT/Plot": "/mnt/xprun/plot",
+                "/home/bene/SPT/temp": "/mnt/xprun/temp",
+                "/home/bene/SPT/wandb": "/mnt/xprun/wandb",
+            },
+        ),
+    }
+)

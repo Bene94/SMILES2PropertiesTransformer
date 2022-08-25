@@ -1,0 +1,30 @@
+XpV0(
+    project: "GNN_T",
+    containers: {
+        "main": (
+            command: ["python", "-u", "src/main_script.py"],
+            
+            build: [
+                From("nvcr.io/nvidia/pytorch:21.03-py3"),
+                Repo(path: "requirements.txt", cd: true),
+                Run("pip install -r requirements.txt"),
+                Repo(keep: true, cd: true),
+            ],
+
+            gpu: 1,
+            gpu_mem: "24GB",
+            cpu_mem: "16GB",
+            
+            env_secrets: {
+                "WANDB_API_KEY": "wandb-api-key",
+            },
+            volumes: 
+                {"/local/home/bewinter/Paper_SPT/SPT/data": "/mnt/xprun/data", 
+                "/local/home/bewinter/Paper_SPT/SPT/Models": "/mnt/xprun/out",
+                "/local/home/bewinter/Paper_SPT/SPT/Plot": "/mnt/xprun/plot",
+                "/local/home/bewinter/Paper_SPT/SPT/temp": "/mnt/xprun/temp",
+                "/local/home/bewinter/Paper_SPT/SPT/wandb": "/mnt/xprun/wandb",
+            },
+        ),
+    }
+)

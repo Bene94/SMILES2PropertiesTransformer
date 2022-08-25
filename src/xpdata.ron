@@ -1,0 +1,32 @@
+XpV0(
+    project: "data_processing",
+    containers: {
+        "main": (
+            command: ["python", "-u", "data_processing/mult_split_n.py"],
+            
+            build: [
+                From("nvcr.io/nvidia/pytorch:21.03-py3"),
+                Repo(path: "requirements.txt", cd: true),
+                Run("pip install -r requirements.txt"),
+                Repo(keep: true, cd: true),
+            ],
+
+            gpu: 0,
+            gpu_mem: "0GB",
+            cpu_mem: "24GB",
+            
+            env_secrets: {
+                "WANDB_API_KEY": "wandb-api-key",
+            },
+            volumes: 
+                {"/home/bene/SPT/data": "/mnt/xprun/data", 
+                "/home/bene/SPT/raw_data": "/mnt/xprun/raw_data",
+                "/home/bene/SPT/vocab": "/mnt/xprun/vocab",
+                "/home/bene/SPT/Models": "/mnt/xprun/out",
+                "/home/bene/SPT/Plot": "/mnt/xprun/plot",
+                "/home/bene/SPT/temp": "/mnt/xprun/temp",
+                "/home/bene/SPT/wandb": "/mnt/xprun/wandb",
+            },
+        ),
+    }
+)
