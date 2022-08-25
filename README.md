@@ -18,7 +18,7 @@ This git contains the code for the paper "A SMILE is all you need: Predicting li
 
 `pip install -r requirements_pip.txt`
 
-Install a suitable torch verstion:
+Install a suitable torch version:
 
 https://pytorch.org/
 
@@ -28,33 +28,51 @@ Get the content of the raw_data folder from https://polybox.ethz.ch/index.php/s/
 
 ## Run training and fine-tuning
 
-In the following it is discribed how to reproduce the training and validation of the model from "A SMILE is all you need":
+In the following it is described how to reproduce the training and validation of the model from "A SMILE is all you need":
 
 `cd src/`
 
-Generate the alias list of SMILES, warning can be ignored
+Generate the alias list of SMILES, warning can be ignored:
 
 `python data_processing/make_alias_list.py`
  
-Generate the training data
+Generate the training data:
 
 `python data_processing/data_processing.py -p inf_cosmo -p t_cosmo -s inf_t_cosmo`
 
-Run the pretraining
+Run the pretraining:
 
 `python main_script.py`
 
-Generate the validation sets
+Alternatively the pretrained model available in https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4 can be used.
+
+Generate the validation sets:
 
 `python data_processing/mult_split_n.py`
 
-Run the validation, set the model name in the script to your pretrained model name, the outputs are saved into out_fine_tune
+Run the validation, set the model name in the script to your pretrained model name, the outputs are saved into out_fine_tune:
 
 `python run_fine_tune_n_fold.py`
 
-Run the evaluation script, set 'name' to the output name of the fine_tune 
+Run the evaluation script, set 'name' to the output name of the fine_tune:
 
 `python plot/plot_results.py`
+
+## Evaluating mixtures
+
+To use the models to predict limiting activity coefficients use the script `misc/simple_evaluation.py`. Mixtures can either be put in manualy or loaded from an input file.
+
+## Fine-tuning a model on new data
+
+To fine-tune a model on other data the model has first to be processed:
+
+`python data_processing/data_processing.py -p path_to_raw_data -s save_path`
+
+Then run the fine-tuning:
+
+`python fine_tune.py --model_name=model_name --data_path=input_data_path`
+
+If the flag `--no_val` is set also the validation data is used for training.
 
 # How to run the code more general
 
