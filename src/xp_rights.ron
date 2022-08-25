@@ -1,0 +1,22 @@
+XpV0(
+    project: "Get Up Stand Up",
+    containers: {
+        "main": (
+            command: ["python", "-u", "src/change_rights.py"],
+            
+            build: [
+                From("nvcr.io/nvidia/pytorch:21.03-py3"),
+                Repo(path: "requirements.txt", cd: true),
+                Run("pip install -r requirements.txt"),
+                Repo(keep: true, cd: true),
+            ],
+            
+            env_secrets: {
+                "WANDB_API_KEY": "wandb-api-key",
+            },
+            volumes: 
+                {"/local/home/bewinter/SPT": "/mnt/xprun", 
+            },
+        ),
+    }
+)

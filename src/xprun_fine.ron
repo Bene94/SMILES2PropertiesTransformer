@@ -1,0 +1,29 @@
+XpV0(
+    project: "GNN_FTS",
+    containers: {
+        "main": (
+            command: ["python", "-u", "fine_tune.py"],
+            
+            build: [
+                From("nvcr.io/nvidia/pytorch:21.03-py3"),
+                Repo(path: "requirements.txt", cd: true),
+                Run("pip install -r requirements.txt"),
+                Repo(keep: true, cd: true),
+            ],
+
+            gpu: 1,
+            gpu_mem: "11GB",
+            cpu_mem: "24GB",
+            
+            env_secrets: {
+                "WANDB_API_KEY": "wandb-api-key",
+            },
+            volumes: 
+                {"/home/bene/SPT/data": "/mnt/xprun/data", 
+                "/home/bene/SPT/Models": "/mnt/xprun/out",
+                "/home/bene/SPT/Plot": "/mnt/xprun/plot",
+                "/home/bene/SPT/out_fine_tune": "/mnt/xprun/temp",
+            },
+        ),
+    }
+)

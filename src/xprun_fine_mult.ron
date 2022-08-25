@@ -1,0 +1,29 @@
+XpV0(
+    project: "GNN_FTS",
+    containers: {
+        "main": (
+            command: ["python", "-u", "src/fine_tune_mult.py"],
+            
+            build: [
+                From("nvcr.io/nvidia/pytorch:21.03-py3"),
+                Repo(path: "requirements.txt", cd: true),
+                Run("pip install -r requirements.txt"),
+                Repo(keep: true, cd: true),
+            ],
+
+            gpu: 1,
+            gpu_mem: "24GB",
+            cpu_mem: "8GB",
+            
+            env_secrets: {
+                "WANDB_API_KEY": "wandb-api-key",
+            },
+            volumes: 
+                {"/local/home/bewinter/Paper_SPT/SPT/data": "/mnt/xprun/data", 
+                "/local/home/bewinter/Paper_SPT/SPT/Models": "/mnt/xprun/out",
+                "/local/home/bewinter/Paper_SPT/SPT/Plot": "/mnt/xprun/plot",
+                "/local/home/bewinter/Paper_SPT/SPT/out_fine_tune": "/mnt/xprun/temp",
+            },
+        ),
+    }
+)
