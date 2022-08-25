@@ -72,8 +72,7 @@ Then run the fine-tuning:
 
 `python fine_tune.py --model_name=model_name --data_path=input_data_path`
 
-This function uses the validation data for training and will thus not produce a
-
+If the flag `--no_val` is set also the validation data is used for training.
 
 # How to run the code more general
 
