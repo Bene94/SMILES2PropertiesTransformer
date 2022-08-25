@@ -4,7 +4,26 @@ This git contains the code for the paper "A SMILE is all you need: Predicting li
 
 # Paper reproduction
 
+## Pull git
+
+`git clone git@github.com:Bene94/SMILES2PropertiesTransformer.git`
+`cd SMILES2PropertiesTransformer`
+
+## Set up Environment
+
+`conda create -n'SPT_env' python=3.9`
+`conda activate SPT_env`
+`pip install -r requirements_pip.txt`
+
+Install a suitable torch verstion:
+
+https://pytorch.org/
+
+## Run training and fine-tuning
+
 In the following it is discribed how to reproduce the training and validation of the model from "A SMILE is all you need":
+
+`cd src/`
 
 Generate the alias list of SMILES, warning can be ignored
 
