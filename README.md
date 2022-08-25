@@ -58,6 +58,10 @@ Run the evaluation script, set 'name' to the output name of the fine_tune
 
 `python plot/plot_results.py`
 
+## Evaluating mixtures
+
+To use the models to predict limiting activity coefficients use the script `misc/simple_evaluation.py`. Mixtures can either be put in manualy or loaded from an input file.
+
 
 # How to run the code more general
 
