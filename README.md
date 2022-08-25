@@ -44,6 +44,8 @@ Run the pretraining
 
 `python main_script.py`
 
+Alternatively the pretrained model available in https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4 can be used.
+
 Generate the validation sets
 
 `python data_processing/mult_split_n.py`
