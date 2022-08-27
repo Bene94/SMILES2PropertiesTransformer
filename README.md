@@ -64,11 +64,13 @@ To use the models to predict limiting activity coefficients use the script `misc
 
 ## Fine-tuning a model on new data
 
-To fine-tune a model on other data the model has first to be processed:
+Alternative data for fine-tuning the model should be dropped in the raw_data folder as a tab-separated .csv. See the example files in https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4 for the format. To fine-tune a model, the new data has first to be processed.
 
 `python data_processing/data_processing.py -p path_to_raw_data -s save_path`
 
-Then run the fine-tuning:
+Optional: It might be required to run 'data_processing/make_alias_list.py' again to update the alias_list with the new data. 
+After the data is processed, the fine-tuning can be executed:
+
 
 `python fine_tune.py --model_name=model_name --data_path=input_data_path`
 
