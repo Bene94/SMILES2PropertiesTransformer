@@ -24,15 +24,15 @@ https://pytorch.org/
 
 ## Get raw data
 
-Get the content of the raw_data folder from https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4 and put it into the raw_data folder
+Get the content of the raw_data folder from https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4 and put it into the raw_data folder.
 
 ## Run training and fine-tuning
 
-In the following it is described how to reproduce the training and validation of the model from "A SMILE is all you need":
+In the following, it is described how to reproduce the training and validation of the model from "A SMILE is all you need":
 
 `cd src/`
 
-Generate the alias list of SMILES, warning can be ignored:
+Generate the alias list of SMILES. Warnings can be ignored:
 
 `python data_processing/make_alias_list.py`
  
@@ -50,7 +50,7 @@ Generate the validation sets:
 
 `python data_processing/mult_split_n.py`
 
-Run the validation, set the model name in the script to your pretrained model name, the outputs are saved into out_fine_tune:
+To run the validation, set the model name in `run_fine_tune_n_fold.py` to your pre-trained model name. The outputs are saved into SPT/out_fine_tune/. See wandb.ai for the name of the output folder (xp_name):
 
 `python run_fine_tune_n_fold.py`
 
@@ -68,9 +68,8 @@ Alternative data for fine-tuning the model should be dropped in the raw_data fol
 
 `python data_processing/data_processing.py -p path_to_raw_data -s save_path`
 
-Optional: It might be required to run 'data_processing/make_alias_list.py' again to update the alias_list with the new data. 
+Optional: It might be required to run `data_processing/make_alias_list.py` again to update the alias_list with the new data. 
 After the data is processed, the fine-tuning can be executed:
-
 
 `python fine_tune.py --model_name=model_name --data_path=input_data_path`
 
