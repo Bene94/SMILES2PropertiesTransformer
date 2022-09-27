@@ -73,6 +73,8 @@ After the data is processed, the fine-tuning can be executed:
 
 `python fine_tune.py --model_name=model_name --data_path=input_data_path`
 
+The trained modle will then be saved to: “SPT/Models/model_name_fine.*”
+
 If the flag `--no_val` is set also the validation data is used for training.
 
 # How to run the code more general
