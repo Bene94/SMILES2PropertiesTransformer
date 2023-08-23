@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 import torch
 from torch.utils.data import Dataset, DataLoader
 import os

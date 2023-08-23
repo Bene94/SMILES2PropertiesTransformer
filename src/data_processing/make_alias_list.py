@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 from progressbar.widgets import ETA
 import rdkit as rd  
 import numpy as np

@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 import dataclasses
 import os
 import torch

@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 
 ## load the pytorch transformer model and the cofiguration file
 

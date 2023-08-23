@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 import data_processing as dc
 import numpy as np
 import os

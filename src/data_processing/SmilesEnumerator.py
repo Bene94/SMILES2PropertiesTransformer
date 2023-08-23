@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 #Experimental Class for Smiles Enumeration, Iterator and SmilesIterator adapted from Keras 1.2.2
 from rdkit import Chem
 import numpy as np

@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 # %% 
 # This is a simple script to evaluate the modle for custom data pairs
 import os

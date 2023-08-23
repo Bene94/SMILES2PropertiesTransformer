@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 import math
 import torch
 from torch.optim.lr_scheduler import _LRScheduler

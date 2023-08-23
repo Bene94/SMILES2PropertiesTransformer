@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 import os
 import datetime
 now = datetime.datetime.now()

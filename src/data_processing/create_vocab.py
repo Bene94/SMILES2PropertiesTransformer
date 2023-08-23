@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 import pandas as pd
 import os
 ## Load the text files out of InputData into a pandas dataframe

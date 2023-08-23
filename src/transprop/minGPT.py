@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 """
 GPT model:
 - the initial stem consists of a combination of token encoding and a positional encoding

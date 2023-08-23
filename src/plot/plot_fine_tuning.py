@@ -1,3 +1,4 @@
+# © 2022-2023, ETH Zurich, EPSE, Benedikt Winter
 from operator import truediv
 import numpy as np
 import plot_results as pr
