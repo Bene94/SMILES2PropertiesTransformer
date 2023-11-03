@@ -139,7 +139,7 @@ To use the model, use the function `misc\simple_evaluation.py` and the trained m
 
 # Data availability 
 
-Training data as well as evaluation results can currently be found here: https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4
+Data is no longer available due to licensing issues.
 
 # Authors note
 
