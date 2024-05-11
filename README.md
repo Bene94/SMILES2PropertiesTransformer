@@ -24,6 +24,8 @@ https://pytorch.org/
 
 ## Get raw data
 
+Data update: Due to concerns about rights to the data the raw data and models are no longer available.
+
 Get the content of the raw_data folder from https://polybox.ethz.ch/index.php/s/kyVOt3pwHW26PP4 and put it into the raw_data folder.
 
 ## Run training and fine-tuning
